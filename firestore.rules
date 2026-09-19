@@ -1,0 +1,72 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function datosUsuarioActual() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function esAdmin() {
+      return estaAutenticado() && datosUsuarioActual().rol == 'administrador';
+    }
+
+    function esProfesional() {
+      return estaAutenticado() && datosUsuarioActual().rol == 'profesional';
+    }
+
+    function esPropietario(uid) {
+      return estaAutenticado() && request.auth.uid == uid;
+    }
+
+    // Perfil de cada usuario (paciente, profesional o administrador).
+    // Cualquier persona autenticada puede leer perfiles (necesario para
+    // mostrar el perfil público del doctor, o el del paciente al doctor).
+    // Nadie puede cambiar su propio "rol" ni "estado": eso solo lo hace un admin
+    // (evita que alguien se autoasigne rol administrador o se reactive solo).
+    match /usuarios/{uid} {
+      allow read: if estaAutenticado();
+      allow create: if esPropietario(uid)
+        || esAdmin()
+        || (esProfesional() && request.resource.data.rol == 'paciente');
+      allow update: if esAdmin() || (
+        esPropietario(uid)
+        && request.resource.data.rol == resource.data.rol
+        && request.resource.data.estado == resource.data.estado
+      );
+      allow delete: if esAdmin();
+    }
+
+    // Datos profesionales extendidos (especialidad, carnet, disponibilidad, etc.).
+    match /profesionales/{uid} {
+      allow read: if estaAutenticado();
+      allow create: if esPropietario(uid) || esAdmin();
+      allow update: if esPropietario(uid) || esAdmin();
+      allow delete: if esAdmin();
+    }
+
+    // Catálogo de especialidades: lo administra solo el equipo de DocTop.
+    match /tiposProfesion/{id} {
+      allow read: if estaAutenticado();
+      allow write: if esAdmin();
+    }
+
+    // Denuncias: cualquiera puede crear una a su propio nombre;
+    // solo el admin puede leerlas y resolverlas.
+    match /reportes/{id} {
+      allow create: if estaAutenticado() && request.resource.data.denuncianteId == request.auth.uid;
+      allow read, update, delete: if esAdmin();
+    }
+
+    // Todo lo demás (consultas, mensajes, calificaciones, favoritos,
+    // notificaciones: aún no conectadas a la app) queda cerrado salvo
+    // para el admin, hasta que se definan sus reglas específicas.
+    match /{coleccion}/{id} {
+      allow read, write: if esAdmin();
+    }
+  }
+}
