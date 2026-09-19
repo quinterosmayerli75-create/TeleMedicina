@@ -1,0 +1,52 @@
+.acceso-fondo {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--onyx);
+  padding: 40px 20px;
+}
+
+.acceso-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--blanco);
+  border-radius: 8px;
+  padding: 36px 32px;
+}
+
+.acceso-marca {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.acceso-nombre {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  margin-top: 8px;
+}
+
+.acceso-slogan {
+  font-size: 12px;
+  color: var(--gris);
+  margin-top: 6px;
+}
+
+.acceso-error {
+  color: var(--alerta);
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+.acceso-card .btn-primary {
+  margin-top: 20px;
+}
+
+.acceso-divisor {
+  text-align: center;
+  font-size: 11px;
+  color: var(--gris);
+  margin: 18px 0 10px;
+}

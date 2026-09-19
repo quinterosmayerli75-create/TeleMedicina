@@ -1,0 +1,34 @@
+:root {
+  --onyx: #0F1417;
+  --oro: #2C8FD6;
+  --oro-rgb: 44, 143, 214;
+  --oro-claro: #8AD0F5;
+  --marfil: #F7FAFC;
+  --marfil-osc: #DCE8F0;
+  --gris: #6E7880;
+  --texto: #10151A;
+  --esmeralda: #2E8B6E;
+  --alerta: #C1443A;
+  --ambar: #B07A2A;
+  --blanco: #FFFFFF;
+
+  --display: 'Playfair Display', serif;
+  --sans: 'Jost', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--texto);
+  background: var(--marfil);
+}
+
+h1, h2, h3 {
+  font-family: var(--display);
+  margin: 0;
+}
