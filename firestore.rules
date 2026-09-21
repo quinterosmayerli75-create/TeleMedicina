@@ -15,8 +15,18 @@ service cloud.firestore {
       return estaAutenticado() && datosUsuarioActual().rol == 'administrador';
     }
 
+    // El super admin es un administrador con el campo `superadmin: true` en su documento de "usuarios"
+    // (se marca a mano en Firebase Console). Es el único que puede crear otras cuentas de administrador.
+    function esSuperAdmin() {
+      return esAdmin() && datosUsuarioActual().get('superadmin', false) == true;
+    }
+
     function esProfesional() {
       return estaAutenticado() && datosUsuarioActual().rol == 'profesional';
+    }
+
+    function esPaciente() {
+      return estaAutenticado() && datosUsuarioActual().rol == 'paciente';
     }
 
     function esPropietario(uid) {
@@ -26,26 +36,108 @@ service cloud.firestore {
     // Perfil de cada usuario (paciente, profesional o administrador).
     // Cualquier persona autenticada puede leer perfiles (necesario para
     // mostrar el perfil público del doctor, o el del paciente al doctor).
-    // Nadie puede cambiar su propio "rol" ni "estado": eso solo lo hace un admin
-    // (evita que alguien se autoasigne rol administrador o se reactive solo).
+    //
+    // Crear:
+    //  - Al registrarse, cada persona solo puede crear SU perfil como paciente (activo) o profesional
+    //    (pendiente de revisión): nadie puede autoasignarse rol administrador ni superadmin.
+    //  - Un admin da de alta doctores y pacientes.
+    //  - Solo el super admin crea cuentas de administrador (y nunca otro super admin: ese campo se
+    //    marca a mano en Firebase Console).
+    // Actualizar:
+    //  - El super admin puede todo, salvo cambiar el campo superadmin.
+    //  - Un admin gestiona pacientes y doctores (aprobar, bloquear, reactivar), no a otros administradores.
+    //  - Cada persona edita sus propios datos, pero no su rol, estado, superadmin ni los datos de su bloqueo.
+    //  - Excepción: cuando su bloqueo temporal ya venció, la propia persona puede reactivar su cuenta
+    //    (vuelve al estado que tenía antes del bloqueo).
+    // Eliminar: un admin elimina pacientes y doctores; solo el super admin elimina administradores.
     match /usuarios/{uid} {
       allow read: if estaAutenticado();
-      allow create: if esPropietario(uid)
-        || esAdmin()
-        || (esProfesional() && request.resource.data.rol == 'paciente');
-      allow update: if esAdmin() || (
-        esPropietario(uid)
-        && request.resource.data.rol == resource.data.rol
-        && request.resource.data.estado == resource.data.estado
+      allow create: if (
+          esPropietario(uid)
+          && !('superadmin' in request.resource.data)
+          && (
+            (request.resource.data.rol == 'paciente' && request.resource.data.estado == 'activo')
+            || (request.resource.data.rol == 'profesional' && request.resource.data.estado == 'pendiente')
+          )
+        )
+        || (
+          esAdmin()
+          && !('superadmin' in request.resource.data)
+          && request.resource.data.rol in ['paciente', 'profesional']
+        )
+        || (esSuperAdmin() && !('superadmin' in request.resource.data) && request.resource.data.rol == 'administrador')
+        || (esProfesional() && !('superadmin' in request.resource.data) && request.resource.data.rol == 'paciente');
+      allow update: if (
+          esSuperAdmin()
+          && request.resource.data.get('superadmin', false) == resource.data.get('superadmin', false)
+        )
+        || (
+          esAdmin()
+          && resource.data.rol != 'administrador'
+          && request.resource.data.rol == resource.data.rol
+          && !('superadmin' in request.resource.data)
+        )
+        || (
+          esPropietario(uid)
+          && request.resource.data.rol == resource.data.rol
+          && request.resource.data.estado == resource.data.estado
+          && request.resource.data.get('superadmin', false) == resource.data.get('superadmin', false)
+          && request.resource.data.get('bloqueadoHasta', null) == resource.data.get('bloqueadoHasta', null)
+          && request.resource.data.get('estadoPrevio', null) == resource.data.get('estadoPrevio', null)
+        )
+        || (
+          esPropietario(uid)
+          && resource.data.estado == 'bloqueado_temporal'
+          && resource.data.get('bloqueadoHasta', null) != null
+          && resource.data.bloqueadoHasta <= request.time
+          && request.resource.data.estado == resource.data.get('estadoPrevio', 'activo')
+          && request.resource.data.rol == resource.data.rol
+          && request.resource.data.get('superadmin', false) == resource.data.get('superadmin', false)
+        );
+      allow delete: if (esAdmin() && resource.data.rol != 'administrador')
+        || (
+          esSuperAdmin()
+          && resource.data.rol == 'administrador'
+          && resource.data.get('superadmin', false) == false
+        );
+    }
+
+    // Datos profesionales extendidos (especialidad, carnet, disponibilidad, etc.).
+    // Un paciente que califica al doctor solo puede tocar su promedio y el total de calificaciones
+    // (nada más de su ficha), y el promedio tiene que estar entre 0 y 5.
+    match /profesionales/{uid} {
+      allow read: if estaAutenticado();
+      allow create: if esPropietario(uid) || esAdmin();
+      allow update: if esPropietario(uid) || esAdmin() || (
+        esPaciente()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['calificacionPromedio', 'totalCalificaciones'])
+        && request.resource.data.calificacionPromedio is number
+        && request.resource.data.calificacionPromedio >= 0
+        && request.resource.data.calificacionPromedio <= 5
+        && request.resource.data.totalCalificaciones is int
+        && request.resource.data.totalCalificaciones >= 0
       );
       allow delete: if esAdmin();
     }
 
-    // Datos profesionales extendidos (especialidad, carnet, disponibilidad, etc.).
-    match /profesionales/{uid} {
+    // Calificaciones de los pacientes a los doctores (1 a 5 estrellas y un comentario opcional).
+    // Hay una sola por paciente y doctor: el id del documento es "{doctorId}_{pacienteId}", y cada
+    // paciente solo puede crear o cambiar la suya.
+    match /calificaciones/{id} {
       allow read: if estaAutenticado();
-      allow create: if esPropietario(uid) || esAdmin();
-      allow update: if esPropietario(uid) || esAdmin();
+      allow create: if esPaciente()
+        && request.resource.data.pacienteId == request.auth.uid
+        && id == request.resource.data.doctorId + '_' + request.auth.uid
+        && request.resource.data.estrellas is int
+        && request.resource.data.estrellas >= 1
+        && request.resource.data.estrellas <= 5;
+      allow update: if esPaciente()
+        && resource.data.pacienteId == request.auth.uid
+        && request.resource.data.pacienteId == request.auth.uid
+        && request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.estrellas is int
+        && request.resource.data.estrellas >= 1
+        && request.resource.data.estrellas <= 5;
       allow delete: if esAdmin();
     }
 
@@ -58,11 +150,56 @@ service cloud.firestore {
     // Denuncias: cualquiera puede crear una a su propio nombre;
     // solo el admin puede leerlas y resolverlas.
     match /reportes/{id} {
-      allow create: if estaAutenticado() && request.resource.data.denuncianteId == request.auth.uid;
+      allow create: if estaAutenticado()
+        && request.resource.data.denuncianteId == request.auth.uid
+        && request.resource.data.denunciadoId is string
+        && exists(/databases/$(database)/documents/usuarios/$(request.resource.data.denunciadoId));
       allow read, update, delete: if esAdmin();
     }
 
-    // Todo lo demás (consultas, mensajes, calificaciones, favoritos,
+    // Apelaciones de usuarios bloqueados: cada usuario puede crear y leer las suyas;
+    // solo el admin las resuelve (aceptar = levantar el bloqueo, o rechazar).
+    match /apelaciones/{id} {
+      allow create: if estaAutenticado() && request.resource.data.usuarioId == request.auth.uid;
+      allow read: if esAdmin() || (estaAutenticado() && resource.data.usuarioId == request.auth.uid);
+      allow update, delete: if esAdmin();
+    }
+
+    // Chat entre paciente y doctor. El id de la conversación es "{pacienteId}_{doctorId}", así que
+    // cada participante se reconoce por su uid dentro del id. Los adjuntos (fotos, videos, audios,
+    // documentos) se suben a Storage (ver storage.rules) y aquí solo se guarda su URL.
+    match /conversaciones/{convId} {
+      allow read: if estaAutenticado() && (request.auth.uid in resource.data.participantes || esAdmin());
+      allow create: if estaAutenticado()
+        && request.auth.uid in convId.split('_')
+        && convId == request.resource.data.pacienteId + '_' + request.resource.data.doctorId
+        && request.resource.data.participantes.size() == 2;
+      allow update: if estaAutenticado()
+        && request.auth.uid in resource.data.participantes
+        && request.resource.data.participantes == resource.data.participantes;
+
+      match /mensajes/{mensajeId} {
+        allow read: if estaAutenticado() && (request.auth.uid in convId.split('_') || esAdmin());
+        allow create: if estaAutenticado()
+          && request.auth.uid in convId.split('_')
+          && request.resource.data.de == request.auth.uid;
+      }
+    }
+
+    // Informes médicos: los crea y ve solo el doctor que los escribió (no los ve el paciente).
+    // Al editar no se puede cambiar de doctor ni de paciente.
+    match /informes/{id} {
+      allow read: if estaAutenticado() && resource.data.doctorId == request.auth.uid;
+      allow create: if esProfesional()
+        && request.resource.data.doctorId == request.auth.uid
+        && request.resource.data.pacienteId is string;
+      allow update: if esProfesional()
+        && resource.data.doctorId == request.auth.uid
+        && request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.pacienteId == resource.data.pacienteId;
+    }
+
+    // Todo lo demás (consultas, favoritos,
     // notificaciones: aún no conectadas a la app) queda cerrado salvo
     // para el admin, hasta que se definan sus reglas específicas.
     match /{coleccion}/{id} {

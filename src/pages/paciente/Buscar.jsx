@@ -10,6 +10,20 @@ const MODALIDADES = [
   { clave: 'Video', indice: 2 },
 ]
 
+// Calificación mínima (estrellas) que se puede exigir; 0 = sin filtro.
+const CALIFICACIONES = [
+  { etiqueta: 'Todas', minimo: 0 },
+  { etiqueta: '★ 3+', minimo: 3 },
+  { etiqueta: '★ 4+', minimo: 4 },
+  { etiqueta: '★ 4.5+', minimo: 4.5 },
+]
+
+const ORDENES = [
+  { clave: 'recomendados', etiqueta: 'Recomendados' },
+  { clave: 'calificacion', etiqueta: 'Mejor calificación' },
+  { clave: 'precio', etiqueta: 'Menor precio' },
+]
+
 export default function Buscar() {
   const { profesionales, cargando } = useProfesionalesActivos()
   const tipos = useTiposProfesion()
@@ -19,10 +33,12 @@ export default function Buscar() {
   const [precioMax, setPrecioMax] = useState(500)
   const [soloEnLinea, setSoloEnLinea] = useState(false)
   const [modalidad, setModalidad] = useState('Todas')
+  const [calificacionMinima, setCalificacionMinima] = useState(0)
+  const [orden, setOrden] = useState('recomendados')
 
   const resultados = useMemo(() => {
     const indiceModalidad = MODALIDADES.find((m) => m.clave === modalidad)?.indice
-    return profesionales.filter((p) => {
+    const filtrados = profesionales.filter((p) => {
       const coincideTexto =
         !texto ||
         p.nombre.toLowerCase().includes(texto.toLowerCase()) ||
@@ -32,9 +48,15 @@ export default function Buscar() {
       const coincidePrecio = p.costoConsulta <= precioMax
       const coincideDisponibilidad = !soloEnLinea || p.disponibleAhora
       const coincideModalidad = indiceModalidad === null || indiceModalidad === undefined || p.modalidades?.[indiceModalidad]
-      return coincideTexto && coincideEspecialidad && coincidePrecio && coincideDisponibilidad && coincideModalidad
+      const coincideCalificacion = (Number(p.calificacionPromedio) || 0) >= calificacionMinima
+      return coincideTexto && coincideEspecialidad && coincidePrecio && coincideDisponibilidad && coincideModalidad && coincideCalificacion
     })
-  }, [profesionales, texto, especialidad, precioMax, soloEnLinea, modalidad])
+    if (orden === 'calificacion') {
+      return [...filtrados].sort((a, b) => (b.calificacionPromedio || 0) - (a.calificacionPromedio || 0) || a.nombre.localeCompare(b.nombre, 'es'))
+    }
+    if (orden === 'precio') return [...filtrados].sort((a, b) => a.costoConsulta - b.costoConsulta)
+    return filtrados
+  }, [profesionales, texto, especialidad, precioMax, soloEnLinea, modalidad, calificacionMinima, orden])
 
   return (
     <div>
@@ -71,6 +93,25 @@ export default function Buscar() {
               </div>
             ))}
           </div>
+
+          <label className="campo-label">Calificación (estrellas)</label>
+          <div className="chip-row">
+            {CALIFICACIONES.map((c) => (
+              <button
+                type="button"
+                key={c.minimo}
+                className={`chip${calificacionMinima === c.minimo ? ' on' : ''}`}
+                onClick={() => setCalificacionMinima(c.minimo)}
+              >
+                {c.etiqueta}
+              </button>
+            ))}
+          </div>
+
+          <label className="campo-label" htmlFor="orden">Ordenar por</label>
+          <select id="orden" value={orden} onChange={(e) => setOrden(e.target.value)}>
+            {ORDENES.map((o) => <option key={o.clave} value={o.clave}>{o.etiqueta}</option>)}
+          </select>
 
           <label className="campo-label" htmlFor="precio">Precio máximo por consulta</label>
           <input id="precio" type="range" min="50" max="500" value={precioMax} onChange={(e) => setPrecioMax(Number(e.target.value))} />

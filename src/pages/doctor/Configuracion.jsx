@@ -1,27 +1,28 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { signOut, updatePassword } from 'firebase/auth'
+import { signOut } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { auth, db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
-import { validarContrasena } from '../../utils/validacion'
+import CambiarFotoPerfil from '../../components/CambiarFotoPerfil'
+import CambiarContrasena from '../../components/CambiarContrasena'
+import GestionTitulos from '../../components/GestionTitulos'
 
 export default function Configuracion() {
   const { usuario } = useAuth()
   const navigate = useNavigate()
 
-  const [telefono, setTelefono] = useState('')
-  const [nuevaContrasena, setNuevaContrasena] = useState('')
-  const [confirmarContrasena, setConfirmarContrasena] = useState('')
+  const [datos, setDatos] = useState({ edad: '', estatura: '', peso: '', telefono: '' })
   const [mensajeDatos, setMensajeDatos] = useState('')
-  const [mensajeContrasena, setMensajeContrasena] = useState('')
   const [guardandoDatos, setGuardandoDatos] = useState(false)
-  const [guardandoContrasena, setGuardandoContrasena] = useState(false)
 
   useEffect(() => {
     if (!usuario) return
     getDoc(doc(db, 'usuarios', usuario.uid)).then((snap) => {
-      if (snap.exists()) setTelefono(snap.data().telefono ?? '')
+      if (snap.exists()) {
+        const d = snap.data()
+        setDatos({ edad: d.edad ?? '', estatura: d.estatura ?? '', peso: d.peso ?? '', telefono: d.telefono ?? '' })
+      }
     })
   }, [usuario])
 
@@ -30,41 +31,17 @@ export default function Configuracion() {
     setMensajeDatos('')
     setGuardandoDatos(true)
     try {
-      await updateDoc(doc(db, 'usuarios', usuario.uid), { telefono })
+      await updateDoc(doc(db, 'usuarios', usuario.uid), {
+        edad: datos.edad ? Number(datos.edad) : null,
+        estatura: datos.estatura,
+        peso: datos.peso,
+        telefono: datos.telefono,
+      })
       setMensajeDatos('Datos actualizados.')
     } catch {
       setMensajeDatos('No se pudo guardar. Intenta de nuevo.')
     } finally {
       setGuardandoDatos(false)
-    }
-  }
-
-  async function guardarContrasena(e) {
-    e.preventDefault()
-    setMensajeContrasena('')
-    const errorContrasena = validarContrasena(nuevaContrasena)
-    if (errorContrasena) {
-      setMensajeContrasena(errorContrasena)
-      return
-    }
-    if (nuevaContrasena !== confirmarContrasena) {
-      setMensajeContrasena('Las contraseñas no coinciden.')
-      return
-    }
-    setGuardandoContrasena(true)
-    try {
-      await updatePassword(auth.currentUser, nuevaContrasena)
-      setMensajeContrasena('Contraseña actualizada.')
-      setNuevaContrasena('')
-      setConfirmarContrasena('')
-    } catch (err) {
-      setMensajeContrasena(
-        err.code === 'auth/requires-recent-login'
-          ? 'Por seguridad, cierra sesión y vuelve a entrar antes de cambiar la contraseña.'
-          : 'No se pudo actualizar la contraseña.'
-      )
-    } finally {
-      setGuardandoContrasena(false)
     }
   }
 
@@ -78,27 +55,28 @@ export default function Configuracion() {
       <h1 className="web-h1">Configuración de cuenta</h1>
       <div className="web-2col" style={{ maxWidth: 820 }}>
         <div>
-          <form className="card-plain" onSubmit={guardarContrasena}>
-            <h2 className="section-title">Contraseña</h2>
-            <label className="campo-label" htmlFor="nueva">Nueva contraseña</label>
-            <input id="nueva" type="password" value={nuevaContrasena} onChange={(e) => setNuevaContrasena(e.target.value)} />
-            <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>Mínimo 8 caracteres, con letras y números.</div>
-            <label className="campo-label" htmlFor="confirmar">Confirmar nueva contraseña</label>
-            <input id="confirmar" type="password" value={confirmarContrasena} onChange={(e) => setConfirmarContrasena(e.target.value)} />
-            {mensajeContrasena && <div style={{ fontSize: 12, marginTop: 8, color: 'var(--alerta)' }}>{mensajeContrasena}</div>}
-            <button type="submit" className="btn btn-primary btn-auto" style={{ marginTop: 10 }} disabled={guardandoContrasena}>Guardar contraseña</button>
-          </form>
+          <div className="card-plain">
+            <h2 className="section-title">Foto de perfil</h2>
+            <CambiarFotoPerfil />
+          </div>
+
+          <CambiarContrasena />
 
           <form className="card-plain" onSubmit={guardarDatos}>
-            <h2 className="section-title">Datos de contacto</h2>
-            <label className="campo-label" htmlFor="telefono">Celular</label>
-            <input id="telefono" type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+            <h2 className="section-title">Mis datos</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div><label className="campo-label" htmlFor="edad">Edad</label><input id="edad" type="number" min="0" value={datos.edad} onChange={(e) => setDatos({ ...datos, edad: e.target.value })} /></div>
+              <div><label className="campo-label" htmlFor="estatura">Estatura aprox.</label><input id="estatura" type="text" value={datos.estatura} onChange={(e) => setDatos({ ...datos, estatura: e.target.value })} /></div>
+              <div><label className="campo-label" htmlFor="peso">Peso aprox.</label><input id="peso" type="text" value={datos.peso} onChange={(e) => setDatos({ ...datos, peso: e.target.value })} /></div>
+              <div><label className="campo-label" htmlFor="telefono">Celular</label><input id="telefono" type="text" value={datos.telefono} onChange={(e) => setDatos({ ...datos, telefono: e.target.value })} /></div>
+            </div>
             {mensajeDatos && <div style={{ fontSize: 12, marginTop: 8, color: 'var(--esmeralda)' }}>{mensajeDatos}</div>}
             <button type="submit" className="btn btn-primary btn-auto" style={{ marginTop: 10 }} disabled={guardandoDatos}>Guardar</button>
           </form>
         </div>
 
         <div>
+          <GestionTitulos />
           <div className="card-plain">
             <h2 className="section-title">Notificaciones</h2>
             <div className="admin-row"><div style={{ fontSize: 12 }}>Mensajes de pacientes</div><div className="switch on" onClick={(e) => e.currentTarget.classList.toggle('on')}></div></div>

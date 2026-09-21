@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { auth, db, storage } from '../../firebase/config'
+import { auth, db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
+import SelectorFotos from '../../components/SelectorFotos'
+import { mensajeErrorSubida, nombreSeguro, subirArchivo } from '../../utils/archivos'
 import { validarContrasena } from '../../utils/validacion'
 
 function mensajeError(codigo) {
@@ -36,7 +37,8 @@ const ESTADO_INICIAL = {
 
 export default function RegistroPaciente() {
   const [datos, setDatos] = useState(ESTADO_INICIAL)
-  const [foto, setFoto] = useState(null)
+  const [fotos, setFotos] = useState([])
+  const [intentado, setIntentado] = useState(false)
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const [mostrarTerminos, setMostrarTerminos] = useState(false)
   const [error, setError] = useState('')
@@ -46,10 +48,11 @@ export default function RegistroPaciente() {
   const { usuario, rol, cargando, refrescarRol } = useAuth()
 
   useEffect(() => {
-    if (!cargando && usuario && rol === 'paciente') {
+    // Mientras se está creando la cuenta, el propio submit decide a dónde ir.
+    if (!cargando && usuario && rol === 'paciente' && !enviando) {
       navigate('/paciente', { replace: true })
     }
-  }, [usuario, rol, cargando, navigate])
+  }, [usuario, rol, cargando, enviando, navigate])
 
   function actualizarCampo(campo) {
     return (e) => setDatos((prev) => ({ ...prev, [campo]: e.target.value }))
@@ -63,7 +66,12 @@ export default function RegistroPaciente() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    setIntentado(true)
 
+    if (fotos.length === 0) {
+      setError('La foto de perfil es obligatoria. Suba una foto suya para poder crear la cuenta.')
+      return
+    }
     if (camposIncompletos()) {
       setError('Complete todos los campos obligatorios antes de continuar.')
       return
@@ -88,11 +96,17 @@ export default function RegistroPaciente() {
       const credencial = await createUserWithEmailAndPassword(auth, datos.email, datos.contrasena)
       const uid = credencial.user.uid
 
-      let fotoUrl = ''
-      if (foto) {
-        const archivoRef = ref(storage, `usuarios/${uid}/perfil-${foto.name}`)
-        await uploadBytes(archivoRef, foto)
-        fotoUrl = await getDownloadURL(archivoRef)
+      // La foto es obligatoria: si no se puede subir se anula la cuenta recién creada para que pueda
+      // reintentar con el mismo correo en vez de quedar una cuenta sin foto.
+      let fotoUrl
+      try {
+        const subida = await subirArchivo(`usuarios/${uid}/perfil-${Date.now()}-${nombreSeguro(fotos[0].name)}`, fotos[0])
+        fotoUrl = subida.url
+      } catch (errSubida) {
+        await credencial.user.delete().catch(() => {})
+        setError(`No se pudo subir la foto, por eso la cuenta no se creó. ${mensajeErrorSubida(errSubida)}`)
+        setEnviando(false)
+        return
       }
 
       await setDoc(doc(db, 'usuarios', uid), {
@@ -194,8 +208,18 @@ export default function RegistroPaciente() {
 
             <div>
               <div className="registro-seccion">
-                <label className="campo-label" htmlFor="foto">Foto de la persona</label>
-                <input id="foto" type="file" accept="image/*" onChange={(e) => setFoto(e.target.files[0] ?? null)} />
+                <h2 className="seccion-titulo">Foto de perfil (obligatoria)</h2>
+                <SelectorFotos
+                  archivos={fotos}
+                  onChange={setFotos}
+                  maximo={1}
+                  textoBoton="Subir foto de perfil"
+                  obligatoria
+                  resaltar={intentado}
+                  nombre="La foto de perfil"
+                  ayuda="JPG o PNG, máximo 5 MB. Podrás cambiarla después en Configuración."
+                  deshabilitado={enviando}
+                />
               </div>
 
               <div className="terminos-row">

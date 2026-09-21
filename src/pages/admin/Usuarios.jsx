@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { collection, deleteDoc, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore'
+import { collection, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '../../firebase/config'
+import { bloquearUsuario, levantarBloqueo, mensajeErrorBloqueo } from '../../firebase/bloqueos'
+import ModalBloqueo from '../../components/admin/ModalBloqueo'
+import { esBloqueo } from '../../utils/bloqueos'
+import { formatearFecha } from '../../utils/fechas'
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState([])
@@ -9,15 +13,19 @@ export default function Usuarios() {
 
   const [modal, setModal] = useState(null)
   const [seleccion, setSeleccion] = useState(null)
-  const [edicion, setEdicion] = useState(null)
-  const [enviando, setEnviando] = useState(false)
+  const [aviso, setAviso] = useState('')
+  const [errorAccion, setErrorAccion] = useState('')
 
   useEffect(() => {
     const q = query(collection(db, 'usuarios'), where('rol', '==', 'paciente'))
-    const unsubscribe = onSnapshot(q, (snap) => {
-      setUsuarios(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
-      setCargando(false)
-    })
+    const unsubscribe = onSnapshot(
+      q,
+      (snap) => {
+        setUsuarios(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+        setCargando(false)
+      },
+      () => setCargando(false)
+    )
     return unsubscribe
   }, [])
 
@@ -27,42 +35,38 @@ export default function Usuarios() {
     return usuarios.filter((u) => `${u.nombre} ${u.apellido}`.toLowerCase().includes(termino) || u.email?.toLowerCase().includes(termino))
   }, [usuarios, busqueda])
 
-  async function alternarBloqueo(u) {
-    const nuevoEstado = u.estado === 'activo' ? 'bloqueado' : 'activo'
-    await updateDoc(doc(db, 'usuarios', u.id), { estado: nuevoEstado })
+  async function aplicarBloqueo(u, { tipo, dias, motivo }) {
+    const { hasta } = await bloquearUsuario({ usuarioId: u.id, tipo, dias, motivo })
+    const nombre = `${u.nombre ?? ''} ${u.apellido ?? ''}`.trim()
+    setModal(null)
+    setErrorAccion('')
+    setAviso(
+      tipo === 'temporal'
+        ? `${nombre} quedó bloqueado temporalmente hasta el ${formatearFecha(hasta)}.`
+        : `${nombre} quedó bloqueado permanentemente.`
+    )
   }
 
-  function abrirEditar(u) {
-    setSeleccion(u)
-    setEdicion({
-      nombre: u.nombre ?? '',
-      apellido: u.apellido ?? '',
-      telefono: u.telefono ?? '',
-      edad: u.edad ?? '',
-      lugar: u.lugar ?? '',
-    })
-    setModal('editar')
-  }
-
-  async function guardarEdicion(e) {
-    e.preventDefault()
-    setEnviando(true)
+  async function reactivar(u) {
+    setAviso('')
+    setErrorAccion('')
     try {
-      await updateDoc(doc(db, 'usuarios', seleccion.id), {
-        nombre: edicion.nombre,
-        apellido: edicion.apellido,
-        telefono: edicion.telefono,
-        edad: edicion.edad ? Number(edicion.edad) : null,
-        lugar: edicion.lugar,
-      })
-      setModal(null)
-    } finally {
-      setEnviando(false)
+      await levantarBloqueo(u.id)
+      setAviso(`Se levantó el bloqueo de ${`${u.nombre ?? ''} ${u.apellido ?? ''}`.trim()}: su cuenta vuelve a estar activa.`)
+    } catch (err) {
+      setErrorAccion(mensajeErrorBloqueo(err))
     }
   }
 
   async function eliminarUsuario() {
-    await deleteDoc(doc(db, 'usuarios', seleccion.id))
+    setAviso('')
+    setErrorAccion('')
+    try {
+      await deleteDoc(doc(db, 'usuarios', seleccion.id))
+      setAviso('El usuario se eliminó.')
+    } catch (err) {
+      setErrorAccion(mensajeErrorBloqueo(err))
+    }
     setModal(null)
   }
 
@@ -83,25 +87,40 @@ export default function Usuarios() {
         style={{ maxWidth: 420, marginBottom: 20 }}
       />
 
+      {aviso && <div className="banner-ok" role="status" data-testid="aviso-ok">{aviso}</div>}
+      {errorAccion && <div className="banner-error" role="alert" data-testid="aviso-error">{errorAccion}</div>}
+
       <div className="card-plain" style={{ maxWidth: 960 }}>
         {filtrados.map((u) => (
           <div className="admin-row" key={u.id}>
             <div>{u.nombre} {u.apellido}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className={`status-pill ${u.estado === 'activo' ? 'status-active' : 'status-blocked'}`}>
-                {u.estado === 'activo' ? 'Activo' : 'Suspendido'}
+                {u.estado === 'bloqueado_temporal'
+                  ? `Bloqueado temporal · hasta ${formatearFecha(u.bloqueadoHasta)}`
+                  : u.estado === 'bloqueado' ? 'Bloqueado permanente' : 'Activo'}
               </span>
               <button type="button" className="mini-btn" onClick={() => { setSeleccion(u); setModal('detalle') }}>Ver detalle</button>
-              <button type="button" className="mini-btn" onClick={() => abrirEditar(u)}>Editar</button>
-              <button type="button" className="mini-btn danger" onClick={() => alternarBloqueo(u)}>
-                {u.estado === 'activo' ? 'Suspender' : 'Reactivar'}
-              </button>
+              {esBloqueo(u.estado) ? (
+                <button type="button" className="mini-btn" onClick={() => reactivar(u)}>Levantar bloqueo</button>
+              ) : (
+                <button type="button" className="mini-btn danger" onClick={() => { setSeleccion(u); setAviso(''); setErrorAccion(''); setModal('bloquear') }}>Bloquear</button>
+              )}
               <button type="button" className="mini-btn danger" onClick={() => { setSeleccion(u); setModal('eliminar') }}>Eliminar</button>
             </div>
           </div>
         ))}
         {filtrados.length === 0 && <p className="web-sub" style={{ marginBottom: 0 }}>Aún no hay pacientes registrados.</p>}
       </div>
+
+      {modal === 'bloquear' && seleccion && (
+        <ModalBloqueo
+          key={seleccion.id}
+          nombre={`${seleccion.nombre ?? ''} ${seleccion.apellido ?? ''}`.trim()}
+          onCerrar={() => setModal(null)}
+          onConfirmar={(datos) => aplicarBloqueo(seleccion, datos)}
+        />
+      )}
 
       {modal === 'detalle' && seleccion && (
         <div className="modal-fondo" onClick={() => setModal(null)}>
@@ -114,29 +133,18 @@ export default function Usuarios() {
               <div><div style={{ color: 'var(--gris)' }}>Edad</div><div style={{ fontWeight: 600 }}>{seleccion.edad ?? '—'}</div></div>
               <div><div style={{ color: 'var(--gris)' }}>Sexo</div><div style={{ fontWeight: 600 }}>{seleccion.sexo ?? '—'}</div></div>
               <div style={{ gridColumn: '1/3' }}><div style={{ color: 'var(--gris)' }}>Lugar donde vive</div><div style={{ fontWeight: 600 }}>{seleccion.lugar ?? '—'}</div></div>
+              {esBloqueo(seleccion.estado) && (
+                <div style={{ gridColumn: '1/3' }}>
+                  <div style={{ color: 'var(--gris)' }}>Bloqueo</div>
+                  <div style={{ fontWeight: 600 }}>
+                    {seleccion.estado === 'bloqueado_temporal' ? `Temporal, hasta el ${formatearFecha(seleccion.bloqueadoHasta)}` : 'Permanente'}
+                    {seleccion.motivoBloqueo && ` · ${seleccion.motivoBloqueo}`}
+                  </div>
+                </div>
+              )}
             </div>
             <button type="button" className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setModal(null)}>Cerrar</button>
           </div>
-        </div>
-      )}
-
-      {modal === 'editar' && edicion && (
-        <div className="modal-fondo" onClick={() => setModal(null)}>
-          <form className="modal-tarjeta" onClick={(e) => e.stopPropagation()} onSubmit={guardarEdicion}>
-            <div className="modal-titulo">Editar a {seleccion.nombre}</div>
-            <div className="campos-2col">
-              <div><label className="campo-label">Nombre</label><input type="text" value={edicion.nombre} onChange={(e) => setEdicion({ ...edicion, nombre: e.target.value })} required /></div>
-              <div><label className="campo-label">Apellido</label><input type="text" value={edicion.apellido} onChange={(e) => setEdicion({ ...edicion, apellido: e.target.value })} required /></div>
-              <div><label className="campo-label">Celular</label><input type="text" value={edicion.telefono} onChange={(e) => setEdicion({ ...edicion, telefono: e.target.value })} /></div>
-              <div><label className="campo-label">Edad</label><input type="number" value={edicion.edad} onChange={(e) => setEdicion({ ...edicion, edad: e.target.value })} /></div>
-            </div>
-            <label className="campo-label">Lugar donde vive</label>
-            <input type="text" value={edicion.lugar} onChange={(e) => setEdicion({ ...edicion, lugar: e.target.value })} />
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancelar</button>
-              <button type="submit" className="btn btn-primary" disabled={enviando}>Guardar cambios</button>
-            </div>
-          </form>
         </div>
       )}
 

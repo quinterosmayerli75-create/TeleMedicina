@@ -1,5 +1,8 @@
 import { Outlet } from 'react-router-dom'
 import PanelLayout from '../../components/layout/PanelLayout'
+import CuentaRestringida from '../../components/CuentaRestringida'
+import { useAuth } from '../../context/AuthContext'
+import { esBloqueo } from '../../utils/bloqueos'
 
 const ITEMS = [
   { to: '/paciente/inicio', label: 'Inicio' },
@@ -11,6 +14,10 @@ const ITEMS = [
 ]
 
 export default function PacienteLayout() {
+  const { estado } = useAuth()
+
+  if (esBloqueo(estado)) return <CuentaRestringida />
+
   return (
     <PanelLayout items={ITEMS}>
       <Outlet />

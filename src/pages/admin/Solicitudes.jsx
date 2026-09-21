@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { collection, doc, getDoc, onSnapshot, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '../../firebase/config'
+import FotosDoctorAdmin from '../../components/FotosDoctorAdmin'
 
 export default function Solicitudes() {
   const [solicitudes, setSolicitudes] = useState([])
@@ -76,7 +77,7 @@ export default function Solicitudes() {
 
       {modal === 'detalles' && seleccion && (
         <div className="modal-fondo" onClick={() => setModal(null)}>
-          <div className="modal-tarjeta" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-tarjeta" style={{ maxWidth: 600 }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-titulo">Detalles de la solicitud</div>
             <div className="modal-sub">{seleccion.nombre}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 12, marginTop: 12 }}>
@@ -87,8 +88,11 @@ export default function Solicitudes() {
               <div><div style={{ color: 'var(--gris)' }}>Experiencia</div><div style={{ fontWeight: 600 }}>{seleccion.profesional?.experiencia ?? '—'}</div></div>
               <div><div style={{ color: 'var(--gris)' }}>Celular</div><div style={{ fontWeight: 600, fontFamily: 'var(--mono)' }}>{seleccion.telefono}</div></div>
               <div><div style={{ color: 'var(--gris)' }}>Costo de consulta</div><div style={{ fontWeight: 600 }}>Bs {seleccion.profesional?.costoConsulta ?? '—'}</div></div>
+              <div><div style={{ color: 'var(--gris)' }}>Edad</div><div style={{ fontWeight: 600 }}>{seleccion.edad ? `${seleccion.edad} años` : '—'}</div></div>
+              <div><div style={{ color: 'var(--gris)' }}>Estatura · Peso</div><div style={{ fontWeight: 600 }}>{seleccion.estatura || '—'} · {seleccion.peso || '—'}</div></div>
               <div style={{ gridColumn: '1/3' }}><div style={{ color: 'var(--gris)' }}>Descripción</div><div style={{ fontWeight: 600 }}>{seleccion.profesional?.descripcion || '—'}</div></div>
             </div>
+            <FotosDoctorAdmin doctor={seleccion} />
             <button type="button" className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setModal(null)}>Cerrar</button>
           </div>
         </div>

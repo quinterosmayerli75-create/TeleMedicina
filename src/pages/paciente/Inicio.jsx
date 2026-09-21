@@ -3,11 +3,13 @@ import { useAuth } from '../../context/AuthContext'
 import { useProfesionalesActivos } from '../../hooks/useProfesionalesActivos'
 import { useTiposProfesion } from '../../hooks/useTiposProfesion'
 import TarjetaDoctor from '../../components/TarjetaDoctor'
+import { useRutas } from '../../hooks/useRutas'
 
 export default function Inicio() {
   const [especialidad, setEspecialidad] = useState('General')
   const [busqueda, setBusqueda] = useState('')
   const { usuario } = useAuth()
+  const { esDoctor } = useRutas()
   const { profesionales, cargando } = useProfesionalesActivos()
   const tipos = useTiposProfesion()
 
@@ -28,7 +30,11 @@ export default function Inicio() {
   return (
     <div>
       <h1 className="web-h1">Buenas tardes{primerNombre ? `, ${primerNombre}` : ''}</h1>
-      <p className="web-sub">¿Con quién le gustaría hablar hoy? Todas las consultas son 100% virtuales.</p>
+      <p className="web-sub">
+        {esDoctor
+          ? 'Encuentre a otro especialista para una interconsulta. Todas las consultas son 100% virtuales.'
+          : '¿Con quién le gustaría hablar hoy? Todas las consultas son 100% virtuales.'}
+      </p>
 
       <input
         type="text"

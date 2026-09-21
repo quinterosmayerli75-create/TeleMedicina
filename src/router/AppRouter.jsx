@@ -19,11 +19,14 @@ import DoctorLayout from '../pages/doctor/DoctorLayout'
 import Panel from '../pages/doctor/Panel'
 import MensajesDoctor from '../pages/doctor/Mensajes'
 import PerfilPaciente from '../pages/doctor/PerfilPaciente'
+import Informes from '../pages/doctor/Informes'
+import InformeForm from '../pages/doctor/InformeForm'
+import InformeDetalle from '../pages/doctor/InformeDetalle'
 import ConfiguracionDoctor from '../pages/doctor/Configuracion'
 import DenunciaDoctor from '../pages/doctor/Denuncia'
 
 import AdminLayout from '../pages/admin/AdminLayout'
-import Dashboard from '../pages/admin/Dashboard'
+import InicioEstadisticas from '../pages/admin/InicioEstadisticas'
 import Solicitudes from '../pages/admin/Solicitudes'
 import Categorias from '../pages/admin/Categorias'
 import NuevaCategoria from '../pages/admin/NuevaCategoria'
@@ -82,9 +85,19 @@ export default function AppRouter() {
         >
           <Route index element={<Navigate to="panel" replace />} />
           <Route path="panel" element={<Panel />} />
+          <Route path="inicio" element={<Inicio />} />
+          <Route path="buscar" element={<Buscar />} />
+          <Route path="favoritos" element={<Favoritos />} />
+          <Route path="especialista/:id" element={<PerfilDoctor />} />
           <Route path="mensajes" element={<MensajesDoctor />} />
+          <Route path="mensajes/doctores" element={<MensajesDoctor con="doctores" />} />
+          <Route path="mensajes/doctores/:id" element={<MensajesDoctor con="doctores" />} />
           <Route path="mensajes/:id" element={<MensajesDoctor />} />
           <Route path="paciente/:id" element={<PerfilPaciente />} />
+          <Route path="informes" element={<Informes />} />
+          <Route path="informes/nuevo" element={<InformeForm />} />
+          <Route path="informes/:id" element={<InformeDetalle />} />
+          <Route path="informes/:id/editar" element={<InformeForm />} />
           <Route path="configuracion" element={<ConfiguracionDoctor />} />
           <Route path="denuncia/:id" element={<DenunciaDoctor />} />
         </Route>
@@ -97,8 +110,9 @@ export default function AppRouter() {
             </RutaProtegida>
           }
         >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route index element={<Navigate to="inicio" replace />} />
+          <Route path="inicio" element={<InicioEstadisticas />} />
+          <Route path="dashboard" element={<Navigate to="/admin/inicio" replace />} />
           <Route path="solicitudes" element={<Solicitudes />} />
           <Route path="categorias" element={<Categorias />} />
           <Route path="categorias/nueva" element={<NuevaCategoria />} />

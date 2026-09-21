@@ -3,6 +3,7 @@ import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firest
 import { db } from '../../firebase/config'
 import { crearUsuarioAuxiliar } from '../../firebase/crearUsuarioSecundario'
 import { useAuth } from '../../context/AuthContext'
+import HorariosAtencion from '../../components/HorariosAtencion'
 import { validarContrasena } from '../../utils/validacion'
 
 const MODALIDADES = [
@@ -140,6 +141,8 @@ export default function Panel() {
               </div>
             ))}
           </div>
+
+          <HorariosAtencion uid={usuario.uid} disponibilidadInicial={datosProfesional.disponibilidad} />
 
           <div className="card-plain">
             <h2 className="section-title">Carnet profesional</h2>

@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { signOut, updatePassword } from 'firebase/auth'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { signOut } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { auth, db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
-import { validarContrasena } from '../../utils/validacion'
+import CambiarContrasena from '../../components/CambiarContrasena'
+import CambiarFotoPerfil from '../../components/CambiarFotoPerfil'
 
 export default function Configuracion() {
   const { usuario } = useAuth()
   const navigate = useNavigate()
+  const { state } = useLocation()
 
   const [datos, setDatos] = useState({ edad: '', peso: '', estatura: '', telefono: '' })
-  const [nuevaContrasena, setNuevaContrasena] = useState('')
-  const [confirmarContrasena, setConfirmarContrasena] = useState('')
   const [mensajeDatos, setMensajeDatos] = useState('')
-  const [mensajeContrasena, setMensajeContrasena] = useState('')
   const [guardandoDatos, setGuardandoDatos] = useState(false)
-  const [guardandoContrasena, setGuardandoContrasena] = useState(false)
 
   useEffect(() => {
     if (!usuario) return
@@ -47,35 +45,6 @@ export default function Configuracion() {
     }
   }
 
-  async function guardarContrasena(e) {
-    e.preventDefault()
-    setMensajeContrasena('')
-    const errorContrasena = validarContrasena(nuevaContrasena)
-    if (errorContrasena) {
-      setMensajeContrasena(errorContrasena)
-      return
-    }
-    if (nuevaContrasena !== confirmarContrasena) {
-      setMensajeContrasena('Las contraseñas no coinciden.')
-      return
-    }
-    setGuardandoContrasena(true)
-    try {
-      await updatePassword(auth.currentUser, nuevaContrasena)
-      setMensajeContrasena('Contraseña actualizada.')
-      setNuevaContrasena('')
-      setConfirmarContrasena('')
-    } catch (err) {
-      if (err.code === 'auth/requires-recent-login') {
-        setMensajeContrasena('Por seguridad, cierra sesión y vuelve a entrar antes de cambiar la contraseña.')
-      } else {
-        setMensajeContrasena('No se pudo actualizar la contraseña.')
-      }
-    } finally {
-      setGuardandoContrasena(false)
-    }
-  }
-
   async function cerrarSesion() {
     await signOut(auth)
     navigate('/acceso', { replace: true })
@@ -86,16 +55,13 @@ export default function Configuracion() {
       <h1 className="web-h1">Configuración de cuenta</h1>
       <div className="web-2col" style={{ maxWidth: 820 }}>
         <div>
-          <form className="card-plain" onSubmit={guardarContrasena}>
-            <h2 className="section-title">Contraseña</h2>
-            <label className="campo-label" htmlFor="nueva">Nueva contraseña</label>
-            <input id="nueva" type="password" placeholder="••••••••" value={nuevaContrasena} onChange={(e) => setNuevaContrasena(e.target.value)} />
-            <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>Mínimo 8 caracteres, con letras y números.</div>
-            <label className="campo-label" htmlFor="confirmar">Confirmar nueva contraseña</label>
-            <input id="confirmar" type="password" placeholder="Repita la contraseña" value={confirmarContrasena} onChange={(e) => setConfirmarContrasena(e.target.value)} />
-            {mensajeContrasena && <div style={{ fontSize: 12, marginTop: 8, color: 'var(--alerta)' }}>{mensajeContrasena}</div>}
-            <button type="submit" className="btn btn-primary btn-auto" style={{ marginTop: 10 }} disabled={guardandoContrasena}>Guardar contraseña</button>
-          </form>
+          <div className="card-plain">
+            <h2 className="section-title">Foto de perfil</h2>
+            {state?.avisoFoto && <div className="registro-error" style={{ marginTop: 0, marginBottom: 12 }}>{state.avisoFoto}</div>}
+            <CambiarFotoPerfil />
+          </div>
+
+          <CambiarContrasena />
 
           <form className="card-plain" onSubmit={guardarDatos}>
             <h2 className="section-title">Mis datos</h2>

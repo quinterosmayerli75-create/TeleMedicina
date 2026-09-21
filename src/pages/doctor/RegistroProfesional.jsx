@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { auth, db, storage } from '../../firebase/config'
+import { auth, db } from '../../firebase/config'
+import SelectorFotos from '../../components/SelectorFotos'
+import { mensajeErrorSubida, nombreSeguro, subirArchivo } from '../../utils/archivos'
 import { validarContrasena } from '../../utils/validacion'
 
 const PROFESIONES = ['Médico', 'Odontólogo', 'Psicólogo', 'Nutricionista']
@@ -27,15 +28,16 @@ function mensajeError(codigo) {
 
 const ESTADO_INICIAL = {
   email: '', celular: '', contrasena: '', confirmarContrasena: '',
-  nombre: '', profesion: PROFESIONES[0], especialidad: ESPECIALIDADES[0],
+  nombre: '', edad: '', estatura: '', peso: '', profesion: PROFESIONES[0], especialidad: ESPECIALIDADES[0],
   experiencia: '', carnet: '', descripcion: '', costoConsulta: '',
 }
 
 export default function RegistroProfesional() {
   const [datos, setDatos] = useState(ESTADO_INICIAL)
-  const [fotoPerfil, setFotoPerfil] = useState(null)
-  const [fotoTitulo, setFotoTitulo] = useState(null)
-  const [fotoCarnet, setFotoCarnet] = useState(null)
+  const [fotoPerfil, setFotoPerfil] = useState([])
+  const [fotosTitulos, setFotosTitulos] = useState([])
+  const [fotoCarnet, setFotoCarnet] = useState([])
+  const [intentado, setIntentado] = useState(false)
   const [modalidades, setModalidades] = useState({ chat: true, llamada: true, video: false })
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const [mostrarTerminos, setMostrarTerminos] = useState(false)
@@ -50,20 +52,28 @@ export default function RegistroProfesional() {
 
   async function subirSiExiste(archivo, uid, etiqueta) {
     if (!archivo) return ''
-    const archivoRef = ref(storage, `profesionales/${uid}/${etiqueta}-${archivo.name}`)
-    await uploadBytes(archivoRef, archivo)
-    return getDownloadURL(archivoRef)
+    const { url } = await subirArchivo(`profesionales/${uid}/${etiqueta}-${Date.now()}-${nombreSeguro(archivo.name)}`, archivo)
+    return url
   }
 
   function camposIncompletos() {
-    const obligatorios = ['email', 'celular', 'contrasena', 'confirmarContrasena', 'nombre', 'carnet', 'experiencia', 'descripcion', 'costoConsulta']
+    const obligatorios = ['email', 'celular', 'contrasena', 'confirmarContrasena', 'nombre', 'edad', 'estatura', 'peso', 'carnet', 'experiencia', 'descripcion', 'costoConsulta']
     return obligatorios.some((campo) => !String(datos[campo]).trim())
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    setIntentado(true)
 
+    const faltantes = []
+    if (fotoPerfil.length === 0) faltantes.push('la foto de perfil')
+    if (fotosTitulos.length === 0) faltantes.push('al menos una foto de sus títulos')
+    if (fotoCarnet.length === 0) faltantes.push('la foto del carnet profesional')
+    if (faltantes.length > 0) {
+      setError(`Las fotos son obligatorias. Falta subir: ${faltantes.join(', ')}.`)
+      return
+    }
     if (camposIncompletos()) {
       setError('Complete todos los campos obligatorios antes de enviar la solicitud.')
       return
@@ -88,16 +98,31 @@ export default function RegistroProfesional() {
       const credencial = await createUserWithEmailAndPassword(auth, datos.email, datos.contrasena)
       const uid = credencial.user.uid
 
-      const [fotoUrl, fotoTituloUrl, fotoCarnetUrl] = await Promise.all([
-        subirSiExiste(fotoPerfil, uid, 'perfil'),
-        subirSiExiste(fotoTitulo, uid, 'titulo'),
-        subirSiExiste(fotoCarnet, uid, 'carnet'),
-      ])
+      let fotoUrl
+      let titulosUrls
+      let fotoCarnetUrl
+      try {
+        ;[fotoUrl, titulosUrls, fotoCarnetUrl] = await Promise.all([
+          subirSiExiste(fotoPerfil[0], uid, 'perfil'),
+          Promise.all(fotosTitulos.map((foto, i) => subirSiExiste(foto, uid, `titulo-${i + 1}`))),
+          subirSiExiste(fotoCarnet[0], uid, 'carnet'),
+        ])
+      } catch (errSubida) {
+        // Sin las fotos la solicitud no se puede revisar: se anula la cuenta recién creada para que
+        // pueda reintentar con el mismo correo en vez de quedar una cuenta a medias.
+        await credencial.user.delete().catch(() => {})
+        setError(`No se pudieron subir las fotos. ${mensajeErrorSubida(errSubida)}`)
+        setEnviando(false)
+        return
+      }
 
       await setDoc(doc(db, 'usuarios', uid), {
         email: datos.email,
         nombre: datos.nombre,
         telefono: datos.celular,
+        edad: Number(datos.edad),
+        estatura: datos.estatura,
+        peso: datos.peso,
         rol: 'profesional',
         estado: 'pendiente',
         fotoUrl,
@@ -116,7 +141,8 @@ export default function RegistroProfesional() {
         disponibleAhora: false,
         modalidades: [modalidades.chat, modalidades.llamada, modalidades.video],
         disponibilidad: {},
-        documentosVerificacion: [fotoTituloUrl, fotoCarnetUrl].filter(Boolean),
+        titulos: titulosUrls,
+        documentosVerificacion: [...titulosUrls, fotoCarnetUrl].filter(Boolean),
       })
 
       navigate('/', { state: { solicitudEnviada: true } })
@@ -155,6 +181,15 @@ export default function RegistroProfesional() {
               </div>
 
               <div className="registro-seccion">
+                <h2 className="seccion-titulo">Datos personales</h2>
+                <div className="campos-2col">
+                  <div><label className="campo-label" htmlFor="edad">Edad</label><input id="edad" type="number" min="18" placeholder="35" value={datos.edad} onChange={actualizarCampo('edad')} required /></div>
+                  <div><label className="campo-label" htmlFor="estatura">Estatura aprox.</label><input id="estatura" type="text" placeholder="1.70 m" value={datos.estatura} onChange={actualizarCampo('estatura')} required /></div>
+                  <div><label className="campo-label" htmlFor="peso">Peso aprox.</label><input id="peso" type="text" placeholder="72 kg" value={datos.peso} onChange={actualizarCampo('peso')} required /></div>
+                </div>
+              </div>
+
+              <div className="registro-seccion">
                 <h2 className="seccion-titulo">Datos profesionales</h2>
                 <label className="campo-label" htmlFor="nombre">Nombre completo</label>
                 <input id="nombre" type="text" placeholder="Dr./Dra. Nombre Apellido" value={datos.nombre} onChange={actualizarCampo('nombre')} required />
@@ -179,19 +214,45 @@ export default function RegistroProfesional() {
                 <label className="campo-label" htmlFor="costoConsulta">Costo de la consulta (Bs)</label>
                 <input id="costoConsulta" type="number" placeholder="150" value={datos.costoConsulta} onChange={actualizarCampo('costoConsulta')} required />
 
-                <div className="web-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginTop: 14 }}>
-                  <div>
-                    <label className="campo-label">Foto de perfil</label>
-                    <input type="file" accept="image/*" onChange={(e) => setFotoPerfil(e.target.files[0] ?? null)} />
-                  </div>
-                  <div>
-                    <label className="campo-label">Foto del título</label>
-                    <input type="file" accept="image/*" onChange={(e) => setFotoTitulo(e.target.files[0] ?? null)} />
-                  </div>
-                  <div>
-                    <label className="campo-label">Foto del carnet</label>
-                    <input type="file" accept="image/*" onChange={(e) => setFotoCarnet(e.target.files[0] ?? null)} />
-                  </div>
+                <div style={{ marginTop: 14 }}>
+                  <label className="campo-label">Foto de perfil (obligatoria)</label>
+                  <SelectorFotos
+                    archivos={fotoPerfil}
+                    onChange={setFotoPerfil}
+                    maximo={1}
+                    textoBoton="Subir foto de perfil"
+                    obligatoria
+                    resaltar={intentado}
+                    nombre="La foto de perfil"
+                    deshabilitado={enviando}
+                  />
+                </div>
+                <div style={{ marginTop: 14 }}>
+                  <label className="campo-label">Fotos de sus títulos (obligatorias)</label>
+                  <SelectorFotos
+                    archivos={fotosTitulos}
+                    onChange={setFotosTitulos}
+                    maximo={6}
+                    textoBoton="Subir fotos de títulos"
+                    obligatoria
+                    resaltar={intentado}
+                    nombre="Las fotos de sus títulos"
+                    ayuda="Puede subir varios títulos o certificados; los pacientes los verán en su perfil."
+                    deshabilitado={enviando}
+                  />
+                </div>
+                <div style={{ marginTop: 14 }}>
+                  <label className="campo-label">Foto del carnet profesional (obligatoria)</label>
+                  <SelectorFotos
+                    archivos={fotoCarnet}
+                    onChange={setFotoCarnet}
+                    maximo={1}
+                    textoBoton="Subir foto del carnet"
+                    obligatoria
+                    resaltar={intentado}
+                    nombre="La foto del carnet profesional"
+                    deshabilitado={enviando}
+                  />
                 </div>
               </div>
             </div>

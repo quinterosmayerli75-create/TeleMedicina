@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
+import CambiarFotoPerfil from '../../components/CambiarFotoPerfil'
 
 export default function MiPerfil() {
   const { usuario } = useAuth()
@@ -19,12 +20,8 @@ export default function MiPerfil() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 20 }}>
-        {datos.fotoUrl ? (
-          <img src={datos.fotoUrl} alt={datos.nombre} style={{ width: 80, height: 80, borderRadius: 6, objectFit: 'cover', border: '2px solid var(--oro)' }} />
-        ) : (
-          <div style={{ width: 80, height: 80, borderRadius: 6, background: 'var(--marfil-osc)' }} />
-        )}
+      <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
+        <CambiarFotoPerfil compacto />
         <div>
           <div className="web-h1" style={{ marginBottom: 0 }}>{datos.nombre} {datos.apellido}</div>
           <div className="web-sub" style={{ marginBottom: 0 }}>Paciente</div>
