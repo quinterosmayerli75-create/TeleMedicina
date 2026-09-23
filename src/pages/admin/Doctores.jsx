@@ -6,8 +6,9 @@ import { bloquearUsuario, levantarBloqueo, mensajeErrorBloqueo } from '../../fir
 import ModalBloqueo from '../../components/admin/ModalBloqueo'
 import { esBloqueo } from '../../utils/bloqueos'
 import { diasRestantes, formatearFecha } from '../../utils/fechas'
-import { validarContrasena } from '../../utils/validacion'
+import { AYUDA_CONTRASENA, validarContrasena } from '../../utils/validacion'
 import FotosDoctorAdmin from '../../components/FotosDoctorAdmin'
+import CampoContrasena from '../../components/CampoContrasena'
 import { useTiposProfesion } from '../../hooks/useTiposProfesion'
 
 const ETIQUETA_ESTADO = {
@@ -306,9 +307,13 @@ export default function Doctores() {
             <div className="modal-sub">La cuenta queda activa de inmediato, sin pasar por revisión.</div>
             <div className="campos-2col">
               <div><label className="campo-label">Nombre completo</label><input type="text" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} required /></div>
-              <div><label className="campo-label">Celular</label><input type="text" value={nuevo.telefono} onChange={(e) => setNuevo({ ...nuevo, telefono: e.target.value })} required /></div>
+              <div><label className="campo-label">Celular (8 dígitos)</label><input type="text" inputMode="numeric" value={nuevo.telefono} onChange={(e) => setNuevo({ ...nuevo, telefono: e.target.value.replace(/\D/g, '').slice(0, 8) })} required /></div>
               <div><label className="campo-label">Correo</label><input type="email" value={nuevo.email} onChange={(e) => setNuevo({ ...nuevo, email: e.target.value })} required /></div>
-              <div><label className="campo-label">Contraseña inicial</label><input type="password" value={nuevo.contrasena} onChange={(e) => setNuevo({ ...nuevo, contrasena: e.target.value })} required /></div>
+              <div>
+                <label className="campo-label">Contraseña inicial</label>
+                <CampoContrasena value={nuevo.contrasena} onChange={(e) => setNuevo({ ...nuevo, contrasena: e.target.value })} required />
+                <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>{AYUDA_CONTRASENA}</div>
+              </div>
               <div>
                 <label className="campo-label">Profesión</label>
                 <select value={nuevo.profesion} onChange={(e) => setNuevo({ ...nuevo, profesion: e.target.value })}>

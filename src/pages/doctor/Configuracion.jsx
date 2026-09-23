@@ -68,7 +68,7 @@ export default function Configuracion() {
               <div><label className="campo-label" htmlFor="edad">Edad</label><input id="edad" type="number" min="0" value={datos.edad} onChange={(e) => setDatos({ ...datos, edad: e.target.value })} /></div>
               <div><label className="campo-label" htmlFor="estatura">Estatura aprox.</label><input id="estatura" type="text" value={datos.estatura} onChange={(e) => setDatos({ ...datos, estatura: e.target.value })} /></div>
               <div><label className="campo-label" htmlFor="peso">Peso aprox.</label><input id="peso" type="text" value={datos.peso} onChange={(e) => setDatos({ ...datos, peso: e.target.value })} /></div>
-              <div><label className="campo-label" htmlFor="telefono">Celular</label><input id="telefono" type="text" value={datos.telefono} onChange={(e) => setDatos({ ...datos, telefono: e.target.value })} /></div>
+              <div><label className="campo-label" htmlFor="telefono">Celular (8 dígitos)</label><input id="telefono" type="text" inputMode="numeric" value={datos.telefono} onChange={(e) => setDatos({ ...datos, telefono: e.target.value.replace(/\D/g, '').slice(0, 8) })} /></div>
             </div>
             {mensajeDatos && <div style={{ fontSize: 12, marginTop: 8, color: 'var(--esmeralda)' }}>{mensajeDatos}</div>}
             <button type="submit" className="btn btn-primary btn-auto" style={{ marginTop: 10 }} disabled={guardandoDatos}>Guardar</button>

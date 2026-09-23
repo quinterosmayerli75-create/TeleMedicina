@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import { useAuth } from '../context/AuthContext'
-import { validarContrasena } from '../utils/validacion'
+import CampoContrasena from './CampoContrasena'
+import { AYUDA_CONTRASENA, validarContrasena } from '../utils/validacion'
 
 function mensajeDeError(err) {
   switch (err?.code) {
@@ -79,21 +80,19 @@ export default function CambiarContrasena({ mostrarCorreo = false, textoBoton = 
         </>
       )}
       <label className="campo-label" htmlFor="contrasena-actual">Contraseña actual</label>
-      <input
+      <CampoContrasena
         id="contrasena-actual"
-        type="password"
         autoComplete="current-password"
         placeholder="Tu contraseña de ahora"
         value={actual}
         onChange={(e) => setActual(e.target.value)}
       />
       <label className="campo-label" htmlFor="contrasena-nueva">Nueva contraseña</label>
-      <input id="contrasena-nueva" type="password" autoComplete="new-password" value={nueva} onChange={(e) => setNueva(e.target.value)} />
-      <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>Mínimo 8 caracteres, con letras y números.</div>
+      <CampoContrasena id="contrasena-nueva" autoComplete="new-password" value={nueva} onChange={(e) => setNueva(e.target.value)} />
+      <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>{AYUDA_CONTRASENA}</div>
       <label className="campo-label" htmlFor="contrasena-confirmar">Confirmar nueva contraseña</label>
-      <input
+      <CampoContrasena
         id="contrasena-confirmar"
-        type="password"
         autoComplete="new-password"
         placeholder="Repita la contraseña"
         value={confirmar}

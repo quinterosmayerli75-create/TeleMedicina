@@ -4,8 +4,9 @@ import { db } from '../../firebase/config'
 import { crearUsuarioAuxiliar } from '../../firebase/crearUsuarioSecundario'
 import { mensajeErrorBloqueo } from '../../firebase/bloqueos'
 import { useAuth } from '../../context/AuthContext'
-import { validarContrasena } from '../../utils/validacion'
+import { AYUDA_CONTRASENA, validarContrasena } from '../../utils/validacion'
 import { formatearFecha } from '../../utils/fechas'
+import CampoContrasena from '../../components/CampoContrasena'
 
 const NUEVO_INICIAL = { nombre: '', email: '', telefono: '', contrasena: '' }
 
@@ -171,8 +172,8 @@ export default function Roles() {
             </div>
             <div>
               <label className="campo-label" htmlFor="adm-clave">Contraseña inicial</label>
-              <input id="adm-clave" type="password" value={nuevo.contrasena} onChange={(e) => setNuevo({ ...nuevo, contrasena: e.target.value })} required />
-              <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>Mínimo 8 caracteres, con letras y números.</div>
+              <CampoContrasena id="adm-clave" value={nuevo.contrasena} onChange={(e) => setNuevo({ ...nuevo, contrasena: e.target.value })} required />
+              <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>{AYUDA_CONTRASENA}</div>
             </div>
           </div>
           {error && <div className="registro-error" role="alert" data-testid="error-crear-admin">{error}</div>}

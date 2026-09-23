@@ -4,7 +4,8 @@ import { db } from '../../firebase/config'
 import { crearUsuarioAuxiliar } from '../../firebase/crearUsuarioSecundario'
 import { useAuth } from '../../context/AuthContext'
 import HorariosAtencion from '../../components/HorariosAtencion'
-import { validarContrasena } from '../../utils/validacion'
+import CampoContrasena from '../../components/CampoContrasena'
+import { AYUDA_CONTRASENA, validarContrasena } from '../../utils/validacion'
 
 const MODALIDADES = [
   { clave: 'chat', etiqueta: 'Chat de texto' },
@@ -181,8 +182,12 @@ export default function Panel() {
               <div><label className="campo-label">Nombre</label><input type="text" value={nuevoPaciente.nombre} onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, nombre: e.target.value })} required /></div>
               <div><label className="campo-label">Apellido</label><input type="text" value={nuevoPaciente.apellido} onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, apellido: e.target.value })} required /></div>
               <div><label className="campo-label">Correo</label><input type="email" value={nuevoPaciente.email} onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, email: e.target.value })} required /></div>
-              <div><label className="campo-label">Contraseña inicial</label><input type="password" value={nuevoPaciente.contrasena} onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, contrasena: e.target.value })} required /></div>
-              <div><label className="campo-label">Celular</label><input type="text" value={nuevoPaciente.telefono} onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, telefono: e.target.value })} required /></div>
+              <div>
+                <label className="campo-label">Contraseña inicial</label>
+                <CampoContrasena value={nuevoPaciente.contrasena} onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, contrasena: e.target.value })} required />
+                <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>{AYUDA_CONTRASENA}</div>
+              </div>
+              <div><label className="campo-label">Celular (8 dígitos)</label><input type="text" inputMode="numeric" value={nuevoPaciente.telefono} onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, telefono: e.target.value.replace(/\D/g, '').slice(0, 8) })} required /></div>
               <div><label className="campo-label">Edad</label><input type="number" value={nuevoPaciente.edad} onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, edad: e.target.value })} required /></div>
               <div>
                 <label className="campo-label">Sexo</label>

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
+import CampoContrasena from '../../components/CampoContrasena'
 import './Acceso.css'
 
 const RUTA_POR_ROL = {
@@ -44,6 +45,20 @@ export default function Acceso() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+
+    if (!correo.trim() && !contrasena.trim()) {
+      setError('Complete el correo y la contraseña.')
+      return
+    }
+    if (!correo.trim()) {
+      setError('Complete el correo electrónico.')
+      return
+    }
+    if (!contrasena.trim()) {
+      setError('Complete la contraseña.')
+      return
+    }
+
     setEnviando(true)
     try {
       await signInWithEmailAndPassword(auth, correo, contrasena)
@@ -66,26 +81,23 @@ export default function Acceso() {
           <div className="acceso-slogan">Su especialista de confianza, en cualquier dispositivo</div>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit}>
           <label className="campo-label" htmlFor="correo">Correo electrónico</label>
           <input
             id="correo"
-            type="email"
+            type="text"
             placeholder="tu@correo.com"
             value={correo}
             onChange={(e) => setCorreo(e.target.value)}
-            required
             autoComplete="email"
           />
 
           <label className="campo-label" htmlFor="contrasena">Contraseña</label>
-          <input
+          <CampoContrasena
             id="contrasena"
-            type="password"
             placeholder="••••••••"
             value={contrasena}
             onChange={(e) => setContrasena(e.target.value)}
-            required
             autoComplete="current-password"
           />
 
