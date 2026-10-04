@@ -10,8 +10,49 @@ Proyecto de Sistemas I — Grupo 3 (Mayerli Quinteros Silva, Carlos Roberto Herr
 - **Frontend web**: React 19 + Vite, React Router.
 - **Backend**: Firebase (Authentication + Cloud Firestore + Storage). No hay servidor propio: toda
   la lógica vive en el cliente, protegida por las reglas de seguridad de Firestore.
-- La configuración de Firebase (`firebaseConfig`) está en `src/firebase/config.js` — es pública por
+- La configuración de Firebase (`firebaseConfig`) está en `src/services/firebase/config.js` — es pública por
   diseño, la seguridad real la dan `firestore.rules`.
+
+
+## Estructura de carpetas
+
+El código está organizado **por funcionalidad** (feature-based) y, dentro de cada una, separado en capas
+al estilo MVC:
+
+| Capa | Carpeta | Qué contiene |
+|---|---|---|
+| **Modelo** | `services/` | Acceso a datos: Firebase, Cloudinary, subida de archivos |
+| **Controlador** | `hooks/`, `context/` | Estado y lógica que conecta los datos con la pantalla |
+| **Vista** | `pages/`, `components/` | Lo que se muestra al usuario |
+
+```
+src/
+├── main.jsx                 Punto de entrada
+├── app/                     Router y layouts de cada panel (paciente, doctor, admin)
+├── services/                Modelo global: firebase/config, cloudinary, archivos
+├── shared/                  Reutilizable en toda la app
+│   ├── components/          Logo, Estrellas, VisorImagen, CampoContrasena, SelectorFotos
+│   ├── hooks/               useRutas, useTiposProfesion
+│   ├── utils/               fechas, validacion, exportar
+│   └── styles/              tokens.css, components.css
+└── features/                Una carpeta por funcionalidad
+    ├── auth/                Login, registros, AuthContext, cuenta restringida
+    ├── landing/             Página pública de inicio
+    ├── profesionales/       Inicio, búsqueda, perfil de doctor, favoritos, reseñas, panel del doctor
+    ├── consultas/           Solicitar, pagar, agenda, validación de pagos
+    ├── chat/                Mensajes, llamadas, grabadora, interconsulta
+    ├── informes/            Informes médicos y PDF
+    ├── pacientes/           Perfil del paciente visto por el doctor
+    ├── perfil/              Configuración de cuenta (paciente, doctor, admin)
+    ├── denuncias/           Denuncias y su revisión por el admin
+    ├── bloqueos/            Bloqueo de cuentas
+    ├── notificaciones/      Campana de notificaciones
+    └── admin/               Estadísticas, solicitudes, categorías, doctores, usuarios, roles
+```
+
+Cada funcionalidad usa las subcarpetas que necesita (`pages/`, `components/`, `hooks/`, `services/`,
+`utils/`, `context/`, `data/`). Los imports entre carpetas distintas usan el alias `@/` (= `src/`),
+definido en `vite.config.js` y `jsconfig.json`; dentro de una misma funcionalidad se usan rutas relativas.
 
 ## Cómo correr el proyecto
 
@@ -61,7 +102,7 @@ cuáles no se pudieron incluir. (Las fotos sí se ven siempre en pantalla, dentr
 - `/` — Landing pública (sin sesión).
 - `/acceso` — Login compartido para los 3 roles (el sistema detecta el rol automáticamente).
 - `/registro/paciente`, `/registro/profesional` — Registro público.
-- `/paciente/*`, `/doctor/*`, `/admin/*` — Paneles protegidos por rol (ver `src/router/AppRouter.jsx`).
+- `/paciente/*`, `/doctor/*`, `/admin/*` — Paneles protegidos por rol (ver `src/app/AppRouter.jsx`).
   `/admin/*` es el mismo panel para las cuentas administrador y superadmin (ambas tienen `rol: 'administrador'`).
 
 ## Colecciones de Firestore
@@ -94,7 +135,7 @@ cuáles no se pudieron incluir. (Las fotos sí se ven siempre en pantalla, dentr
 - `conversaciones/{pacienteId_doctorId}` — Chat real entre un paciente y un doctor, **construido pero desconectado por ahora**
   (la app usa el chat de ejemplo de antes, ver más abajo). Guarda `participantes`, `ultimoMensaje`, `ultimoDe`,
   `ultimaFecha` y la subcolección `mensajes` con `de`, `tipo` (texto | imagen | video | audio | documento), `texto`,
-  `archivo` (`url`, `nombre`, `tamano`, `mime`) y `fecha`. Para activarlo: en `src/router/AppRouter.jsx` cambia los
+  `archivo` (`url`, `nombre`, `tamano`, `mime`) y `fecha`. Para activarlo: en `src/app/AppRouter.jsx` cambia los
   imports `../pages/paciente/Mensajes` y `../pages/doctor/Mensajes` por `.../MensajesReal` y publica `firestore.rules`
   y `storage.rules`.
 - `calificaciones/{doctorId_pacienteId}` — Calificación de un paciente a un doctor (`doctorId`, `pacienteId`, `estrellas` de 1 a 5,

@@ -1,10 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './styles/tokens.css'
-import './styles/components.css'
-import { AuthProvider } from './context/AuthContext'
-import { FavoritosProvider } from './context/FavoritosContext'
-import AppRouter from './router/AppRouter'
+import '@/shared/styles/tokens.css'
+import '@/shared/styles/components.css'
+import { AuthProvider } from '@/features/auth/context/AuthContext'
+import { FavoritosProvider } from '@/features/profesionales/context/FavoritosContext'
+import AppRouter from '@/app/AppRouter'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
