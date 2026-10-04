@@ -38,6 +38,28 @@ export function resumenDia(dia) {
     .join(' · ')
 }
 
+const DIA_JS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
+
+// Horas en punto disponibles para agendar una consulta en una fecha "aaaa-mm-dd", según el día de la
+// semana que le toque y las franjas que el doctor activó ese día. [] si no atiende ese día.
+export function horasDisponibles(disponibilidad, fechaStr) {
+  if (!fechaStr) return []
+  const fecha = new Date(`${fechaStr}T00:00:00`)
+  if (Number.isNaN(fecha.getTime())) return []
+  const dia = normalizarDisponibilidad(disponibilidad)[DIA_JS[fecha.getDay()]]
+  if (!dia.activo) return []
+  const horas = []
+  for (const { desde, hasta } of dia.franjas) {
+    let hora = Number(desde.split(':')[0])
+    const horaFin = Number(hasta.split(':')[0])
+    while (hora < horaFin) {
+      horas.push(`${String(hora).padStart(2, '0')}:00`)
+      hora += 1
+    }
+  }
+  return horas
+}
+
 // Revisa lo que eligió el doctor antes de guardar. Devuelve un mensaje de error o null si está bien.
 export function validarHorarios(disponibilidad) {
   const normal = normalizarDisponibilidad(disponibilidad)

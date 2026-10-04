@@ -14,16 +14,23 @@ import MensajesPaciente from '../pages/paciente/Mensajes'
 import MiPerfil from '../pages/paciente/MiPerfil'
 import ConfiguracionPaciente from '../pages/paciente/Configuracion'
 import DenunciaPaciente from '../pages/paciente/Denuncia'
+import SolicitarConsulta from '../pages/paciente/SolicitarConsulta'
+import Consulta from '../pages/paciente/Consulta'
+import MisConsultasPaciente from '../pages/paciente/MisConsultas'
 
 import DoctorLayout from '../pages/doctor/DoctorLayout'
 import Panel from '../pages/doctor/Panel'
 import MensajesDoctor from '../pages/doctor/Mensajes'
+import MensajesInterconsulta from '../pages/doctor/MensajesInterconsulta'
 import PerfilPaciente from '../pages/doctor/PerfilPaciente'
 import Informes from '../pages/doctor/Informes'
 import InformeForm from '../pages/doctor/InformeForm'
 import InformeDetalle from '../pages/doctor/InformeDetalle'
 import ConfiguracionDoctor from '../pages/doctor/Configuracion'
 import DenunciaDoctor from '../pages/doctor/Denuncia'
+import MisConsultasDoctor from '../pages/doctor/MisConsultas'
+import ConsultaDetalleDoctor from '../pages/doctor/ConsultaDetalle'
+import AgendaDoctor from '../pages/doctor/Agenda'
 
 import AdminLayout from '../pages/admin/AdminLayout'
 import InicioEstadisticas from '../pages/admin/InicioEstadisticas'
@@ -35,6 +42,7 @@ import Usuarios from '../pages/admin/Usuarios'
 import Denuncias from '../pages/admin/Denuncias'
 import Roles from '../pages/admin/Roles'
 import ConfiguracionAdmin from '../pages/admin/Configuracion'
+import ValidacionPagos from '../pages/admin/ValidacionPagos'
 
 function RutaProtegida({ rolPermitido, children }) {
   const { usuario, rol, cargando } = useAuth()
@@ -73,6 +81,9 @@ export default function AppRouter() {
           <Route path="perfil" element={<MiPerfil />} />
           <Route path="configuracion" element={<ConfiguracionPaciente />} />
           <Route path="denuncia/:id" element={<DenunciaPaciente />} />
+          <Route path="solicitar/:id" element={<SolicitarConsulta />} />
+          <Route path="consultas" element={<MisConsultasPaciente />} />
+          <Route path="consultas/:id" element={<Consulta />} />
         </Route>
 
         <Route
@@ -90,8 +101,8 @@ export default function AppRouter() {
           <Route path="favoritos" element={<Favoritos />} />
           <Route path="especialista/:id" element={<PerfilDoctor />} />
           <Route path="mensajes" element={<MensajesDoctor />} />
-          <Route path="mensajes/doctores" element={<MensajesDoctor con="doctores" />} />
-          <Route path="mensajes/doctores/:id" element={<MensajesDoctor con="doctores" />} />
+          <Route path="mensajes/doctores" element={<MensajesInterconsulta />} />
+          <Route path="mensajes/doctores/:id" element={<MensajesInterconsulta />} />
           <Route path="mensajes/:id" element={<MensajesDoctor />} />
           <Route path="paciente/:id" element={<PerfilPaciente />} />
           <Route path="informes" element={<Informes />} />
@@ -100,6 +111,9 @@ export default function AppRouter() {
           <Route path="informes/:id/editar" element={<InformeForm />} />
           <Route path="configuracion" element={<ConfiguracionDoctor />} />
           <Route path="denuncia/:id" element={<DenunciaDoctor />} />
+          <Route path="agenda" element={<AgendaDoctor />} />
+          <Route path="consultas" element={<MisConsultasDoctor />} />
+          <Route path="consultas/:id" element={<ConsultaDetalleDoctor />} />
         </Route>
 
         <Route
@@ -120,6 +134,7 @@ export default function AppRouter() {
           <Route path="usuarios" element={<Usuarios />} />
           <Route path="denuncias" element={<Denuncias />} />
           <Route path="roles" element={<Roles />} />
+          <Route path="pagos" element={<ValidacionPagos />} />
           <Route path="configuracion" element={<ConfiguracionAdmin />} />
         </Route>
 

@@ -5,8 +5,9 @@ import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { auth, db } from '../../firebase/config'
 import SelectorFotos from '../../components/SelectorFotos'
 import CampoContrasena from '../../components/CampoContrasena'
-import { nombreSeguro, subirArchivo } from '../../utils/archivos'
+import { mensajeErrorSubida, nombreSeguro, subirArchivo } from '../../utils/archivos'
 import { AYUDA_CONTRASENA, validarContrasena } from '../../utils/validacion'
+import { calcularEdad } from '../../utils/fechas'
 
 const PROFESIONES = ['Médico', 'Odontólogo', 'Psicólogo', 'Nutricionista']
 const ESPECIALIDADES = ['Cardiología', 'Odontología', 'Psicología', 'Medicina general']
@@ -15,7 +16,8 @@ const MODALIDADES = [
   { clave: 'llamada', etiqueta: 'Llamada de voz' },
   { clave: 'video', etiqueta: 'Videollamada' },
 ]
-const OBLIGATORIOS = ['email', 'celular', 'contrasena', 'confirmarContrasena', 'nombre', 'edad', 'estatura', 'peso', 'carnet', 'experiencia', 'descripcion', 'costoConsulta']
+const OBLIGATORIOS = ['email', 'celular', 'contrasena', 'confirmarContrasena', 'nombre', 'fechaNacimiento', 'estatura', 'peso', 'carnet', 'experiencia', 'descripcion', 'costoConsulta']
+const HOY = new Date().toISOString().slice(0, 10)
 
 function mensajeError(codigo) {
   switch (codigo) {
@@ -30,7 +32,7 @@ function mensajeError(codigo) {
 
 const ESTADO_INICIAL = {
   email: '', celular: '', contrasena: '', confirmarContrasena: '',
-  nombre: '', edad: '', estatura: '', peso: '', profesion: PROFESIONES[0], especialidad: ESPECIALIDADES[0],
+  nombre: '', fechaNacimiento: '', estatura: '', peso: '', profesion: PROFESIONES[0], especialidad: ESPECIALIDADES[0],
   experiencia: '', carnet: '', descripcion: '', costoConsulta: '',
 }
 
@@ -72,9 +74,10 @@ export default function RegistroProfesional() {
     e.preventDefault()
     setError('')
 
-    // TODO: volver a exigir las 3 fotos (fotoPerfil, fotosTitulos, fotoCarnet) en cuanto Storage
-    // esté disponible (plan Blaze activado). Mientras tanto no bloqueamos el registro por esto.
     const camposFaltantes = OBLIGATORIOS.filter((campo) => !String(datos[campo]).trim())
+    if (fotoPerfil.length === 0) camposFaltantes.push('fotoPerfil')
+    if (fotosTitulos.length === 0) camposFaltantes.push('fotosTitulos')
+    if (fotoCarnet.length === 0) camposFaltantes.push('fotoCarnet')
     setFaltantes(camposFaltantes)
     if (camposFaltantes.length > 0) {
       setError('Complete todos los campos obligatorios antes de enviar la solicitud (marcados en rojo).')
@@ -84,6 +87,18 @@ export default function RegistroProfesional() {
     if (datos.celular.length !== 8) {
       setError('El celular debe tener 8 dígitos.')
       setFaltantes(['celular'])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (datos.fechaNacimiento > HOY) {
+      setError('La fecha de nacimiento no puede ser futura.')
+      setFaltantes(['fechaNacimiento'])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (calcularEdad(datos.fechaNacimiento) < 18) {
+      setError('Debe ser mayor de edad (18 años) para registrarse como profesional.')
+      setFaltantes(['fechaNacimiento'])
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
@@ -110,29 +125,31 @@ export default function RegistroProfesional() {
       const credencial = await createUserWithEmailAndPassword(auth, datos.email, datos.contrasena)
       const uid = credencial.user.uid
 
-      // Las fotos son opcionales por ahora (Storage aún no está habilitado): si falla la subida,
-      // seguimos el registro sin esa foto en vez de bloquearlo.
-      let fotoUrl = ''
-      let titulosUrls = []
-      let fotoCarnetUrl = ''
+      let fotoUrl
+      let titulosUrls
+      let fotoCarnetUrl
       try {
         ;[fotoUrl, titulosUrls, fotoCarnetUrl] = await Promise.all([
           subirSiExiste(fotoPerfil[0], uid, 'perfil'),
           Promise.all(fotosTitulos.map((foto, i) => subirSiExiste(foto, uid, `titulo-${i + 1}`))),
           subirSiExiste(fotoCarnet[0], uid, 'carnet'),
         ])
-      } catch {
-        // Storage no disponible todavía: no interrumpimos el registro, solo quedan sin foto.
-        fotoUrl = ''
-        titulosUrls = []
-        fotoCarnetUrl = ''
+      } catch (errSubida) {
+        // Sin las fotos la solicitud no se puede revisar: se anula la cuenta recién creada para que
+        // pueda reintentar con el mismo correo en vez de quedar una cuenta a medias.
+        await credencial.user.delete().catch(() => {})
+        setError(`No se pudieron subir las fotos. ${mensajeErrorSubida(errSubida)}`)
+        setEnviando(false)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
       }
 
       await setDoc(doc(db, 'usuarios', uid), {
         email: datos.email,
         nombre: datos.nombre,
         telefono: datos.celular,
-        edad: Number(datos.edad),
+        fechaNacimiento: datos.fechaNacimiento,
+        edad: calcularEdad(datos.fechaNacimiento),
         estatura: datos.estatura,
         peso: datos.peso,
         rol: 'profesional',
@@ -210,9 +227,9 @@ export default function RegistroProfesional() {
                 <h2 className="seccion-titulo">Datos personales</h2>
                 <div className="campos-2col">
                   <div>
-                    <label className="campo-label" htmlFor="edad">Edad</label>
-                    <input id="edad" type="number" min="18" placeholder="35" value={datos.edad} onChange={actualizarCampo('edad')} />
-                    <CampoError campo="edad" faltantes={faltantes} />
+                    <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>
+                    <input id="fechaNacimiento" type="date" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
+                    <CampoError campo="fechaNacimiento" faltantes={faltantes} />
                   </div>
                   <div>
                     <label className="campo-label" htmlFor="estatura">Estatura aprox.</label>
@@ -264,35 +281,41 @@ export default function RegistroProfesional() {
                 <CampoError campo="costoConsulta" faltantes={faltantes} />
 
                 <div style={{ marginTop: 14 }}>
-                  <label className="campo-label">Foto de perfil (opcional por ahora)</label>
+                  <label className="campo-label">Foto de perfil (obligatoria)</label>
                   <SelectorFotos
                     archivos={fotoPerfil}
                     onChange={setFotoPerfil}
                     maximo={1}
                     textoBoton="Subir foto de perfil"
+                    obligatoria
+                    resaltar={faltantes.includes('fotoPerfil')}
                     nombre="La foto de perfil"
                     deshabilitado={enviando}
                   />
                 </div>
                 <div style={{ marginTop: 14 }}>
-                  <label className="campo-label">Fotos de sus títulos (opcional por ahora)</label>
+                  <label className="campo-label">Fotos de sus títulos (obligatorias)</label>
                   <SelectorFotos
                     archivos={fotosTitulos}
                     onChange={setFotosTitulos}
                     maximo={6}
                     textoBoton="Subir fotos de títulos"
+                    obligatoria
+                    resaltar={faltantes.includes('fotosTitulos')}
                     nombre="Las fotos de sus títulos"
                     ayuda="Puede subir varios títulos o certificados; los pacientes los verán en su perfil."
                     deshabilitado={enviando}
                   />
                 </div>
                 <div style={{ marginTop: 14 }}>
-                  <label className="campo-label">Foto del carnet profesional (opcional por ahora)</label>
+                  <label className="campo-label">Foto del carnet profesional (obligatoria)</label>
                   <SelectorFotos
                     archivos={fotoCarnet}
                     onChange={setFotoCarnet}
                     maximo={1}
                     textoBoton="Subir foto del carnet"
+                    obligatoria
+                    resaltar={faltantes.includes('fotoCarnet')}
                     nombre="La foto del carnet profesional"
                     deshabilitado={enviando}
                   />

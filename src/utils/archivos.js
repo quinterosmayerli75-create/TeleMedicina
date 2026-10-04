@@ -1,5 +1,4 @@
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
-import { storage } from '../firebase/config'
+import { CLOUDINARY_UPLOAD_PRESET, CLOUDINARY_UPLOAD_URL } from '../cloudinary/config'
 
 export const MB = 1024 * 1024
 export const LIMITE_FOTO_MB = 5
@@ -57,24 +56,31 @@ export function validarArchivo(archivo, { solo, maxMB }) {
   return null
 }
 
-// Sube un archivo a Firebase Storage y devuelve su URL de descarga.
+// Sube un archivo a Cloudinary (plan gratuito, sin tarjeta) y devuelve su URL pública.
+// "ruta" se usa como public_id para mantener la misma organización en carpetas que antes
+// (ej. "usuarios/<uid>/perfil-...").
 export function subirArchivo(ruta, archivo, onProgreso) {
   return new Promise((resolve, reject) => {
-    const archivoRef = ref(storage, ruta)
-    const tarea = uploadBytesResumable(archivoRef, archivo, archivo.type ? { contentType: archivo.type } : undefined)
-    tarea.on(
-      'state_changed',
-      (instantanea) => onProgreso?.(instantanea.totalBytes ? instantanea.bytesTransferred / instantanea.totalBytes : 0),
-      reject,
-      async () => {
-        try {
-          const url = await getDownloadURL(tarea.snapshot.ref)
-          resolve({ url, nombre: archivo.name, tamano: archivo.size, mime: archivo.type || '' })
-        } catch (err) {
-          reject(err)
-        }
+    const formData = new FormData()
+    formData.append('file', archivo)
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+    formData.append('public_id', ruta)
+
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', CLOUDINARY_UPLOAD_URL)
+    xhr.upload.onprogress = (evento) => {
+      if (evento.lengthComputable) onProgreso?.(evento.loaded / evento.total)
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const datos = JSON.parse(xhr.responseText)
+        resolve({ url: datos.secure_url, nombre: archivo.name, tamano: archivo.size, mime: archivo.type || '' })
+      } else {
+        reject(new Error(`cloudinary/http-${xhr.status}`))
       }
-    )
+    }
+    xhr.onerror = () => reject(new Error('cloudinary/network'))
+    xhr.send(formData)
   })
 }
 
@@ -88,15 +94,12 @@ export async function subirEvidencias(uid, fotos) {
 }
 
 export function mensajeErrorSubida(err) {
-  switch (err?.code) {
-    case 'storage/unauthorized':
-    case 'storage/unauthenticated':
-      return 'Firebase Storage rechazó la subida: hay que publicar las reglas de storage.rules (ver README).'
-    case 'storage/quota-exceeded':
-      return 'Se agotó el espacio de Firebase Storage.'
-    case 'storage/canceled':
-      return 'La subida se canceló.'
-    default:
-      return 'No se pudo subir el archivo. Revisa tu conexión e intenta de nuevo.'
+  const mensaje = err?.message ?? ''
+  if (mensaje === 'cloudinary/network') {
+    return 'No hay conexión. Revisa tu internet e intenta de nuevo.'
   }
+  if (mensaje.startsWith('cloudinary/http-4')) {
+    return 'Cloudinary rechazó la subida: revisa que el "upload preset" exista y sea "Unsigned".'
+  }
+  return 'No se pudo subir el archivo. Revisa tu conexión e intenta de nuevo.'
 }

@@ -2,8 +2,9 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../../firebase/config'
 import Logo from '../Logo'
+import NotificacionesBell from '../NotificacionesBell'
 
-export default function PanelLayout({ items, children }) {
+export default function PanelLayout({ items, children, banner }) {
   const navigate = useNavigate()
 
   async function cerrarSesion() {
@@ -13,10 +14,12 @@ export default function PanelLayout({ items, children }) {
 
   return (
     <div className="web-shell">
+      {banner}
       <aside className="web-sidebar">
         <div className="web-logo">
           <Logo />
           <div className="word">DOCTOP</div>
+          <div style={{ marginLeft: 'auto' }}><NotificacionesBell /></div>
         </div>
         {items.map((item) => (
           <NavLink

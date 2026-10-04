@@ -1,7 +1,8 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
+// Nota: ya no se usa firebase/storage — las fotos y adjuntos se suben a Cloudinary
+// (ver src/cloudinary/config.js) porque su plan gratuito no requiere tarjeta.
 
 // NUNCA pegar aquí credenciales del Admin SDK / cuenta de servicio.
 const firebaseConfig = {
@@ -17,6 +18,5 @@ const app = initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)
 export const db = getFirestore(app)
-export const storage = getStorage(app)
 export { firebaseConfig }
 export default app

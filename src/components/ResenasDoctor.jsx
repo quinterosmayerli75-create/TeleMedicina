@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { guardarCalificacion } from '../firebase/calificaciones'
+import { crearNotificacion } from '../firebase/notificaciones'
 import { formatearFecha } from '../utils/fechas'
 import SelectorEstrellas from './SelectorEstrellas'
 
@@ -25,7 +26,8 @@ function EstrellasFijas({ valor }) {
 // Bloque "Deje su calificación" (el paciente elige de 1 a 5 estrellas y puede dejar un comentario) más la
 // lista de calificaciones que ya dejaron otros pacientes. Recibe la lista ya cargada (useCalificaciones).
 // Solo los pacientes califican: en el panel del doctor (`puedeCalificar` = false) se ve la lista, sin el formulario.
-export default function ResenasDoctor({ doctorId, calificaciones, cargando, error, puedeCalificar = true }) {
+// Además, solo puede calificar quien ya tuvo una consulta finalizada con ese doctor (`consultaId`, o null si no tuvo ninguna).
+export default function ResenasDoctor({ doctorId, calificaciones, cargando, error, puedeCalificar = true, consultaId = null }) {
   const { usuario } = useAuth()
   const miCalificacion = calificaciones.find((c) => c.pacienteId === usuario?.uid)
 
@@ -49,7 +51,15 @@ export default function ResenasDoctor({ doctorId, calificaciones, cargando, erro
     setEnviando(true)
     setMensaje(null)
     try {
-      const { promedioActualizado } = await guardarCalificacion({ doctorId, pacienteId: usuario.uid, estrellas, comentario })
+      const { promedioActualizado } = await guardarCalificacion({ doctorId, pacienteId: usuario.uid, estrellas, comentario, consultaId })
+      if (!miCalificacion) {
+        crearNotificacion({
+          paraUid: doctorId,
+          tipo: 'calificacion',
+          texto: `Recibiste una nueva calificación: ${estrellas} ★`,
+          enlace: `/doctor/especialista/${doctorId}`,
+        }).catch(() => {})
+      }
       setEstrellasElegidas(null)
       setComentarioEscrito(null)
       setMensaje(
@@ -66,7 +76,15 @@ export default function ResenasDoctor({ doctorId, calificaciones, cargando, erro
 
   return (
     <>
-      {puedeCalificar && (
+      {puedeCalificar && !consultaId && (
+        <div className="card-plain">
+          <p style={{ fontSize: 12.5, color: 'var(--gris)', margin: 0 }}>
+            Podrás calificar a este profesional después de tener una consulta finalizada con él.
+          </p>
+        </div>
+      )}
+
+      {puedeCalificar && consultaId && (
       <form className="card-plain" onSubmit={publicar}>
         <div style={{ fontSize: 12.5, fontWeight: 600, marginBottom: 6 }}>
           {miCalificacion ? 'Tu calificación (puedes cambiarla)' : 'Deje su calificación'}
@@ -98,7 +116,7 @@ export default function ResenasDoctor({ doctorId, calificaciones, cargando, erro
           <p style={{ fontSize: 12.5, color: 'var(--alerta)', margin: 0 }}>No se pudieron cargar las calificaciones.</p>
         )}
         {!cargando && !error && calificaciones.length === 0 && (
-          <p style={{ fontSize: 12.5, color: 'var(--gris)', margin: 0 }}>{puedeCalificar ? 'Todavía nadie calificó a este profesional. ¡Sea el primero!' : 'Todavía nadie calificó a este profesional.'}</p>
+          <p style={{ fontSize: 12.5, color: 'var(--gris)', margin: 0 }}>{puedeCalificar && consultaId ? 'Todavía nadie calificó a este profesional. ¡Sea el primero!' : 'Todavía nadie calificó a este profesional.'}</p>
         )}
         {visibles.map((c) => (
           <div className="resena" key={c.id}>

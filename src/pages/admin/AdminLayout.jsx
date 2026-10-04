@@ -10,6 +10,7 @@ const ITEMS = [
   { to: '/admin/categorias', label: 'Categorías' },
   { to: '/admin/doctores', label: 'Doctores' },
   { to: '/admin/usuarios', label: 'Usuarios' },
+  { to: '/admin/pagos', label: 'Validación de pagos' },
   { to: '/admin/denuncias', label: 'Denuncias' },
   { to: '/admin/roles', label: 'Roles y permisos' },
   { to: '/admin/configuracion', label: 'Configuración' },

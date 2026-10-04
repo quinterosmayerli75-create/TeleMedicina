@@ -303,6 +303,37 @@ button.attach-btn:hover { border-color: var(--oro); }
   .chat-shell .web-pane-chat { min-height: 70vh; }
 }
 
+/* ---- Llamadas (audio y video, WebRTC) ---- */
+.llamada-overlay { position: fixed; inset: 0; background: var(--onyx); color: var(--marfil); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.llamada-tarjeta { text-align: center; animation: latido 1.8s infinite; }
+.llamada-nombre { font-family: var(--display); font-size: 20px; font-weight: 600; }
+.llamada-tipo { font-size: 13px; color: var(--oro-claro); margin-top: 6px; }
+.llamada-activa { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.llamada-videos { position: relative; width: 100%; height: 100%; background: #000; }
+.llamada-videos video { background: #000; }
+.llamada-video-propio { position: absolute; bottom: 90px; right: 20px; width: 140px; height: 190px; border-radius: 6px; overflow: hidden; border: 2px solid var(--oro); }
+.llamada-audio-indicador { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.llamada-controles { position: absolute; bottom: 24px; left: 0; right: 0; display: flex; justify-content: center; gap: 16px; }
+.llamada-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: var(--marfil-osc); color: var(--onyx); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.llamada-btn.off { background: var(--oro); }
+.llamada-btn.colgar { background: var(--alerta); color: #fff; }
+.llamada-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 150; background: var(--esmeralda); color: #fff; padding: 10px 18px; display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 13.5px; cursor: pointer; animation: latido 1.8s infinite; }
+.llamada-banner .btn { padding: 6px 14px; }
+
+/* ---- Notificaciones (campanita) ---- */
+.notif-wrap { position: relative; }
+.notif-campana { position: relative; background: none; border: none; color: var(--oro-claro); font-size: 19px; cursor: pointer; padding: 4px; line-height: 1; }
+.notif-badge { position: absolute; top: -4px; right: -6px; background: var(--alerta); color: #fff; font-size: 10px; font-weight: 700; border-radius: 10px; padding: 1px 5px; min-width: 16px; text-align: center; }
+.notif-fondo { position: fixed; inset: 0; z-index: 90; }
+.notif-panel { position: absolute; top: 32px; left: 0; width: 300px; max-height: 360px; overflow-y: auto; background: #fff; color: var(--onyx); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.25); z-index: 100; }
+.notif-panel-titulo { font-size: 12.5px; font-weight: 700; padding: 12px 14px 8px; }
+.notif-vacio { font-size: 12.5px; color: var(--gris); padding: 0 14px 14px; margin: 0; }
+.notif-item { padding: 10px 14px; border-top: 1px solid var(--marfil-osc); cursor: pointer; }
+.notif-item:hover { background: var(--marfil); }
+.notif-item.no-leida { background: #EAF3FB; }
+.notif-texto { font-size: 12.5px; line-height: 1.4; }
+.notif-hace { font-size: 10.5px; color: var(--gris); margin-top: 3px; }
+
 /* ---- Calificar al doctor con estrellas ---- */
 .selector-estrellas { display: flex; align-items: center; gap: 2px; margin-bottom: 8px; }
 .estrella-btn { background: none; border: none; padding: 2px 3px; font-size: 34px; line-height: 1; color: var(--marfil-osc); cursor: pointer; transition: transform .1s, color .1s; }

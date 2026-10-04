@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import { useProfesional } from '../../hooks/useProfesionalesActivos'
 import { useCalificaciones } from '../../hooks/useCalificaciones'
+import { useConsultaFinalizada } from '../../hooks/useConsultas'
 import { useRutas } from '../../hooks/useRutas'
 import { useFavoritos } from '../../context/FavoritosContext'
 import Estrellas from '../../components/Estrellas'
@@ -17,11 +19,13 @@ export default function PerfilDoctor() {
   const navigate = useNavigate()
   const { key } = useLocation()
   const rutas = useRutas()
+  const { usuario } = useAuth()
   const { esFavorito, alternar } = useFavoritos()
   const [visor, setVisor] = useState(null)
 
   const { profesional: doctor, cargando } = useProfesional(id)
   const resenas = useCalificaciones(id)
+  const consultaFinalizadaId = useConsultaFinalizada(usuario?.uid, id)
 
   // Vuelve a donde estaba el paciente (inicio, favoritos, chat…); si abrió el perfil directo, a la búsqueda.
   function volver() {
@@ -122,6 +126,7 @@ export default function PerfilDoctor() {
           <ResenasDoctor
             doctorId={doctor.id}
             puedeCalificar={!rutas.esDoctor}
+            consultaId={consultaFinalizadaId}
             calificaciones={resenas.calificaciones}
             cargando={resenas.cargando}
             error={resenas.error}
@@ -129,6 +134,12 @@ export default function PerfilDoctor() {
         </div>
 
         <div>
+          {!rutas.esDoctor && (
+            <button type="button" className="btn btn-primary" style={{ width: '100%', marginBottom: 14 }} onClick={() => navigate(`/paciente/solicitar/${doctor.id}`)}>
+              📅 Solicitar consulta
+            </button>
+          )}
+
           <div className="icon-btn-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
             {modalidadesActivas.includes('Llamada de voz') && <div className="icon-btn">📞 Llamar</div>}
             {modalidadesActivas.includes('Videollamada') && <div className="icon-btn">🎥 Video</div>}

@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { enviarMensaje, idConversacion, mensajeErrorEnvio } from '../../firebase/chat'
 import { useMensajes } from '../../hooks/useChat'
 import { useGrabadora } from '../../hooks/useGrabadora'
+import { useLlamada } from '../../hooks/useLlamada'
 import { LIMITE_ADJUNTO_MB, MB, formatearTamano, mensajeErrorSubida, nombreSeguro, subirArchivo, tipoDeArchivo } from '../../utils/archivos'
 import VisorImagen from '../VisorImagen'
 import Burbuja, { formatearSegundos } from './Burbuja'
+import LlamadaPanel from './LlamadaPanel'
 
 // Conversación abierta con una persona: cabecera (foto y nombre llevan a su perfil), mensajes en
 // tiempo real y barra para escribir y enviar archivos, documentos, fotos, videos y audios.
@@ -17,6 +19,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
 
   const { mensajes, cargando, error: errorLectura } = useMensajes(convId)
   const grabadora = useGrabadora()
+  const llamada = useLlamada({ convId, pacienteId, doctorId, miUid })
 
   const [texto, setTexto] = useState('')
   const [subidas, setSubidas] = useState([])
@@ -121,6 +124,8 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
           <div className="name">{otro.nombre}</div>
           <div className="status">{subtitulo}</div>
         </div>
+        <div className="icn" title="Llamada de voz" onClick={() => !llamada.llamada && llamada.iniciar('audio')}>📞</div>
+        <div className="icn" title="Videollamada" onClick={() => !llamada.llamada && llamada.iniciar('video')}>🎥</div>
         <div className="icn" style={{ color: 'var(--alerta)' }} title="Denunciar" onClick={() => navigate(rutaDenuncia)}>⚑</div>
       </div>
 
@@ -187,6 +192,18 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
       </form>
 
       {visor && <VisorImagen imagenes={[visor]} indice={0} onCerrar={() => setVisor(null)} onCambiar={() => {}} />}
+
+      <LlamadaPanel
+        llamada={llamada.llamada}
+        soyLlamante={llamada.soyLlamante}
+        localStream={llamada.localStream}
+        remoteStream={llamada.remoteStream}
+        error={llamada.error}
+        onAceptar={llamada.aceptar}
+        onRechazar={llamada.rechazar}
+        onColgar={llamada.colgar}
+        otro={otro}
+      />
     </div>
   )
 }

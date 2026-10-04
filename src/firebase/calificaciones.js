@@ -15,12 +15,13 @@ export function promedioDe(calificaciones) {
 // Guarda la calificación del paciente y recalcula el promedio del doctor (`calificacionPromedio`), que es
 // el que usan las tarjetas, el filtro por estrellas y el ranking del admin. Devuelve
 // { promedioActualizado } para poder avisar si la calificación se guardó pero el promedio no.
-export async function guardarCalificacion({ doctorId, pacienteId, estrellas, comentario }) {
+export async function guardarCalificacion({ doctorId, pacienteId, estrellas, comentario, consultaId }) {
   await setDoc(doc(db, 'calificaciones', idCalificacion(doctorId, pacienteId)), {
     doctorId,
     pacienteId,
     estrellas,
     comentario: (comentario ?? '').trim(),
+    consultaId,
     fecha: serverTimestamp(),
   })
 

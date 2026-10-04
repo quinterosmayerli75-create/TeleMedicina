@@ -23,7 +23,7 @@ function horaCorta(valor) {
 
 // Pantalla de mensajes compartida por paciente y doctor: lista de conversaciones a la izquierda y
 // la conversación abierta a la derecha. `rol` es el de quien mira: 'paciente' | 'profesional'.
-export default function PaginaMensajes({ rol }) {
+export default function PaginaMensajes({ rol, encabezadoLista = null }) {
   const { id } = useParams()
   const navigate = useNavigate()
   const { usuario } = useAuth()
@@ -45,6 +45,7 @@ export default function PaginaMensajes({ rol }) {
   return (
     <div className="web-two-pane chat-shell" style={{ margin: '-30px -36px' }}>
       <div className="web-pane-list">
+        {encabezadoLista}
         {error && (
           <div className="registro-error" style={{ padding: 16 }}>
             {error === 'permission-denied' ? 'Firestore no permite leer las conversaciones: hay que publicar las reglas de firestore.rules (ver README).' : 'No se pudieron cargar las conversaciones.'}

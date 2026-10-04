@@ -10,6 +10,19 @@ import { AYUDA_CONTRASENA, validarContrasena } from '../../utils/validacion'
 import FotosDoctorAdmin from '../../components/FotosDoctorAdmin'
 import CampoContrasena from '../../components/CampoContrasena'
 import { useTiposProfesion } from '../../hooks/useTiposProfesion'
+import { descargarCSV } from '../../utils/exportar'
+
+const COLUMNAS_EXPORTAR = [
+  { clave: 'nombre', etiqueta: 'Nombre' },
+  { clave: 'email', etiqueta: 'Correo' },
+  { clave: 'telefono', etiqueta: 'Celular' },
+  { clave: 'profesion', etiqueta: 'Profesión' },
+  { clave: 'especialidad', etiqueta: 'Especialidad' },
+  { clave: 'carnet', etiqueta: 'Carnet' },
+  { clave: 'costoConsulta', etiqueta: 'Costo consulta (Bs)' },
+  { clave: 'calificacionPromedio', etiqueta: 'Calificación' },
+  { clave: 'estado', etiqueta: 'Estado' },
+]
 
 const ETIQUETA_ESTADO = {
   activo: { texto: 'Activo', clase: 'status-active' },
@@ -107,6 +120,21 @@ export default function Doctores() {
       return d.nombre?.toLowerCase().includes(termino) || especialidad.toLowerCase().includes(termino)
     })
   }, [doctores, busqueda, especialidadSel, estadoSel])
+
+  const filasExportar = useMemo(
+    () => filtrados.map((d) => ({
+      nombre: d.nombre,
+      email: d.email,
+      telefono: d.telefono,
+      profesion: d.profesional?.profesion,
+      especialidad: d.profesional?.especialidad,
+      carnet: d.profesional?.carnet,
+      costoConsulta: d.profesional?.costoConsulta,
+      calificacionPromedio: d.profesional?.calificacionPromedio,
+      estado: ETIQUETA_ESTADO[d.estado]?.texto ?? d.estado,
+    })),
+    [filtrados]
+  )
 
   const conteoEstado = useMemo(() => {
     const conteo = { '': doctores.length }
@@ -222,13 +250,18 @@ export default function Doctores() {
         <span style={{ fontSize: 14, color: 'var(--gris)', fontWeight: 400 }}>{doctores.length} en total</span>
       </h1>
 
-      <input
-        type="text"
-        placeholder="Buscar por nombre o especialidad…"
-        value={busqueda}
-        onChange={(e) => setBusqueda(e.target.value)}
-        style={{ maxWidth: 420, marginBottom: 14 }}
-      />
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+        <input
+          type="text"
+          placeholder="Buscar por nombre o especialidad…"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          style={{ maxWidth: 420, margin: 0 }}
+        />
+        <button type="button" className="btn btn-outline btn-auto" onClick={() => descargarCSV('doctores-doctop', COLUMNAS_EXPORTAR, filasExportar)}>
+          📊 Exportar a Excel
+        </button>
+      </div>
 
       {aviso && <div className="banner-ok" role="status" data-testid="aviso-ok">{aviso}</div>}
       {errorAccion && <div className="banner-error" role="alert" data-testid="aviso-error">{errorAccion}</div>}

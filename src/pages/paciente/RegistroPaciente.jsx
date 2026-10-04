@@ -6,8 +6,9 @@ import { auth, db } from '../../firebase/config'
 import { useAuth } from '../../context/AuthContext'
 import SelectorFotos from '../../components/SelectorFotos'
 import CampoContrasena from '../../components/CampoContrasena'
-import { nombreSeguro, subirArchivo } from '../../utils/archivos'
+import { mensajeErrorSubida, nombreSeguro, subirArchivo } from '../../utils/archivos'
 import { AYUDA_CONTRASENA, validarContrasena } from '../../utils/validacion'
+import { calcularEdad } from '../../utils/fechas'
 
 function mensajeError(codigo) {
   switch (codigo) {
@@ -22,7 +23,8 @@ function mensajeError(codigo) {
   }
 }
 
-const OBLIGATORIOS = ['email', 'celular', 'contrasena', 'confirmarContrasena', 'nombre', 'apellido', 'edad', 'estatura', 'peso', 'lugar']
+const OBLIGATORIOS = ['email', 'celular', 'contrasena', 'confirmarContrasena', 'nombre', 'apellido', 'fechaNacimiento', 'estatura', 'peso', 'lugar']
+const HOY = new Date().toISOString().slice(0, 10)
 
 const ESTADO_INICIAL = {
   email: '',
@@ -31,7 +33,7 @@ const ESTADO_INICIAL = {
   confirmarContrasena: '',
   nombre: '',
   apellido: '',
-  edad: '',
+  fechaNacimiento: '',
   sexo: 'Femenino',
   estatura: '',
   peso: '',
@@ -75,17 +77,27 @@ export default function RegistroPaciente() {
     e.preventDefault()
     setError('')
 
-    // TODO: volver a exigir la foto de perfil en cuanto Storage esté disponible (plan Blaze activado).
     const camposFaltantes = OBLIGATORIOS.filter((campo) => !String(datos[campo]).trim())
+    if (fotos.length === 0) camposFaltantes.push('foto')
     setFaltantes(camposFaltantes)
     if (camposFaltantes.length > 0) {
-      setError('Complete todos los campos obligatorios antes de continuar (marcados en rojo).')
+      setError(
+        camposFaltantes.includes('foto') && camposFaltantes.length === 1
+          ? 'La foto de perfil es obligatoria. Suba una foto suya para poder crear la cuenta.'
+          : 'Complete todos los campos obligatorios antes de continuar (marcados en rojo).'
+      )
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
     if (datos.celular.length !== 8) {
       setError('El celular debe tener 8 dígitos.')
       setFaltantes(['celular'])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (datos.fechaNacimiento > HOY) {
+      setError('La fecha de nacimiento no puede ser futura.')
+      setFaltantes(['fechaNacimiento'])
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
@@ -112,16 +124,18 @@ export default function RegistroPaciente() {
       const credencial = await createUserWithEmailAndPassword(auth, datos.email, datos.contrasena)
       const uid = credencial.user.uid
 
-      // La foto es opcional por ahora (Storage aún no está habilitado): si falla la subida,
-      // seguimos el registro sin foto en vez de bloquearlo.
-      let fotoUrl = ''
-      if (fotos.length > 0) {
-        try {
-          const subida = await subirArchivo(`usuarios/${uid}/perfil-${Date.now()}-${nombreSeguro(fotos[0].name)}`, fotos[0])
-          fotoUrl = subida.url
-        } catch {
-          fotoUrl = ''
-        }
+      // La foto es obligatoria: si no se puede subir se anula la cuenta recién creada para que
+      // pueda reintentar con el mismo correo en vez de quedar una cuenta sin foto.
+      let fotoUrl
+      try {
+        const subida = await subirArchivo(`usuarios/${uid}/perfil-${Date.now()}-${nombreSeguro(fotos[0].name)}`, fotos[0])
+        fotoUrl = subida.url
+      } catch (errSubida) {
+        await credencial.user.delete().catch(() => {})
+        setError(`No se pudo subir la foto, por eso la cuenta no se creó. ${mensajeErrorSubida(errSubida)}`)
+        setEnviando(false)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
       }
 
       await setDoc(doc(db, 'usuarios', uid), {
@@ -129,7 +143,8 @@ export default function RegistroPaciente() {
         nombre: datos.nombre,
         apellido: datos.apellido,
         telefono: datos.celular,
-        edad: datos.edad ? Number(datos.edad) : null,
+        fechaNacimiento: datos.fechaNacimiento,
+        edad: calcularEdad(datos.fechaNacimiento),
         sexo: datos.sexo,
         estatura: datos.estatura,
         peso: datos.peso,
@@ -204,9 +219,9 @@ export default function RegistroPaciente() {
                     <CampoError campo="apellido" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="edad">Edad</label>
-                    <input id="edad" type="number" min="0" placeholder="29" value={datos.edad} onChange={actualizarCampo('edad')} />
-                    <CampoError campo="edad" faltantes={faltantes} />
+                    <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>
+                    <input id="fechaNacimiento" type="date" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
+                    <CampoError campo="fechaNacimiento" faltantes={faltantes} />
                   </div>
                   <div>
                     <label className="campo-label" htmlFor="sexo">Sexo</label>
@@ -234,12 +249,14 @@ export default function RegistroPaciente() {
 
             <div>
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">Foto de perfil (opcional por ahora)</h2>
+                <h2 className="seccion-titulo">Foto de perfil (obligatoria)</h2>
                 <SelectorFotos
                   archivos={fotos}
                   onChange={setFotos}
                   maximo={1}
                   textoBoton="Subir foto de perfil"
+                  obligatoria
+                  resaltar={faltantes.includes('foto')}
                   nombre="La foto de perfil"
                   ayuda="JPG o PNG, máximo 5 MB. Podrás cambiarla después en Configuración."
                   deshabilitado={enviando}

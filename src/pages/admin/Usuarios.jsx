@@ -5,6 +5,18 @@ import { bloquearUsuario, levantarBloqueo, mensajeErrorBloqueo } from '../../fir
 import ModalBloqueo from '../../components/admin/ModalBloqueo'
 import { esBloqueo } from '../../utils/bloqueos'
 import { formatearFecha } from '../../utils/fechas'
+import { descargarCSV } from '../../utils/exportar'
+
+const COLUMNAS_EXPORTAR = [
+  { clave: 'nombre', etiqueta: 'Nombre' },
+  { clave: 'apellido', etiqueta: 'Apellido' },
+  { clave: 'email', etiqueta: 'Correo' },
+  { clave: 'telefono', etiqueta: 'Celular' },
+  { clave: 'edad', etiqueta: 'Edad' },
+  { clave: 'sexo', etiqueta: 'Sexo' },
+  { clave: 'lugar', etiqueta: 'Lugar' },
+  { clave: 'estado', etiqueta: 'Estado' },
+]
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState([])
@@ -79,13 +91,18 @@ export default function Usuarios() {
         <span style={{ fontSize: 14, color: 'var(--gris)', fontWeight: 400 }}>{usuarios.length} en total</span>
       </h1>
 
-      <input
-        type="text"
-        placeholder="Buscar por nombre o correo…"
-        value={busqueda}
-        onChange={(e) => setBusqueda(e.target.value)}
-        style={{ maxWidth: 420, marginBottom: 20 }}
-      />
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20 }}>
+        <input
+          type="text"
+          placeholder="Buscar por nombre o correo…"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          style={{ maxWidth: 420, margin: 0 }}
+        />
+        <button type="button" className="btn btn-outline btn-auto" onClick={() => descargarCSV('pacientes-doctop', COLUMNAS_EXPORTAR, filtrados)}>
+          📊 Exportar a Excel
+        </button>
+      </div>
 
       {aviso && <div className="banner-ok" role="status" data-testid="aviso-ok">{aviso}</div>}
       {errorAccion && <div className="banner-error" role="alert" data-testid="aviso-error">{errorAccion}</div>}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { collection, doc, getDoc, onSnapshot, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '../../firebase/config'
+import { crearNotificacion } from '../../firebase/notificaciones'
 import FotosDoctorAdmin from '../../components/FotosDoctorAdmin'
 
 export default function Solicitudes() {
@@ -29,12 +30,14 @@ export default function Solicitudes() {
   async function aprobar(id) {
     await updateDoc(doc(db, 'usuarios', id), { estado: 'activo' })
     await updateDoc(doc(db, 'profesionales', id), { verificado: true })
+    crearNotificacion({ paraUid: id, tipo: 'cuenta_verificada', texto: '¡Tu cuenta de profesional fue verificada! Ya apareces disponible para los pacientes.', enlace: '/doctor/panel' }).catch(() => {})
     setModal(null)
   }
 
   async function rechazoTemporal(id) {
     await updateDoc(doc(db, 'usuarios', id), { estado: 'rechazado_temporal' })
     await updateDoc(doc(db, 'profesionales', id), { verificado: false, motivoRechazo: motivo })
+    crearNotificacion({ paraUid: id, tipo: 'cuenta_rechazada', texto: `Tu registro fue rechazado: ${motivo}. Puedes corregirlo y volver a enviarlo.`, enlace: '/doctor/panel' }).catch(() => {})
     setModal(null)
     setMotivo('')
   }
@@ -42,6 +45,7 @@ export default function Solicitudes() {
   async function rechazarDefinitivo(id) {
     await updateDoc(doc(db, 'usuarios', id), { estado: 'rechazado_definitivo' })
     await updateDoc(doc(db, 'profesionales', id), { verificado: false, motivoRechazo: motivo })
+    crearNotificacion({ paraUid: id, tipo: 'cuenta_rechazada', texto: `Tu registro fue rechazado definitivamente: ${motivo}`, enlace: '/doctor/panel' }).catch(() => {})
     setModal(null)
     setMotivo('')
   }

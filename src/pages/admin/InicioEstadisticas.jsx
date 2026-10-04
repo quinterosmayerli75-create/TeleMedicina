@@ -3,6 +3,7 @@ import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/fire
 import { db } from '../../firebase/config'
 import { useBloqueados } from '../../hooks/useBloqueados'
 import ListaBloqueos from '../../components/admin/ListaBloqueos'
+import { descargarReportePdf } from '../../utils/reportePdf'
 
 const CONSULTAS = {
   doctoresActivos: query(collection(db, 'usuarios'), where('rol', '==', 'profesional'), where('estado', '==', 'activo')),
@@ -58,24 +59,26 @@ function useDoctoresActivos() {
   return { doctores, cargando }
 }
 
+// Ranking = calificación promedio que los pacientes le dan al doctor. Los que aún no tienen
+// calificaciones (promedio 0) no entran al ranking: no hay con qué compararlos.
+function agruparPorEspecialidad(doctores) {
+  const porEspecialidad = new Map()
+  doctores.forEach((d) => {
+    const especialidad = d.profesional?.especialidad ?? 'Sin especialidad'
+    if (!porEspecialidad.has(especialidad)) porEspecialidad.set(especialidad, [])
+    const nota = Number(d.profesional?.calificacionPromedio) || 0
+    if (nota > 0) porEspecialidad.get(especialidad).push({ id: d.id, nombre: d.nombre, nota, experiencia: d.profesional?.experiencia })
+  })
+  return [...porEspecialidad.entries()]
+    .map(([especialidad, lista]) => ({
+      especialidad,
+      top: lista.sort((a, b) => b.nota - a.nota || a.nombre.localeCompare(b.nombre, 'es')).slice(0, TOP_POR_ESPECIALIDAD),
+    }))
+    .sort((a, b) => a.especialidad.localeCompare(b.especialidad, 'es'))
+}
+
 function MejoresPorEspecialidad({ doctores, cargando }) {
-  // Ranking = calificación promedio que los pacientes le dan al doctor. Los que aún no tienen
-  // calificaciones (promedio 0) no entran al ranking: no hay con qué compararlos.
-  const grupos = useMemo(() => {
-    const porEspecialidad = new Map()
-    doctores.forEach((d) => {
-      const especialidad = d.profesional?.especialidad ?? 'Sin especialidad'
-      if (!porEspecialidad.has(especialidad)) porEspecialidad.set(especialidad, [])
-      const nota = Number(d.profesional?.calificacionPromedio) || 0
-      if (nota > 0) porEspecialidad.get(especialidad).push({ id: d.id, nombre: d.nombre, nota, experiencia: d.profesional?.experiencia })
-    })
-    return [...porEspecialidad.entries()]
-      .map(([especialidad, lista]) => ({
-        especialidad,
-        top: lista.sort((a, b) => b.nota - a.nota || a.nombre.localeCompare(b.nombre, 'es')).slice(0, TOP_POR_ESPECIALIDAD),
-      }))
-      .sort((a, b) => a.especialidad.localeCompare(b.especialidad, 'es'))
-  }, [doctores])
+  const grupos = useMemo(() => agruparPorEspecialidad(doctores), [doctores])
 
   return (
     <>
@@ -127,9 +130,25 @@ export default function InicioEstadisticas() {
   const temporales = useBloqueados('bloqueado_temporal', { soloDoctores: true })
   const permanentes = useBloqueados('bloqueado', { soloDoctores: true })
 
+  function exportarReporte() {
+    descargarReportePdf({
+      metricas: [
+        { etiqueta: 'Doctores activos', valor: doctoresActivos },
+        { etiqueta: 'Pacientes registrados', valor: pacientes },
+        { etiqueta: 'Solicitudes pendientes', valor: solicitudesPendientes },
+        { etiqueta: 'Denuncias pendientes', valor: denunciasPendientes },
+        { etiqueta: 'Doctores bloqueados', valor: temporales.bloqueados.length + permanentes.bloqueados.length },
+      ],
+      ranking: agruparPorEspecialidad(doctores),
+    })
+  }
+
   return (
     <div>
-      <h1 className="web-h1">Inicio y estadísticas</h1>
+      <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>Inicio y estadísticas</span>
+        <button type="button" className="btn btn-outline btn-auto" onClick={exportarReporte}>📄 Descargar reporte PDF</button>
+      </h1>
       <p className="web-sub">Vista general de la actividad de DocTop.</p>
 
       <div className="subtabs" role="tablist">

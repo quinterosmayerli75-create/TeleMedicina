@@ -7,12 +7,15 @@ import { useAuth } from '../../context/AuthContext'
 import CambiarFotoPerfil from '../../components/CambiarFotoPerfil'
 import CambiarContrasena from '../../components/CambiarContrasena'
 import GestionTitulos from '../../components/GestionTitulos'
+import { calcularEdad } from '../../utils/fechas'
+
+const HOY = new Date().toISOString().slice(0, 10)
 
 export default function Configuracion() {
   const { usuario } = useAuth()
   const navigate = useNavigate()
 
-  const [datos, setDatos] = useState({ edad: '', estatura: '', peso: '', telefono: '' })
+  const [datos, setDatos] = useState({ fechaNacimiento: '', estatura: '', peso: '', telefono: '' })
   const [mensajeDatos, setMensajeDatos] = useState('')
   const [guardandoDatos, setGuardandoDatos] = useState(false)
 
@@ -21,7 +24,7 @@ export default function Configuracion() {
     getDoc(doc(db, 'usuarios', usuario.uid)).then((snap) => {
       if (snap.exists()) {
         const d = snap.data()
-        setDatos({ edad: d.edad ?? '', estatura: d.estatura ?? '', peso: d.peso ?? '', telefono: d.telefono ?? '' })
+        setDatos({ fechaNacimiento: d.fechaNacimiento ?? '', estatura: d.estatura ?? '', peso: d.peso ?? '', telefono: d.telefono ?? '' })
       }
     })
   }, [usuario])
@@ -29,10 +32,15 @@ export default function Configuracion() {
   async function guardarDatos(e) {
     e.preventDefault()
     setMensajeDatos('')
+    if (datos.fechaNacimiento && datos.fechaNacimiento > HOY) {
+      setMensajeDatos('La fecha de nacimiento no puede ser futura.')
+      return
+    }
     setGuardandoDatos(true)
     try {
       await updateDoc(doc(db, 'usuarios', usuario.uid), {
-        edad: datos.edad ? Number(datos.edad) : null,
+        fechaNacimiento: datos.fechaNacimiento || null,
+        edad: datos.fechaNacimiento ? calcularEdad(datos.fechaNacimiento) : null,
         estatura: datos.estatura,
         peso: datos.peso,
         telefono: datos.telefono,
@@ -65,7 +73,11 @@ export default function Configuracion() {
           <form className="card-plain" onSubmit={guardarDatos}>
             <h2 className="section-title">Mis datos</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div><label className="campo-label" htmlFor="edad">Edad</label><input id="edad" type="number" min="0" value={datos.edad} onChange={(e) => setDatos({ ...datos, edad: e.target.value })} /></div>
+              <div>
+                <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>
+                <input id="fechaNacimiento" type="date" max={HOY} value={datos.fechaNacimiento} onChange={(e) => setDatos({ ...datos, fechaNacimiento: e.target.value })} />
+                {datos.fechaNacimiento && <div style={{ fontSize: 11, color: 'var(--gris)', marginTop: 4 }}>Edad: {calcularEdad(datos.fechaNacimiento)} años</div>}
+              </div>
               <div><label className="campo-label" htmlFor="estatura">Estatura aprox.</label><input id="estatura" type="text" value={datos.estatura} onChange={(e) => setDatos({ ...datos, estatura: e.target.value })} /></div>
               <div><label className="campo-label" htmlFor="peso">Peso aprox.</label><input id="peso" type="text" value={datos.peso} onChange={(e) => setDatos({ ...datos, peso: e.target.value })} /></div>
               <div><label className="campo-label" htmlFor="telefono">Celular (8 dígitos)</label><input id="telefono" type="text" inputMode="numeric" value={datos.telefono} onChange={(e) => setDatos({ ...datos, telefono: e.target.value.replace(/\D/g, '').slice(0, 8) })} /></div>
