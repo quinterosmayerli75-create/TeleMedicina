@@ -23,7 +23,6 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
   const candidatosVistos = useRef(new Set())
 
   const soyLlamante = llamada?.llamanteId === miUid
-  const campoMisCandidatos = soyLlamante ? 'candidatosLlamante' : 'candidatosReceptor'
   const campoCandidatosOtro = soyLlamante ? 'candidatosReceptor' : 'candidatosLlamante'
 
   useEffect(() => {
@@ -41,10 +40,14 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
     candidatosVistos.current = new Set()
   }, [])
 
-  function crearConexion() {
+  // "comoLlamante" se pasa explícito (no se puede confiar en el estado "llamada" reactivo aquí: justo
+  // al iniciar una llamada, Firestore todavía no avisó el nuevo documento, así que "soyLlamante" seguiría
+  // en false un instante y los candidatos ICE del llamante se guardarían en el campo equivocado).
+  function crearConexion(comoLlamante) {
+    const campoCandidatos = comoLlamante ? 'candidatosLlamante' : 'candidatosReceptor'
     const pc = new RTCPeerConnection(CONFIG_ICE)
     pc.onicecandidate = (e) => {
-      if (e.candidate) agregarCandidato(convId, campoMisCandidatos, e.candidate.toJSON()).catch(() => {})
+      if (e.candidate) agregarCandidato(convId, campoCandidatos, e.candidate.toJSON()).catch(() => {})
     }
     pc.ontrack = (e) => setRemoteStream(e.streams[0])
     pcRef.current = pc
@@ -64,7 +67,7 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
     try {
       const stream = await obtenerMedios(tipo)
       await crearLlamada(convId, { pacienteId, doctorId, llamanteId: miUid, tipo })
-      const pc = crearConexion()
+      const pc = crearConexion(true)
       stream.getTracks().forEach((track) => pc.addTrack(track, stream))
       const oferta = await pc.createOffer()
       await pc.setLocalDescription(oferta)
@@ -81,7 +84,7 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
     setError('')
     try {
       const stream = await obtenerMedios(llamada.tipo)
-      const pc = crearConexion()
+      const pc = crearConexion(false)
       stream.getTracks().forEach((track) => pc.addTrack(track, stream))
       await pc.setRemoteDescription(new RTCSessionDescription(llamada.oferta))
       const respuesta = await pc.createAnswer()

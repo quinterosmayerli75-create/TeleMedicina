@@ -18,10 +18,21 @@ const COLUMNAS_EXPORTAR = [
   { clave: 'estado', etiqueta: 'Estado' },
 ]
 
+const FILTROS_ESTADO = [
+  { clave: '', etiqueta: 'Todos' },
+  { clave: 'activo', etiqueta: 'Activos' },
+  { clave: 'bloqueado_temporal', etiqueta: 'Bloqueados temporalmente' },
+  { clave: 'bloqueado', etiqueta: 'Bloqueados permanentemente' },
+]
+
+const POR_PAGINA = 10
+
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState([])
   const [cargando, setCargando] = useState(true)
   const [busqueda, setBusqueda] = useState('')
+  const [estadoSel, setEstadoSel] = useState('')
+  const [pagina, setPagina] = useState(1)
 
   const [modal, setModal] = useState(null)
   const [seleccion, setSeleccion] = useState(null)
@@ -41,11 +52,29 @@ export default function Usuarios() {
     return unsubscribe
   }, [])
 
+  const conteoEstado = useMemo(() => {
+    const conteo = { '': usuarios.length }
+    usuarios.forEach((u) => { conteo[u.estado] = (conteo[u.estado] ?? 0) + 1 })
+    return conteo
+  }, [usuarios])
+
   const filtrados = useMemo(() => {
-    if (!busqueda) return usuarios
-    const termino = busqueda.toLowerCase()
-    return usuarios.filter((u) => `${u.nombre} ${u.apellido}`.toLowerCase().includes(termino) || u.email?.toLowerCase().includes(termino))
-  }, [usuarios, busqueda])
+    const termino = busqueda.trim().toLowerCase()
+    return usuarios.filter((u) => {
+      if (estadoSel && u.estado !== estadoSel) return false
+      if (!termino) return true
+      return (
+        `${u.nombre} ${u.apellido}`.toLowerCase().includes(termino) ||
+        u.email?.toLowerCase().includes(termino) ||
+        u.telefono?.includes(termino)
+      )
+    })
+  }, [usuarios, busqueda, estadoSel])
+
+  useEffect(() => setPagina(1), [busqueda, estadoSel])
+
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA))
+  const paginados = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA)
 
   async function aplicarBloqueo(u, { tipo, dias, motivo }) {
     const { hasta } = await bloquearUsuario({ usuarioId: u.id, tipo, dias, motivo })
@@ -94,7 +123,7 @@ export default function Usuarios() {
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20 }}>
         <input
           type="text"
-          placeholder="Buscar por nombre o correo…"
+          placeholder="Buscar por nombre, correo o celular…"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
           style={{ maxWidth: 420, margin: 0 }}
@@ -107,10 +136,21 @@ export default function Usuarios() {
       {aviso && <div className="banner-ok" role="status" data-testid="aviso-ok">{aviso}</div>}
       {errorAccion && <div className="banner-error" role="alert" data-testid="aviso-error">{errorAccion}</div>}
 
+      <div className="chip-row" style={{ marginBottom: 20 }} role="group" aria-label="Filtrar por estado">
+        {FILTROS_ESTADO.map((f) => (
+          <button type="button" key={f.clave || 'todos'} className={`chip${estadoSel === f.clave ? ' on' : ''}`} onClick={() => setEstadoSel(f.clave)}>
+            {f.etiqueta}<span className="chip-count">{conteoEstado[f.clave] ?? 0}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="card-plain" style={{ maxWidth: 960 }}>
-        {filtrados.map((u) => (
+        {paginados.map((u) => (
           <div className="admin-row" key={u.id}>
-            <div>{u.nombre} {u.apellido}</div>
+            <div>
+              {u.nombre} {u.apellido}
+              <div className="rank-meta">{u.email}{u.telefono && ` · ${u.telefono}`}</div>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className={`status-pill ${u.estado === 'activo' ? 'status-active' : 'status-blocked'}`}>
                 {u.estado === 'bloqueado_temporal'
@@ -127,8 +167,20 @@ export default function Usuarios() {
             </div>
           </div>
         ))}
-        {filtrados.length === 0 && <p className="web-sub" style={{ marginBottom: 0 }}>Aún no hay pacientes registrados.</p>}
+        {filtrados.length === 0 && (
+          <p className="web-sub" style={{ marginBottom: 0 }}>
+            {usuarios.length === 0 ? 'Aún no hay pacientes registrados.' : 'No hay pacientes que coincidan con el filtro.'}
+          </p>
+        )}
       </div>
+
+      {filtrados.length > POR_PAGINA && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <button type="button" className="mini-btn" disabled={pagina <= 1} onClick={() => setPagina((p) => p - 1)}>← Anterior</button>
+          <span className="rank-meta">Página {pagina} de {totalPaginas}</span>
+          <button type="button" className="mini-btn" disabled={pagina >= totalPaginas} onClick={() => setPagina((p) => p + 1)}>Siguiente →</button>
+        </div>
+      )}
 
       {modal === 'bloquear' && seleccion && (
         <ModalBloqueo

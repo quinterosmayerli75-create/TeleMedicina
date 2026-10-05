@@ -76,7 +76,9 @@ export function subirArchivo(ruta, archivo, onProgreso) {
         const datos = JSON.parse(xhr.responseText)
         resolve({ url: datos.secure_url, nombre: archivo.name, tamano: archivo.size, mime: archivo.type || '' })
       } else {
-        reject(new Error(`cloudinary/http-${xhr.status}`))
+        let detalle = ''
+        try { detalle = JSON.parse(xhr.responseText)?.error?.message ?? '' } catch { /* la respuesta no es JSON */ }
+        reject(new Error(`cloudinary/http-${xhr.status}${detalle ? `: ${detalle}` : ''}`))
       }
     }
     xhr.onerror = () => reject(new Error('cloudinary/network'))
@@ -99,7 +101,8 @@ export function mensajeErrorSubida(err) {
     return 'No hay conexión. Revisa tu internet e intenta de nuevo.'
   }
   if (mensaje.startsWith('cloudinary/http-4')) {
-    return 'Cloudinary rechazó la subida: revisa que el "upload preset" exista y sea "Unsigned".'
+    const detalle = mensaje.split(': ')[1]
+    return `Cloudinary rechazó la subida${detalle ? `: ${detalle}` : ' (revisa que el "upload preset" exista y sea "Unsigned")'}.`
   }
   return 'No se pudo subir el archivo. Revisa tu conexión e intenta de nuevo.'
 }

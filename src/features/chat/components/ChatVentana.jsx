@@ -85,7 +85,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
           })
           quitarSubida(id)
         } catch (err) {
-          actualizarSubida(id, { error: err?.code?.startsWith('storage/') ? mensajeErrorSubida(err) : mensajeErrorEnvio(err) })
+          actualizarSubida(id, { error: err?.message?.startsWith('cloudinary/') ? mensajeErrorSubida(err) : mensajeErrorEnvio(err) })
         }
       })
     )

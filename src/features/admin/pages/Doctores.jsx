@@ -304,6 +304,7 @@ export default function Doctores() {
                     {d.profesional?.notaEstado && (
                       <span className="status-pill status-warn" style={{ marginLeft: 8 }}>{d.profesional.notaEstado}</span>
                     )}
+                    <div className="rank-meta">{d.email}{d.telefono && ` · ${d.telefono}`}</div>
                     {bloqueado && (d.motivoBloqueo) && <div className="rank-meta">Motivo: {d.motivoBloqueo}</div>}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

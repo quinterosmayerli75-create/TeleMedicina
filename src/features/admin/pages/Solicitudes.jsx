@@ -1,8 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { collection, doc, getDoc, onSnapshot, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 import { crearNotificacion } from '@/features/notificaciones/services/notificaciones'
+import { aFecha, formatearFecha } from '@/shared/utils/fechas'
 import FotosDoctorAdmin from '../components/FotosDoctorAdmin'
+
+const ORDENES = [
+  { clave: 'reciente', etiqueta: 'Más recientes primero' },
+  { clave: 'antigua', etiqueta: 'Más antiguas primero' },
+  { clave: 'nombre', etiqueta: 'Nombre (A-Z)' },
+]
+
+const POR_PAGINA = 6
 
 export default function Solicitudes() {
   const [solicitudes, setSolicitudes] = useState([])
@@ -10,6 +19,9 @@ export default function Solicitudes() {
   const [seleccion, setSeleccion] = useState(null)
   const [modal, setModal] = useState(null)
   const [motivo, setMotivo] = useState('')
+  const [busqueda, setBusqueda] = useState('')
+  const [orden, setOrden] = useState('reciente')
+  const [pagina, setPagina] = useState(1)
 
   useEffect(() => {
     const q = query(collection(db, 'usuarios'), where('rol', '==', 'profesional'), where('estado', '==', 'pendiente'))
@@ -26,6 +38,32 @@ export default function Solicitudes() {
     })
     return unsubscribe
   }, [])
+
+  const filtradas = useMemo(() => {
+    const termino = busqueda.trim().toLowerCase()
+    const resultado = termino
+      ? solicitudes.filter((s) =>
+          s.nombre?.toLowerCase().includes(termino) ||
+          s.profesional?.especialidad?.toLowerCase().includes(termino) ||
+          s.profesional?.profesion?.toLowerCase().includes(termino)
+        )
+      : [...solicitudes]
+
+    if (orden === 'nombre') {
+      resultado.sort((a, b) => (a.nombre ?? '').localeCompare(b.nombre ?? '', 'es'))
+    } else {
+      resultado.sort((a, b) => {
+        const diferencia = (aFecha(a.fechaRegistro)?.getTime() ?? 0) - (aFecha(b.fechaRegistro)?.getTime() ?? 0)
+        return orden === 'antigua' ? diferencia : -diferencia
+      })
+    }
+    return resultado
+  }, [solicitudes, busqueda, orden])
+
+  useEffect(() => setPagina(1), [busqueda, orden])
+
+  const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA))
+  const paginadas = filtradas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA)
 
   async function aprobar(id) {
     await updateDoc(doc(db, 'usuarios', id), { estado: 'activo' })
@@ -54,11 +92,36 @@ export default function Solicitudes() {
 
   return (
     <div>
-      <h1 className="web-h1">Solicitudes de registro</h1>
+      <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span>Solicitudes de registro</span>
+        <span style={{ fontSize: 14, color: 'var(--gris)', fontWeight: 400 }}>{solicitudes.length} en total</span>
+      </h1>
+
       {solicitudes.length === 0 && <p className="web-sub">No hay solicitudes pendientes.</p>}
 
+      {solicitudes.length > 0 && (
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Buscar por nombre, profesión o especialidad…"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: 360, margin: 0 }}
+          />
+          <select value={orden} onChange={(e) => setOrden(e.target.value)} style={{ maxWidth: 220 }}>
+            {ORDENES.map((o) => (
+              <option key={o.clave} value={o.clave}>{o.etiqueta}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {solicitudes.length > 0 && filtradas.length === 0 && (
+        <p className="web-sub">No hay solicitudes que coincidan con la búsqueda.</p>
+      )}
+
       <div className="web-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-        {solicitudes.map((s) => (
+        {paginadas.map((s) => (
           <div className="card-plain" key={s.id} style={{ borderColor: 'var(--oro)' }}>
             <div style={{ display: 'flex', gap: 10 }}>
               {s.fotoUrl && <img src={s.fotoUrl} style={{ width: 44, height: 44, objectFit: 'cover' }} alt={s.nombre} />}
@@ -66,6 +129,7 @@ export default function Solicitudes() {
                 <div style={{ fontWeight: 600, fontSize: 12.5 }}>{s.nombre}</div>
                 <div style={{ fontSize: 11, color: 'var(--gris)' }}>{s.profesional?.profesion ?? '—'} · {s.profesional?.especialidad ?? '—'}</div>
                 <div style={{ fontSize: 11, color: 'var(--gris)' }}>Carnet {s.profesional?.carnet ?? '—'} · Bs {s.profesional?.costoConsulta ?? '—'} / consulta</div>
+                <div style={{ fontSize: 11, color: 'var(--gris)' }}>Solicitado el {formatearFecha(s.fechaRegistro)}</div>
               </div>
               <span className="status-pill status-pending">En revisión</span>
             </div>
@@ -78,6 +142,14 @@ export default function Solicitudes() {
           </div>
         ))}
       </div>
+
+      {filtradas.length > POR_PAGINA && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <button type="button" className="mini-btn" disabled={pagina <= 1} onClick={() => setPagina((p) => p - 1)}>← Anterior</button>
+          <span className="rank-meta">Página {pagina} de {totalPaginas}</span>
+          <button type="button" className="mini-btn" disabled={pagina >= totalPaginas} onClick={() => setPagina((p) => p + 1)}>Siguiente →</button>
+        </div>
+      )}
 
       {modal === 'detalles' && seleccion && (
         <div className="modal-fondo" onClick={() => setModal(null)}>
