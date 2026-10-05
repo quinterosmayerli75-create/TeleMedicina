@@ -22,6 +22,7 @@ export default function Solicitudes() {
   const [busqueda, setBusqueda] = useState('')
   const [orden, setOrden] = useState('reciente')
   const [pagina, setPagina] = useState(1)
+  const [aviso, setAviso] = useState('')
 
   useEffect(() => {
     const q = query(collection(db, 'usuarios'), where('rol', '==', 'profesional'), where('estado', '==', 'pendiente'))
@@ -65,27 +66,30 @@ export default function Solicitudes() {
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA))
   const paginadas = filtradas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA)
 
-  async function aprobar(id) {
-    await updateDoc(doc(db, 'usuarios', id), { estado: 'activo' })
-    await updateDoc(doc(db, 'profesionales', id), { verificado: true })
-    crearNotificacion({ paraUid: id, tipo: 'cuenta_verificada', texto: '¡Tu cuenta de profesional fue verificada! Ya apareces disponible para los pacientes.', enlace: '/doctor/panel' }).catch(() => {})
+  async function aprobar(s) {
+    await updateDoc(doc(db, 'usuarios', s.id), { estado: 'activo' })
+    await updateDoc(doc(db, 'profesionales', s.id), { verificado: true })
+    crearNotificacion({ paraUid: s.id, tipo: 'cuenta_verificada', texto: '¡Tu cuenta de profesional fue verificada! Ya apareces disponible para los pacientes.', enlace: '/doctor/panel' }).catch(() => {})
     setModal(null)
+    setAviso(`Se aprobó la solicitud de ${s.nombre}.`)
   }
 
-  async function rechazoTemporal(id) {
-    await updateDoc(doc(db, 'usuarios', id), { estado: 'rechazado_temporal' })
-    await updateDoc(doc(db, 'profesionales', id), { verificado: false, motivoRechazo: motivo })
-    crearNotificacion({ paraUid: id, tipo: 'cuenta_rechazada', texto: `Tu registro fue rechazado: ${motivo}. Puedes corregirlo y volver a enviarlo.`, enlace: '/doctor/panel' }).catch(() => {})
+  async function rechazoTemporal(s) {
+    await updateDoc(doc(db, 'usuarios', s.id), { estado: 'rechazado_temporal' })
+    await updateDoc(doc(db, 'profesionales', s.id), { verificado: false, motivoRechazo: motivo })
+    crearNotificacion({ paraUid: s.id, tipo: 'cuenta_rechazada', texto: `Tu registro fue rechazado: ${motivo}. Puedes corregirlo y volver a enviarlo.`, enlace: '/doctor/panel' }).catch(() => {})
     setModal(null)
     setMotivo('')
+    setAviso(`Se envió un rechazo temporal a ${s.nombre}.`)
   }
 
-  async function rechazarDefinitivo(id) {
-    await updateDoc(doc(db, 'usuarios', id), { estado: 'rechazado_definitivo' })
-    await updateDoc(doc(db, 'profesionales', id), { verificado: false, motivoRechazo: motivo })
-    crearNotificacion({ paraUid: id, tipo: 'cuenta_rechazada', texto: `Tu registro fue rechazado definitivamente: ${motivo}`, enlace: '/doctor/panel' }).catch(() => {})
+  async function rechazarDefinitivo(s) {
+    await updateDoc(doc(db, 'usuarios', s.id), { estado: 'rechazado_definitivo' })
+    await updateDoc(doc(db, 'profesionales', s.id), { verificado: false, motivoRechazo: motivo })
+    crearNotificacion({ paraUid: s.id, tipo: 'cuenta_rechazada', texto: `Tu registro fue rechazado definitivamente: ${motivo}`, enlace: '/doctor/panel' }).catch(() => {})
     setModal(null)
     setMotivo('')
+    setAviso(`Se rechazó definitivamente la solicitud de ${s.nombre}.`)
   }
 
   if (cargando) return <p className="web-sub">Cargando…</p>
@@ -96,6 +100,8 @@ export default function Solicitudes() {
         <span>Solicitudes de registro</span>
         <span style={{ fontSize: 14, color: 'var(--gris)', fontWeight: 400 }}>{solicitudes.length} en total</span>
       </h1>
+
+      {aviso && <div className="banner-ok" role="status">{aviso}</div>}
 
       {solicitudes.length === 0 && <p className="web-sub">No hay solicitudes pendientes.</p>}
 
@@ -134,7 +140,7 @@ export default function Solicitudes() {
               <span className="status-pill status-pending">En revisión</span>
             </div>
             <div className="btn-grid-4">
-              <button type="button" className="btn btn-ok" onClick={() => aprobar(s.id)}>Aprobar</button>
+              <button type="button" className="btn btn-ok" onClick={() => aprobar(s)}>Aprobar</button>
               <button type="button" className="btn btn-outline" onClick={() => { setSeleccion(s); setModal('detalles') }}>Ver detalles</button>
               <button type="button" className="btn btn-warn" onClick={() => { setSeleccion(s); setModal('rechazo-temp') }}>Rechazo temporal</button>
               <button type="button" className="btn btn-danger" onClick={() => { setSeleccion(s); setModal('rechazo-def') }}>Rechazar definitivo</button>
@@ -183,7 +189,7 @@ export default function Solicitudes() {
             <textarea rows="3" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Explique qué debe corregir…" />
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancelar</button>
-              <button type="button" className="btn btn-warn" onClick={() => rechazoTemporal(seleccion.id)}>Enviar rechazo temporal</button>
+              <button type="button" className="btn btn-warn" onClick={() => rechazoTemporal(seleccion)}>Enviar rechazo temporal</button>
             </div>
           </div>
         </div>
@@ -198,7 +204,7 @@ export default function Solicitudes() {
             <textarea rows="3" value={motivo} onChange={(e) => setMotivo(e.target.value)} required />
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancelar</button>
-              <button type="button" className="btn btn-danger" onClick={() => rechazarDefinitivo(seleccion.id)}>Rechazar definitivamente</button>
+              <button type="button" className="btn btn-danger" onClick={() => rechazarDefinitivo(seleccion)}>Rechazar definitivamente</button>
             </div>
           </div>
         </div>
