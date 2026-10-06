@@ -1,5 +1,6 @@
 import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
+import { crearNotificacion } from '@/features/notificaciones/services/notificaciones'
 
 // Una conversación por pareja paciente–doctor. El id lleva ambos uid (nunca contienen "_"),
 // así las reglas de Firestore pueden saber quiénes participan sin leer otro documento.
@@ -18,8 +19,9 @@ export function resumenDeMensaje({ tipo, texto, archivo }) {
 }
 
 // Guarda un mensaje (texto o adjunto ya subido a Storage) y actualiza el resumen de la conversación.
-// `archivo`: { url, nombre, tamano, mime, duracion? } cuando `tipo` no es 'texto'.
-export async function enviarMensaje({ pacienteId, doctorId, de, tipo, texto = '', archivo = null }) {
+// `archivo`: { url, nombre, tamano, mime, duracion? } cuando `tipo` no es 'texto'. `deNombre` es el
+// nombre de quien envía, para el texto de la notificación que recibe la otra persona.
+export async function enviarMensaje({ pacienteId, doctorId, de, deNombre, tipo, texto = '', archivo = null }) {
   const convId = idConversacion(pacienteId, doctorId)
   await setDoc(
     doc(db, 'conversaciones', convId),
@@ -40,6 +42,15 @@ export async function enviarMensaje({ pacienteId, doctorId, de, tipo, texto = ''
     archivo,
     fecha: serverTimestamp(),
   })
+
+  const paraUid = de === pacienteId ? doctorId : pacienteId
+  const enlace = paraUid === pacienteId ? `/paciente/mensajes/${doctorId}` : `/doctor/mensajes/${pacienteId}`
+  crearNotificacion({
+    paraUid,
+    tipo: 'mensaje_chat',
+    texto: `${deNombre || 'Tienes un mensaje nuevo'}: ${resumenDeMensaje({ tipo, texto, archivo })}`.slice(0, 120),
+    enlace,
+  }).catch(() => {})
 }
 
 export function mensajeErrorEnvio(err) {

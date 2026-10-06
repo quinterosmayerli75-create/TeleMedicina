@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useProfesional } from '@/features/profesionales/hooks/useProfesionalesActivos'
 import { crearConsulta, MODALIDADES } from '../../services/consultas'
-import { horasDisponibles } from '@/features/profesionales/utils/horarios'
+import { hayHorarios, horasDisponibles } from '@/features/profesionales/utils/horarios'
 
 const HOY = new Date().toISOString().slice(0, 10)
 
@@ -29,6 +29,7 @@ export default function SolicitarConsulta() {
   }
 
   const modalidadesActivas = Object.keys(MODALIDADES).filter((_, i) => doctor.modalidades?.[i])
+  const tieneHorarios = hayHorarios(doctor.disponibilidad)
   const horas = horasDisponibles(doctor.disponibilidad, fecha)
 
   function elegirFecha(valor) {
@@ -90,22 +91,31 @@ export default function SolicitarConsulta() {
         </div>
 
         <h2 className="section-title">Elige fecha y hora</h2>
-        <label className="campo-label" htmlFor="fecha">Fecha</label>
-        <input id="fecha" type="date" min={HOY} value={fecha} onChange={(e) => elegirFecha(e.target.value)} style={{ marginBottom: 12 }} />
 
-        {fecha && horas.length === 0 && (
-          <p style={{ fontSize: 12.5, color: 'var(--gris)' }}>Este profesional no atiende ese día. Elige otra fecha.</p>
-        )}
-        {horas.length > 0 && (
-          <div className="chip-row" style={{ marginBottom: 16 }}>
-            {horas.map((h) => (
-              <div key={h} className={`chip${hora === h ? ' on' : ''}`} onClick={() => setHora(h)}>{h}</div>
-            ))}
-          </div>
+        {!tieneHorarios ? (
+          <p style={{ fontSize: 12.5, color: 'var(--gris)' }}>
+            Este profesional todavía no configuró sus horarios de atención, así que por ahora no se le pueden agendar consultas. Vuelve a intentarlo más tarde.
+          </p>
+        ) : (
+          <>
+            <label className="campo-label" htmlFor="fecha">Fecha</label>
+            <input id="fecha" type="date" min={HOY} value={fecha} onChange={(e) => elegirFecha(e.target.value)} style={{ marginBottom: 12 }} />
+
+            {fecha && horas.length === 0 && (
+              <p style={{ fontSize: 12.5, color: 'var(--gris)' }}>Este profesional no atiende ese día. Elige otra fecha.</p>
+            )}
+            {horas.length > 0 && (
+              <div className="chip-row" style={{ marginBottom: 16 }}>
+                {horas.map((h) => (
+                  <div key={h} className={`chip${hora === h ? ' on' : ''}`} onClick={() => setHora(h)}>{h}</div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {error && <div className="registro-error" style={{ marginTop: 0 }}>{error}</div>}
-        <button type="button" className="btn btn-primary btn-auto" disabled={enviando || modalidadesActivas.length === 0} onClick={confirmar}>
+        <button type="button" className="btn btn-primary btn-auto" disabled={enviando || modalidadesActivas.length === 0 || !tieneHorarios} onClick={confirmar}>
           {enviando ? 'Enviando…' : 'Continuar al pago'}
         </button>
       </div>

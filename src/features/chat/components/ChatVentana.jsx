@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/features/auth/context/AuthContext'
 import { enviarMensaje, idConversacion, mensajeErrorEnvio } from '../services/chat'
 import { useMensajes } from '../hooks/useChat'
 import { useGrabadora } from '../hooks/useGrabadora'
@@ -13,6 +14,7 @@ import LlamadaPanel from './LlamadaPanel'
 // tiempo real y barra para escribir y enviar archivos, documentos, fotos, videos y audios.
 export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenuncia, subtitulo }) {
   const navigate = useNavigate()
+  const { perfil } = useAuth()
   const pacienteId = miRol === 'paciente' ? miUid : otro.id
   const doctorId = miRol === 'paciente' ? otro.id : miUid
   const convId = idConversacion(pacienteId, doctorId)
@@ -43,7 +45,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
     setTexto('')
     setAviso('')
     try {
-      await enviarMensaje({ pacienteId, doctorId, de: miUid, tipo: 'texto', texto: limpio })
+      await enviarMensaje({ pacienteId, doctorId, de: miUid, deNombre: perfil?.nombre, tipo: 'texto', texto: limpio })
     } catch (err) {
       setTexto(limpio)
       setAviso(mensajeErrorEnvio(err))
@@ -80,6 +82,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
             pacienteId,
             doctorId,
             de: miUid,
+            deNombre: perfil?.nombre,
             tipo: tipoDeArchivo(archivo),
             archivo: { url: subida.url, nombre: subida.nombre, tamano: subida.tamano, mime: subida.mime, duracion: archivo.duracion ?? null },
           })
