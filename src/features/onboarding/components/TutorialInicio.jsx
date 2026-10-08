@@ -14,27 +14,22 @@ const PASOS_POR_ROL = {
     { icono: '📋', titulo: 'Atiende consultas', texto: 'Revisa las solicitudes de tus pacientes en "Mis consultas" y mira tu día a día en "Agenda".' },
     { icono: '💬', titulo: 'Conéctate', texto: 'Chatea, llama o haz videollamada con tus pacientes una vez que su pago esté habilitado.' },
   ],
-  administrador: [
-    { icono: '👋', titulo: 'Bienvenido a DocTop', texto: 'Desde aquí administras toda la plataforma: doctores, pacientes y pagos.' },
-    { icono: '✅', titulo: 'Verifica profesionales', texto: 'Aprueba o rechaza las solicitudes de registro de doctores en "Solicitudes".' },
-    { icono: '💳', titulo: 'Valida pagos', texto: 'Revisa los comprobantes que suben los pacientes en "Validación de pagos".' },
-    { icono: '📊', titulo: 'Estadísticas', texto: 'Consulta el panel de "Inicio y estadísticas" para ver métricas y gráficas de toda la plataforma.' },
-  ],
 }
 
 function claveVisto(uid) {
   return `doctop_tutorial_visto_${uid}`
 }
 
-// Mini-tutorial que se ve una sola vez, la primera vez que la persona entra. Se puede omitir en
-// cualquier paso; una vez cerrado (por "Omitir" o al terminarlo) no vuelve a aparecer en ese navegador.
+// Mini-tutorial que se ve una sola vez, la primera vez que la persona entra (solo paciente y
+// doctor; el admin no lo necesita). Se puede omitir en cualquier paso; una vez cerrado (por
+// "Omitir" o al terminarlo) no vuelve a aparecer en ese navegador.
 export default function TutorialInicio() {
   const { usuario, rol } = useAuth()
   const [paso, setPaso] = useState(0)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    if (!usuario || !rol) return
+    if (!usuario || !rol || rol === 'administrador') return
     const yaVisto = localStorage.getItem(claveVisto(usuario.uid))
     if (!yaVisto) {
       setPaso(0)
@@ -47,7 +42,7 @@ export default function TutorialInicio() {
     setVisible(false)
   }
 
-  if (!visible) return null
+  if (!visible || rol === 'administrador') return null
 
   const pasos = PASOS_POR_ROL[rol] ?? PASOS_POR_ROL.paciente
   const actual = pasos[paso]
