@@ -244,6 +244,16 @@ export default function InicioEstadisticas() {
             <div className="metric-card"><div className="metric-num">{denunciasPendientes}</div><div className="metric-label">Denuncias pendientes</div></div>
             <div className="metric-card"><div className="metric-num">{temporales.bloqueados.length + permanentes.bloqueados.length}</div><div className="metric-label">Doctores bloqueados</div></div>
           </div>
+          <GraficaBarras
+            titulo="Resumen en gráfica"
+            datos={[
+              { etiqueta: 'Doctores activos', valor: doctoresActivos },
+              { etiqueta: 'Pacientes registrados', valor: pacientes },
+              { etiqueta: 'Solicitudes pendientes', valor: solicitudesPendientes },
+              { etiqueta: 'Denuncias pendientes', valor: denunciasPendientes },
+              { etiqueta: 'Doctores bloqueados', valor: temporales.bloqueados.length + permanentes.bloqueados.length },
+            ]}
+          />
           <MejoresPorEspecialidad doctores={doctores} cargando={cargando} />
         </>
       )}
