@@ -27,6 +27,8 @@ const PESTANAS = [
 export default function ValidacionPagos() {
   const { consultas, cargando } = useConsultasAdmin()
   const [pestana, setPestana] = useState('pago_en_revision')
+  const [busqueda, setBusqueda] = useState('')
+  const [fechaFiltro, setFechaFiltro] = useState('')
   const [visor, setVisor] = useState(null)
   const [modal, setModal] = useState(null)
   const [seleccion, setSeleccion] = useState(null)
@@ -36,7 +38,14 @@ export default function ValidacionPagos() {
   const [guardando, setGuardando] = useState(false)
 
   const conteos = Object.fromEntries(PESTANAS.map((p) => [p.clave, consultas.filter((c) => c.estado === p.clave).length]))
-  const filtradas = consultas.filter((c) => c.estado === pestana)
+  const termino = busqueda.trim().toLowerCase()
+  const filtradas = consultas.filter((c) => {
+    if (c.estado !== pestana) return false
+    if (fechaFiltro && c.fecha !== fechaFiltro) return false
+    if (!termino) return true
+    return (c.paciente?.nombre ?? c.pacienteNombre ?? '').toLowerCase().includes(termino)
+      || (c.doctor?.nombre ?? c.doctorNombre ?? '').toLowerCase().includes(termino)
+  })
   const filasExportar = filtradas.map((c) => ({
     paciente: c.paciente?.nombre ?? c.pacienteNombre,
     doctor: c.doctor?.nombre ?? c.doctorNombre,
@@ -110,6 +119,26 @@ export default function ValidacionPagos() {
             {p.etiqueta} <span className="subtab-count">{conteos[p.clave]}</span>
           </button>
         ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '14px 0' }}>
+        <input
+          type="text"
+          placeholder="Buscar por nombre de paciente o doctor…"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          style={{ maxWidth: 300, margin: 0 }}
+        />
+        <input
+          type="date"
+          value={fechaFiltro}
+          onChange={(e) => setFechaFiltro(e.target.value)}
+          style={{ margin: 0 }}
+          aria-label="Filtrar por fecha"
+        />
+        {fechaFiltro && (
+          <button type="button" className="mini-btn" onClick={() => setFechaFiltro('')}>Quitar fecha</button>
+        )}
       </div>
 
       {filtradas.length > 0 && (

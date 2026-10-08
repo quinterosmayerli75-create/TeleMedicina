@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useConsulta } from '../../hooks/useConsultas'
-import { useRutas } from '@/shared/hooks/useRutas'
 import { ESTADOS_CONSULTA, finalizarConsulta, MODALIDADES } from '../../services/consultas'
 import { formatearFecha } from '@/shared/utils/fechas'
 import { descargarComprobanteConsulta } from '../../utils/comprobantePdf'
@@ -10,7 +9,6 @@ import { descargarComprobanteConsulta } from '../../utils/comprobantePdf'
 export default function ConsultaDetalle() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const rutas = useRutas()
   const { usuario } = useAuth()
   const { consulta, cargando } = useConsulta(id)
   const [guardando, setGuardando] = useState(false)
@@ -58,7 +56,7 @@ export default function ConsultaDetalle() {
 
         {consulta.estado === 'habilitada' && (
           <>
-            <button type="button" className="btn btn-primary btn-auto" style={{ marginTop: 14 }} onClick={() => navigate(rutas.mensajesDoctor(consulta.pacienteId))}>
+            <button type="button" className="btn btn-primary btn-auto" style={{ marginTop: 14 }} onClick={() => navigate(`/doctor/mensajes/${consulta.pacienteId}`)}>
               Ir a la consulta
             </button>
             <button type="button" className="btn btn-outline btn-auto" style={{ marginTop: 8 }} disabled={guardando} onClick={finalizar}>

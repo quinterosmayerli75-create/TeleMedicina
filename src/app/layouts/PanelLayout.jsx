@@ -3,6 +3,7 @@ import { signOut } from 'firebase/auth'
 import { auth } from '@/services/firebase/config'
 import Logo from '@/shared/components/Logo'
 import NotificacionesBell from '@/features/notificaciones/components/NotificacionesBell'
+import TutorialInicio from '@/features/onboarding/components/TutorialInicio'
 
 export default function PanelLayout({ items, children, banner }) {
   const navigate = useNavigate()
@@ -37,6 +38,7 @@ export default function PanelLayout({ items, children, banner }) {
         </div>
       </aside>
       <main className="web-content">{children}</main>
+      <TutorialInicio />
     </div>
   )
 }

@@ -19,6 +19,8 @@ export default function MisConsultas() {
   const { usuario } = useAuth()
   const { consultas, cargando } = useConsultasDoctor(usuario?.uid)
   const [pestana, setPestana] = useState('')
+  const [busqueda, setBusqueda] = useState('')
+  const [fechaFiltro, setFechaFiltro] = useState('')
 
   const conteos = useMemo(() => {
     const conteo = { '': consultas.length }
@@ -26,7 +28,15 @@ export default function MisConsultas() {
     return conteo
   }, [consultas])
 
-  const filtradas = pestana ? consultas.filter((c) => c.estado === pestana) : consultas
+  const filtradas = useMemo(() => {
+    const termino = busqueda.trim().toLowerCase()
+    return consultas.filter((c) => {
+      if (pestana && c.estado !== pestana) return false
+      if (fechaFiltro && c.fecha !== fechaFiltro) return false
+      if (!termino) return true
+      return (c.paciente?.nombre ?? c.pacienteNombre ?? '').toLowerCase().includes(termino)
+    })
+  }, [consultas, pestana, busqueda, fechaFiltro])
 
   return (
     <div>
@@ -36,6 +46,33 @@ export default function MisConsultas() {
       {cargando && <p className="web-sub">Cargando…</p>}
 
       {!cargando && consultas.length === 0 && <p className="web-sub">Todavía no tienes consultas solicitadas.</p>}
+
+      {consultas.length > 0 && (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+          <input
+            type="text"
+            placeholder="Buscar por nombre del paciente…"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            style={{ maxWidth: 300, margin: 0 }}
+          />
+          <select value={pestana} onChange={(e) => setPestana(e.target.value)} style={{ maxWidth: 220 }} aria-label="Filtrar por estado">
+            {PESTANAS.map((p) => (
+              <option key={p.clave || 'todas'} value={p.clave}>{p.etiqueta}</option>
+            ))}
+          </select>
+          <input
+            type="date"
+            value={fechaFiltro}
+            onChange={(e) => setFechaFiltro(e.target.value)}
+            style={{ margin: 0 }}
+            aria-label="Filtrar por fecha"
+          />
+          {fechaFiltro && (
+            <button type="button" className="mini-btn" onClick={() => setFechaFiltro('')}>Quitar fecha</button>
+          )}
+        </div>
+      )}
 
       {consultas.length > 0 && (
         <div className="subtabs" role="tablist" style={{ marginBottom: 20 }}>
