@@ -6,6 +6,7 @@ import { useAuth } from '@/features/auth/context/AuthContext'
 import HorariosAtencion from '../components/HorariosAtencion'
 import CampoContrasena from '@/shared/components/CampoContrasena'
 import { AYUDA_CONTRASENA, validarContrasena } from '@/shared/utils/validacion'
+import { LIMITE_FOTO_MB, mensajeErrorSubida, subirArchivo, validarArchivo } from '@/services/archivos'
 
 const MODALIDADES = [
   { clave: 'chat', etiqueta: 'Chat de texto' },
@@ -25,6 +26,9 @@ export default function Panel() {
   const [costoConsulta, setCostoConsulta] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [mensaje, setMensaje] = useState('')
+  const [datosPago, setDatosPago] = useState('')
+  const [progresoQr, setProgresoQr] = useState(null)
+  const [mensajeQr, setMensajeQr] = useState(null)
 
   const [mostrarPaciente, setMostrarPaciente] = useState(false)
   const [nuevoPaciente, setNuevoPaciente] = useState(PACIENTE_INICIAL)
@@ -40,6 +44,7 @@ export default function Panel() {
         setDatosProfesional(datos)
         setCostoConsulta(datos.costoConsulta ?? '')
         setDescripcion(datos.descripcion ?? '')
+        setDatosPago(datos.datosPago ?? '')
       }
     })
   }, [usuario])
@@ -65,6 +70,42 @@ export default function Panel() {
       descripcion,
     })
     setMensaje('Guardado.')
+  }
+
+  async function alElegirQrPago(e) {
+    const archivo = e.target.files?.[0]
+    e.target.value = ''
+    if (!archivo) return
+
+    const problema = validarArchivo(archivo, { solo: 'imagen', maxMB: LIMITE_FOTO_MB })
+    if (problema) {
+      setMensajeQr({ tipo: 'error', texto: problema })
+      return
+    }
+
+    setMensajeQr(null)
+    setProgresoQr(0)
+    try {
+      const { url } = await subirArchivo(`profesionales/${usuario.uid}/qr-pago-${Date.now()}`, archivo, setProgresoQr)
+      await updateDoc(doc(db, 'profesionales', usuario.uid), { qrPagoUrl: url })
+      setDatosProfesional((prev) => ({ ...prev, qrPagoUrl: url }))
+      setMensajeQr({ tipo: 'ok', texto: 'QR actualizado.' })
+    } catch (err) {
+      setMensajeQr({ tipo: 'error', texto: mensajeErrorSubida(err) })
+    } finally {
+      setProgresoQr(null)
+    }
+  }
+
+  async function guardarDatosPago(e) {
+    e.preventDefault()
+    setMensajeQr(null)
+    try {
+      await updateDoc(doc(db, 'profesionales', usuario.uid), { datosPago })
+      setMensajeQr({ tipo: 'ok', texto: 'Datos de pago guardados.' })
+    } catch {
+      setMensajeQr({ tipo: 'error', texto: 'No se pudo guardar. Intenta de nuevo.' })
+    }
   }
 
   function abrirNuevoPaciente() {
@@ -169,6 +210,24 @@ export default function Panel() {
             <textarea id="descripcion" rows="3" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
             {mensaje && <div style={{ fontSize: 12, marginTop: 8, color: 'var(--esmeralda)' }}>{mensaje}</div>}
             <button type="submit" className="btn btn-primary btn-auto" style={{ marginTop: 8 }}>Guardar</button>
+          </form>
+
+          <form className="card-plain" onSubmit={guardarDatosPago}>
+            <h2 className="section-title" style={{ marginTop: 0 }}>Mi QR de pago</h2>
+            <p style={{ fontSize: 12.5, color: 'var(--gris)', marginTop: 0 }}>Este QR se le muestra a tus pacientes cuando pagan su consulta — el pago te llega directo a ti.</p>
+            {datosProfesional.qrPagoUrl && (
+              <div style={{ textAlign: 'center', marginBottom: 10 }}>
+                <img src={datosProfesional.qrPagoUrl} alt="Mi QR de pago" style={{ width: 160, height: 160, objectFit: 'contain', border: '1px solid var(--marfil-osc)', borderRadius: 6 }} />
+              </div>
+            )}
+            <input type="file" accept="image/*" onChange={alElegirQrPago} disabled={progresoQr !== null} />
+            {progresoQr !== null && <div style={{ fontSize: 12, marginTop: 8 }}>Subiendo… {Math.round(progresoQr * 100)}%</div>}
+
+            <label className="campo-label" htmlFor="datosPago" style={{ marginTop: 12, display: 'block' }}>Datos de pago (texto que ve el paciente)</label>
+            <textarea id="datosPago" rows="3" value={datosPago} onChange={(e) => setDatosPago(e.target.value)} placeholder="Ej. Cuenta Banco Unión, titular…" />
+
+            {mensajeQr && <div style={{ fontSize: 12, marginTop: 8, color: mensajeQr.tipo === 'ok' ? 'var(--esmeralda)' : 'var(--alerta)' }}>{mensajeQr.texto}</div>}
+            <button type="submit" className="btn btn-primary btn-auto" style={{ marginTop: 8 }}>Guardar datos de pago</button>
           </form>
         </div>
       </div>

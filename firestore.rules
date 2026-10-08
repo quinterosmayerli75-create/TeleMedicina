@@ -223,7 +223,8 @@ service cloud.firestore {
         && request.resource.data.modalidad in ['chat', 'llamada', 'video']
         && request.resource.data.costoConsulta is number
         && request.resource.data.fecha is string
-        && request.resource.data.hora is string;
+        && request.resource.data.hora is string
+        && get(/databases/$(database)/documents/profesionales/$(request.resource.data.doctorId)).data.get('suscripcionActiva', false) == true;
       allow update: if estaAutenticado() && (
           (
             request.auth.uid == resource.data.pacienteId
@@ -235,7 +236,7 @@ service cloud.firestore {
             )
           )
           || (
-            esAdmin()
+            (esAdmin() || request.auth.uid == resource.data.doctorId)
             && resource.data.estado == 'pago_en_revision'
             && request.resource.data.estado in ['habilitada', 'rechazada']
           )
@@ -243,6 +244,32 @@ service cloud.firestore {
             (request.auth.uid == resource.data.pacienteId || request.auth.uid == resource.data.doctorId)
             && resource.data.estado == 'habilitada'
             && request.resource.data.estado == 'finalizada'
+          )
+        );
+      allow delete: if esAdmin();
+    }
+
+    // Suscripción del doctor a la plataforma (mensual o anual): el doctor paga al admin por QR y
+    // sube su comprobante; el admin lo valida. Al aprobar, se activa profesionales/{doctorId}.
+    match /suscripciones/{id} {
+      allow read: if estaAutenticado() && (request.auth.uid == resource.data.doctorId || esAdmin());
+      allow create: if esProfesional()
+        && request.resource.data.doctorId == request.auth.uid
+        && request.resource.data.estado == 'pendiente_pago'
+        && request.resource.data.plan in ['mensual', 'anual']
+        && request.resource.data.precio is number;
+      allow update: if estaAutenticado() && (
+          (
+            request.auth.uid == resource.data.doctorId
+            && request.resource.data.doctorId == resource.data.doctorId
+            && resource.data.estado in ['pendiente_pago', 'rechazada']
+            && request.resource.data.estado == 'pago_en_revision'
+            && request.resource.data.comprobanteUrl is string
+          )
+          || (
+            esAdmin()
+            && resource.data.estado == 'pago_en_revision'
+            && request.resource.data.estado in ['activa', 'rechazada']
           )
         );
       allow delete: if esAdmin();

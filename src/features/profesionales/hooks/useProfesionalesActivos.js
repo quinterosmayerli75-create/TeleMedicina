@@ -5,6 +5,13 @@ import { useAuth } from '@/features/auth/context/AuthContext'
 import { obtenerTitulos } from '../utils/documentosDoctor'
 import { estadoEfectivo } from '@/features/bloqueos/utils/bloqueos'
 
+// Suscripción activa = el admin la aprobó Y todavía no vence (comparando fechas como texto
+// "aaaa-mm-dd", que ordenan igual que las fechas).
+export function suscripcionVigente(datos) {
+  const hoy = new Date().toISOString().slice(0, 10)
+  return Boolean(datos?.suscripcionActiva) && (datos?.suscripcionVenceEl ?? '') >= hoy
+}
+
 // Profesionales verificados por el admin, con sus datos públicos de "usuarios" incluidos.
 // Si quien mira es un doctor (que consulta a otros doctores como un paciente), no se incluye a sí mismo.
 export function useProfesionalesActivos() {
@@ -23,6 +30,7 @@ export function useProfesionalesActivos() {
           // Un doctor bloqueado (temporal o permanentemente) no aparece para los pacientes.
           const estado = estadoEfectivo(usuario)
           if (estado && estado !== 'activo') return null
+          if (!suscripcionVigente(datos)) return null
           return {
             id: docSnap.id,
             nombre: usuario.nombre ?? 'Profesional',
@@ -87,6 +95,7 @@ export function useProfesional(id) {
             notaEstado: datos.notaEstado ?? '',
             disponibilidad: datos.disponibilidad ?? {},
             titulos: obtenerTitulos(datos),
+            suscripcionVigente: suscripcionVigente(datos),
           })
         }
       })

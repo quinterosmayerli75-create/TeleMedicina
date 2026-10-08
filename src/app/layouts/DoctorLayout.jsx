@@ -6,11 +6,13 @@ import LlamadaEntranteBanner from '@/features/chat/components/LlamadaEntranteBan
 
 const ITEMS = [
   { to: '/doctor/panel', label: 'Panel principal' },
+  { to: '/doctor/suscripcion', label: 'Suscripción' },
   { to: '/doctor/agenda', label: 'Agenda' },
   { to: '/doctor/inicio', label: 'Inicio' },
   { to: '/doctor/buscar', label: 'Buscar doctores' },
   { to: '/doctor/favoritos', label: 'Favoritos' },
   { to: '/doctor/consultas', label: 'Mis consultas' },
+  { to: '/doctor/validacion-pagos', label: 'Validar pagos' },
   { to: '/doctor/mensajes', label: 'Mensajes' },
   { to: '/doctor/informes', label: 'Informes médicos' },
   { to: '/doctor/configuracion', label: 'Configuración' },

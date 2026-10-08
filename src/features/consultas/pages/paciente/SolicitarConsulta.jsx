@@ -27,6 +27,14 @@ export default function SolicitarConsulta() {
       </div>
     )
   }
+  if (!doctor.suscripcionVigente) {
+    return (
+      <div>
+        <span className="back-link" onClick={() => navigate(-1)}>← Volver</span>
+        <p>Este profesional no tiene su suscripción activa por ahora, así que no se le pueden solicitar consultas.</p>
+      </div>
+    )
+  }
 
   const modalidadesActivas = Object.keys(MODALIDADES).filter((_, i) => doctor.modalidades?.[i])
   const tieneHorarios = hayHorarios(doctor.disponibilidad)

@@ -31,6 +31,8 @@ import DenunciaDoctor from '@/features/denuncias/pages/doctor/Denuncia'
 import MisConsultasDoctor from '@/features/consultas/pages/doctor/MisConsultas'
 import ConsultaDetalleDoctor from '@/features/consultas/pages/doctor/ConsultaDetalle'
 import AgendaDoctor from '@/features/consultas/pages/doctor/Agenda'
+import SuscripcionDoctor from '@/features/consultas/pages/doctor/Suscripcion'
+import ValidacionPagosDoctor from '@/features/consultas/pages/doctor/ValidacionPagos'
 
 import AdminLayout from './layouts/AdminLayout'
 import InicioEstadisticas from '@/features/admin/pages/InicioEstadisticas'
@@ -43,6 +45,7 @@ import Denuncias from '@/features/denuncias/pages/admin/Denuncias'
 import Roles from '@/features/admin/pages/Roles'
 import ConfiguracionAdmin from '@/features/perfil/pages/admin/Configuracion'
 import ValidacionPagos from '@/features/consultas/pages/admin/ValidacionPagos'
+import ValidacionSuscripciones from '@/features/consultas/pages/admin/ValidacionSuscripciones'
 
 function RutaProtegida({ rolPermitido, children }) {
   const { usuario, rol, cargando } = useAuth()
@@ -114,6 +117,8 @@ export default function AppRouter() {
           <Route path="agenda" element={<AgendaDoctor />} />
           <Route path="consultas" element={<MisConsultasDoctor />} />
           <Route path="consultas/:id" element={<ConsultaDetalleDoctor />} />
+          <Route path="suscripcion" element={<SuscripcionDoctor />} />
+          <Route path="validacion-pagos" element={<ValidacionPagosDoctor />} />
         </Route>
 
         <Route
@@ -135,6 +140,7 @@ export default function AppRouter() {
           <Route path="denuncias" element={<Denuncias />} />
           <Route path="roles" element={<Roles />} />
           <Route path="pagos" element={<ValidacionPagos />} />
+          <Route path="suscripciones" element={<ValidacionSuscripciones />} />
           <Route path="configuracion" element={<ConfiguracionAdmin />} />
         </Route>
 

@@ -22,8 +22,9 @@ export default function Consulta() {
   const [cancelando, setCancelando] = useState(false)
 
   useEffect(() => {
-    getDoc(doc(db, 'config', 'pagos')).then((snap) => setQr(snap.exists() ? snap.data() : {}))
-  }, [])
+    if (!consulta?.doctorId) return
+    getDoc(doc(db, 'profesionales', consulta.doctorId)).then((snap) => setQr(snap.exists() ? snap.data() : {}))
+  }, [consulta?.doctorId])
 
   if (cargando) return <p className="web-sub">Cargando…</p>
   if (!consulta || consulta.pacienteId !== usuario?.uid) {
@@ -100,12 +101,12 @@ export default function Consulta() {
           {puedeSubirComprobante && (
             <div className="card-plain">
               <h2 className="section-title" style={{ marginTop: 0 }}>Pago por QR</h2>
-              {qr?.qrUrl ? (
+              {qr?.qrPagoUrl ? (
                 <div style={{ textAlign: 'center' }}>
-                  <img src={qr.qrUrl} alt="QR de pago" style={{ width: 200, height: 200, objectFit: 'contain', border: '1px solid var(--marfil-osc)', borderRadius: 6 }} />
+                  <img src={qr.qrPagoUrl} alt="QR de pago del doctor" style={{ width: 200, height: 200, objectFit: 'contain', border: '1px solid var(--marfil-osc)', borderRadius: 6 }} />
                 </div>
               ) : (
-                <p style={{ fontSize: 12.5, color: 'var(--gris)' }}>El administrador todavía no configuró el QR de pago. Vuelve más tarde.</p>
+                <p style={{ fontSize: 12.5, color: 'var(--gris)' }}>Este doctor todavía no configuró su QR de pago. Vuelve más tarde.</p>
               )}
               {qr?.datosPago && <p style={{ fontSize: 12.5, whiteSpace: 'pre-wrap', textAlign: 'center' }}>{qr.datosPago}</p>}
 
