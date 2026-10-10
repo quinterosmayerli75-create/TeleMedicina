@@ -31,6 +31,29 @@ export function useInformes(doctorId) {
   return { informes, cargando, error }
 }
 
+// Informes médicos de un paciente con un doctor concreto (vista de solo lectura del paciente).
+export function useInformesConsulta(doctorId, pacienteId) {
+  const [informes, setInformes] = useState([])
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    if (!doctorId || !pacienteId) return undefined
+    return onSnapshot(
+      query(collection(db, 'informes'), where('doctorId', '==', doctorId), where('pacienteId', '==', pacienteId)),
+      (snap) => {
+        const filas = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (aFecha(b.fecha)?.getTime() ?? 0) - (aFecha(a.fecha)?.getTime() ?? 0))
+        setInformes(filas)
+        setCargando(false)
+      },
+      () => setCargando(false)
+    )
+  }, [doctorId, pacienteId])
+
+  return { informes, cargando }
+}
+
 // Un informe por su id (para verlo o editarlo). Solo devuelve informes del doctor que lo pide.
 export function useInforme(id, doctorId) {
   const [informe, setInforme] = useState(null)

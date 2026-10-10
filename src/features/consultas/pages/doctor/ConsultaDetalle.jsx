@@ -5,6 +5,7 @@ import { useConsulta } from '../../hooks/useConsultas'
 import { ESTADOS_CONSULTA, finalizarConsulta, MODALIDADES } from '../../services/consultas'
 import { formatearFecha } from '@/shared/utils/fechas'
 import { descargarComprobanteConsulta } from '../../utils/comprobantePdf'
+import { useInformesConsulta } from '@/features/informes/hooks/useInformes'
 
 export default function ConsultaDetalle() {
   const { id } = useParams()
@@ -12,6 +13,7 @@ export default function ConsultaDetalle() {
   const { usuario } = useAuth()
   const { consulta, cargando } = useConsulta(id)
   const [guardando, setGuardando] = useState(false)
+  const { informes } = useInformesConsulta(usuario?.uid, consulta?.pacienteId)
 
   if (cargando) return <p className="web-sub">Cargando…</p>
   if (!consulta || consulta.doctorId !== usuario?.uid) {
@@ -72,6 +74,33 @@ export default function ConsultaDetalle() {
           <p style={{ fontSize: 12.5, color: 'var(--gris)', marginTop: 14, marginBottom: 0 }}>El paciente todavía no sube su comprobante de pago.</p>
         )}
       </div>
+
+      {(consulta.estado === 'habilitada' || consulta.estado === 'finalizada') && (
+        <div className="card-plain" style={{ maxWidth: 520, marginTop: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <h2 className="section-title" style={{ margin: 0 }}>Informe de esta consulta</h2>
+            <button
+              type="button"
+              className="btn btn-outline btn-auto"
+              onClick={() => navigate(`/doctor/informes/nuevo?paciente=${consulta.pacienteId}`)}
+            >
+              + Nuevo informe
+            </button>
+          </div>
+          {informes.length === 0 ? (
+            <p className="web-sub" style={{ marginBottom: 0 }}>Todavía no registraste cómo fue esta consulta ni qué se le recetó al paciente.</p>
+          ) : (
+            informes.map((informe) => (
+              <div className="admin-row" key={informe.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/doctor/informes/${informe.id}`)}>
+                <div>
+                  <div style={{ fontWeight: 600 }}>{formatearFecha(informe.fecha)}</div>
+                  <div className="rank-meta"><b>Diagnóstico:</b> {informe.diagnostico}</div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
@@ -8,9 +8,10 @@ import CampoContrasena from '@/shared/components/CampoContrasena'
 import { mensajeErrorSubida, nombreSeguro, subirArchivo } from '@/services/archivos'
 import { AYUDA_CONTRASENA, validarContrasena } from '@/shared/utils/validacion'
 import { calcularEdad } from '@/shared/utils/fechas'
+import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
+import { notificarAdmins } from '@/features/notificaciones/services/notificaciones'
 
 const PROFESIONES = ['Médico', 'Odontólogo', 'Psicólogo', 'Nutricionista']
-const ESPECIALIDADES = ['Cardiología', 'Odontología', 'Psicología', 'Medicina general']
 const MODALIDADES = [
   { clave: 'chat', etiqueta: 'Chat de texto' },
   { clave: 'llamada', etiqueta: 'Llamada de voz' },
@@ -32,7 +33,7 @@ function mensajeError(codigo) {
 
 const ESTADO_INICIAL = {
   email: '', celular: '', contrasena: '', confirmarContrasena: '',
-  nombre: '', fechaNacimiento: '', estatura: '', peso: '', profesion: PROFESIONES[0], especialidad: ESPECIALIDADES[0],
+  nombre: '', fechaNacimiento: '', estatura: '', peso: '', profesion: PROFESIONES[0], especialidad: '',
   experiencia: '', carnet: '', descripcion: '', costoConsulta: '',
 }
 
@@ -43,6 +44,7 @@ function CampoError({ campo, faltantes }) {
 
 export default function RegistroProfesional() {
   const [datos, setDatos] = useState(ESTADO_INICIAL)
+  const tiposProfesion = useTiposProfesion()
   const [fotoPerfil, setFotoPerfil] = useState([])
   const [fotosTitulos, setFotosTitulos] = useState([])
   const [fotoCarnet, setFotoCarnet] = useState([])
@@ -54,6 +56,12 @@ export default function RegistroProfesional() {
   const [enviando, setEnviando] = useState(false)
 
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (tiposProfesion.length > 0 && !datos.especialidad) {
+      setDatos((prev) => ({ ...prev, especialidad: tiposProfesion[0].nombre }))
+    }
+  }, [tiposProfesion, datos.especialidad])
 
   function actualizarCampo(campo) {
     return (e) => setDatos((prev) => ({ ...prev, [campo]: e.target.value }))
@@ -174,6 +182,12 @@ export default function RegistroProfesional() {
         documentosVerificacion: [...titulosUrls, fotoCarnetUrl].filter(Boolean),
       })
 
+      notificarAdmins({
+        tipo: 'nueva_solicitud',
+        texto: `${datos.nombre} envió una solicitud de registro como profesional.`,
+        enlace: '/admin/solicitudes',
+      }).catch(() => {})
+
       navigate('/', { state: { solicitudEnviada: true } })
     } catch (err) {
       setError(mensajeError(err.code))
@@ -259,7 +273,7 @@ export default function RegistroProfesional() {
                   <div>
                     <label className="campo-label" htmlFor="especialidad">Especialidad</label>
                     <select id="especialidad" value={datos.especialidad} onChange={actualizarCampo('especialidad')}>
-                      {ESPECIALIDADES.map((e) => <option key={e}>{e}</option>)}
+                      {tiposProfesion.map((t) => <option key={t.id} value={t.nombre}>{t.nombre}</option>)}
                     </select>
                   </div>
                   <div>

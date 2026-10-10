@@ -197,10 +197,11 @@ service cloud.firestore {
       }
     }
 
-    // Informes médicos: los crea y ve solo el doctor que los escribió (no los ve el paciente).
-    // Al editar no se puede cambiar de doctor ni de paciente.
+    // Informes médicos: los crea y edita solo el doctor que los escribió; el paciente puede leer
+    // (no editar) los suyos para ver diagnóstico y tratamiento recetado.
     match /informes/{id} {
-      allow read: if estaAutenticado() && resource.data.doctorId == request.auth.uid;
+      allow read: if estaAutenticado()
+        && (resource.data.doctorId == request.auth.uid || resource.data.pacienteId == request.auth.uid);
       allow create: if esProfesional()
         && request.resource.data.doctorId == request.auth.uid
         && request.resource.data.pacienteId is string;

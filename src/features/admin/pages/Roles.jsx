@@ -82,33 +82,34 @@ export default function Roles() {
   return (
     <div>
       <h1 className="web-h1">Permisos por rol</h1>
+      <p className="web-sub" style={{ marginTop: -2 }}>Solo de referencia: muestra qué puede hacer cada rol, no son botones.</p>
       <div className="web-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', maxWidth: 1100 }}>
         <div className="card-plain">
           <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 6 }}>Paciente</div>
           <div className="chip-row">
-            <div className="chip on">Ver doctores</div><div className="chip on">Mensajes</div>
-            <div className="chip on">Calificar</div><div className="chip on">Denunciar</div>
+            <div className="chip on chip-static">Ver doctores</div><div className="chip on chip-static">Mensajes</div>
+            <div className="chip on chip-static">Calificar</div><div className="chip on chip-static">Denunciar</div>
           </div>
         </div>
         <div className="card-plain">
           <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 6 }}>Doctor</div>
           <div className="chip-row">
-            <div className="chip on">Editar perfil</div><div className="chip on">Trabajos</div>
-            <div className="chip on">Horario</div><div className="chip on">Denunciar</div>
+            <div className="chip on chip-static">Editar perfil</div><div className="chip on chip-static">Trabajos</div>
+            <div className="chip on chip-static">Horario</div><div className="chip on chip-static">Denunciar</div>
           </div>
         </div>
         <div className="card-plain">
           <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 6 }}>Administrador</div>
           <div className="chip-row">
-            <div className="chip on">Aprobar registros</div><div className="chip on">Bloquear</div>
-            <div className="chip on">Categorías</div><div className="chip on">Denuncias</div>
+            <div className="chip on chip-static">Aprobar registros</div><div className="chip on chip-static">Bloquear</div>
+            <div className="chip on chip-static">Categorías</div><div className="chip on chip-static">Denuncias</div>
           </div>
         </div>
         <div className="card-plain" style={{ borderColor: 'var(--oro)' }}>
           <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 6 }}>Super admin</div>
           <div className="chip-row">
-            <div className="chip on">Todo lo del administrador</div>
-            <div className="chip on">Crear administradores</div>
+            <div className="chip on chip-static">Todo lo del administrador</div>
+            <div className="chip on chip-static">Crear administradores</div>
           </div>
         </div>
       </div>

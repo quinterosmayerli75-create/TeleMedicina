@@ -103,24 +103,22 @@ export default function Solicitudes() {
 
       {aviso && <div className="banner-ok" role="status">{aviso}</div>}
 
-      {solicitudes.length === 0 && <p className="web-sub">No hay solicitudes pendientes.</p>}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
+        <input
+          type="text"
+          placeholder="Buscar por nombre, profesión o especialidad…"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          style={{ maxWidth: 360, margin: 0 }}
+        />
+        <select value={orden} onChange={(e) => setOrden(e.target.value)} style={{ maxWidth: 220 }}>
+          {ORDENES.map((o) => (
+            <option key={o.clave} value={o.clave}>{o.etiqueta}</option>
+          ))}
+        </select>
+      </div>
 
-      {solicitudes.length > 0 && (
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            placeholder="Buscar por nombre, profesión o especialidad…"
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            style={{ maxWidth: 360, margin: 0 }}
-          />
-          <select value={orden} onChange={(e) => setOrden(e.target.value)} style={{ maxWidth: 220 }}>
-            {ORDENES.map((o) => (
-              <option key={o.clave} value={o.clave}>{o.etiqueta}</option>
-            ))}
-          </select>
-        </div>
-      )}
+      {solicitudes.length === 0 && <p className="web-sub">No hay solicitudes pendientes.</p>}
 
       {solicitudes.length > 0 && filtradas.length === 0 && (
         <p className="web-sub">No hay solicitudes que coincidan con la búsqueda.</p>

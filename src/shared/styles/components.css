@@ -156,9 +156,29 @@ input[type=range] { width: 100%; accent-color: var(--oro); }
 .web-pane-list { width: 330px; flex: 0 0 330px; border-right: 1px solid var(--marfil-osc); overflow-y: auto; }
 .web-pane-chat { flex: 1; display: flex; flex-direction: column; }
 
-.metric-card { background: var(--blanco); border: 1px solid var(--marfil-osc); border-radius: 8px; padding: 22px; text-align: center; }
+.metric-card {
+  background: var(--blanco); border: 1px solid var(--marfil-osc); border-top: 3px solid var(--oro);
+  border-radius: 8px; padding: 22px; text-align: center;
+  animation: metric-in .45s cubic-bezier(.22, 1, .36, 1) both;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.metric-card:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(15, 20, 23, .08); }
+.metric-card:nth-child(5n+2) { border-top-color: var(--esmeralda); }
+.metric-card:nth-child(5n+3) { border-top-color: var(--alerta); }
+.metric-card:nth-child(5n+4) { border-top-color: var(--ambar); }
+.metric-card:nth-child(5n+5) { border-top-color: var(--oro-claro); }
+.metric-card:nth-child(1) { animation-delay: .03s; }
+.metric-card:nth-child(2) { animation-delay: .08s; }
+.metric-card:nth-child(3) { animation-delay: .13s; }
+.metric-card:nth-child(4) { animation-delay: .18s; }
+.metric-card:nth-child(5) { animation-delay: .23s; }
 .metric-num { font-family: var(--display); font-size: 32px; font-weight: 600; }
 .metric-label { font-size: 12.5px; color: var(--gris); margin-top: 6px; }
+
+@keyframes metric-in {
+  from { opacity: 0; transform: translateY(10px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 .web-auth { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--onyx); padding: 40px; }
 .web-auth-card { width: 440px; max-width: 100%; background: #fff; border-radius: 10px; padding: 40px 36px; }
@@ -206,6 +226,7 @@ input[type=range] { width: 100%; accent-color: var(--oro); }
 
 button.chip { font-family: var(--sans); }
 .chip.vacio { opacity: .55; }
+.chip-static { cursor: default; }
 .chip-count { margin-left: 6px; font-size: 11.5px; opacity: .75; }
 
 .fab-registrar { position: fixed; right: 32px; bottom: 28px; z-index: 20; box-shadow: 0 6px 18px rgba(15, 20, 23, .28); }

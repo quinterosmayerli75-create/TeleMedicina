@@ -9,6 +9,7 @@ import { cancelarConsulta, ESTADOS_CONSULTA, MODALIDADES, subirComprobante } fro
 import { LIMITE_FOTO_MB, mensajeErrorSubida, validarArchivo } from '@/services/archivos'
 import { formatearFecha } from '@/shared/utils/fechas'
 import { descargarComprobanteConsulta } from '../../utils/comprobantePdf'
+import { useInformesConsulta } from '@/features/informes/hooks/useInformes'
 
 export default function Consulta() {
   const { id } = useParams()
@@ -20,6 +21,7 @@ export default function Consulta() {
   const [progreso, setProgreso] = useState(null)
   const [mensaje, setMensaje] = useState(null)
   const [cancelando, setCancelando] = useState(false)
+  const { informes } = useInformesConsulta(consulta?.doctorId, usuario?.uid)
 
   useEffect(() => {
     if (!consulta?.doctorId) return
@@ -144,6 +146,20 @@ export default function Consulta() {
           {consulta.estado === 'finalizada' && (
             <div className="card-plain">
               <p style={{ fontSize: 12.5, color: 'var(--gris)', margin: 0 }}>Esta consulta ya finalizó.</p>
+            </div>
+          )}
+
+          {(consulta.estado === 'habilitada' || consulta.estado === 'finalizada') && informes.length > 0 && (
+            <div className="card-plain">
+              <h2 className="section-title" style={{ marginTop: 0 }}>Cómo fue tu consulta</h2>
+              {informes.map((informe) => (
+                <div key={informe.id} style={{ marginBottom: 12 }}>
+                  <div className="rank-meta">{formatearFecha(informe.fecha)}</div>
+                  <div style={{ fontSize: 13, marginTop: 4 }}><b>Motivo:</b> {informe.motivo}</div>
+                  <div style={{ fontSize: 13, marginTop: 4 }}><b>Diagnóstico:</b> {informe.diagnostico}</div>
+                  {informe.tratamiento && <div style={{ fontSize: 13, marginTop: 4 }}><b>Tratamiento recetado:</b> {informe.tratamiento}</div>}
+                </div>
+              ))}
             </div>
           )}
 

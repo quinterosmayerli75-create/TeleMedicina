@@ -43,11 +43,10 @@ const FILTROS_ESTADO = [
 ]
 
 const PROFESIONES = ['Médico', 'Odontólogo', 'Psicólogo', 'Nutricionista']
-const ESPECIALIDADES = ['Cardiología', 'Odontología', 'Psicología', 'Medicina general']
 
 const NUEVO_INICIAL = {
   nombre: '', email: '', contrasena: '', telefono: '',
-  profesion: PROFESIONES[0], especialidad: ESPECIALIDADES[0],
+  profesion: PROFESIONES[0], especialidad: '',
   carnet: '', experiencia: '', descripcion: '', costoConsulta: '',
 }
 
@@ -143,7 +142,7 @@ export default function Doctores() {
   }, [doctores])
 
   function abrirNuevo() {
-    setNuevo(NUEVO_INICIAL)
+    setNuevo({ ...NUEVO_INICIAL, especialidad: tiposProfesion[0]?.nombre ?? '' })
     setError('')
     setModal('nuevo')
   }
@@ -357,7 +356,7 @@ export default function Doctores() {
               <div>
                 <label className="campo-label">Especialidad</label>
                 <select value={nuevo.especialidad} onChange={(e) => setNuevo({ ...nuevo, especialidad: e.target.value })}>
-                  {ESPECIALIDADES.map((e) => <option key={e}>{e}</option>)}
+                  {tiposProfesion.map((t) => <option key={t.id} value={t.nombre}>{t.nombre}</option>)}
                 </select>
               </div>
               <div><label className="campo-label">Carnet profesional</label><input type="text" value={nuevo.carnet} onChange={(e) => setNuevo({ ...nuevo, carnet: e.target.value })} required /></div>
