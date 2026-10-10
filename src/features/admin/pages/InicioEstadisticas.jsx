@@ -30,10 +30,18 @@ function useColeccion(nombre) {
   return { filas, cargando }
 }
 
-// Cuántas consultas tiene cada doctor (las "más consultas" que pidió el ingeniero) y qué modalidad
-// se usa más entre todas las consultas solicitadas.
+// Cuántas consultas tiene cada doctor, qué modalidad se usa más, qué especialidades se piden más y
+// cuánto se ha ingresado por cada una (lo que pide HU-36: "especialidades más solicitadas" e
+// "ingresos registrados"). Son pocas filas para una app de curso, se agrupa todo en el navegador.
 function useGraficasConsultas() {
   const { filas: consultas, cargando } = useColeccion('consultas')
+  const { filas: profesionales } = useColeccion('profesionales')
+
+  const especialidadPorDoctor = useMemo(() => {
+    const mapa = new Map()
+    profesionales.forEach((p) => mapa.set(p.id, p.especialidad || 'Sin especialidad'))
+    return mapa
+  }, [profesionales])
 
   const porDoctor = useMemo(() => {
     const conteo = new Map()
@@ -56,7 +64,30 @@ function useGraficasConsultas() {
     }))
   }, [consultas])
 
-  return { porDoctor, porModalidad, cargando }
+  const porEspecialidad = useMemo(() => {
+    const conteo = new Map()
+    consultas.forEach((c) => {
+      const esp = especialidadPorDoctor.get(c.doctorId) ?? 'Sin especialidad'
+      conteo.set(esp, (conteo.get(esp) ?? 0) + 1)
+    })
+    return [...conteo.entries()].map(([etiqueta, valor]) => ({ etiqueta, valor })).sort((a, b) => b.valor - a.valor)
+  }, [consultas, especialidadPorDoctor])
+
+  // "Ingresos" = lo que ya se pagó y quedó aprobado (habilitada o finalizada), por especialidad.
+  const pagadas = useMemo(() => consultas.filter((c) => c.estado === 'habilitada' || c.estado === 'finalizada'), [consultas])
+  const ingresoTotal = useMemo(() => pagadas.reduce((suma, c) => suma + (Number(c.costoConsulta) || 0), 0), [pagadas])
+  const ingresosPorEspecialidad = useMemo(() => {
+    const conteo = new Map()
+    pagadas.forEach((c) => {
+      const esp = especialidadPorDoctor.get(c.doctorId) ?? 'Sin especialidad'
+      conteo.set(esp, (conteo.get(esp) ?? 0) + (Number(c.costoConsulta) || 0))
+    })
+    return [...conteo.entries()].map(([etiqueta, valor]) => ({ etiqueta, valor })).sort((a, b) => b.valor - a.valor)
+  }, [pagadas, especialidadPorDoctor])
+
+  const pagosPendientes = useMemo(() => consultas.filter((c) => c.estado === 'pago_en_revision').length, [consultas])
+
+  return { porDoctor, porModalidad, porEspecialidad, ingresoTotal, ingresosPorEspecialidad, pagosPendientes, cargando }
 }
 
 // Cuántas calificaciones de cada cantidad de estrellas (1 a 5) se dieron en total.
@@ -196,7 +227,7 @@ export default function InicioEstadisticas() {
   const { doctores, cargando } = useDoctoresActivos()
   const temporales = useBloqueados('bloqueado_temporal', { soloDoctores: true })
   const permanentes = useBloqueados('bloqueado', { soloDoctores: true })
-  const { porDoctor, porModalidad, cargando: cargandoConsultas } = useGraficasConsultas()
+  const { porDoctor, porModalidad, porEspecialidad, ingresoTotal, ingresosPorEspecialidad, pagosPendientes, cargando: cargandoConsultas } = useGraficasConsultas()
   const { porEstrellas, cargando: cargandoCalificaciones } = useGraficaCalificaciones()
 
   function exportarReporte() {
@@ -207,6 +238,8 @@ export default function InicioEstadisticas() {
         { etiqueta: 'Solicitudes pendientes', valor: solicitudesPendientes },
         { etiqueta: 'Denuncias pendientes', valor: denunciasPendientes },
         { etiqueta: 'Doctores bloqueados', valor: temporales.bloqueados.length + permanentes.bloqueados.length },
+        { etiqueta: 'Ingresos registrados (Bs)', valor: ingresoTotal },
+        { etiqueta: 'Pagos pendientes de validar', valor: pagosPendientes },
       ],
       ranking: agruparPorEspecialidad(doctores),
     })
@@ -244,6 +277,10 @@ export default function InicioEstadisticas() {
             <div className="metric-card"><div className="metric-num">{denunciasPendientes}</div><div className="metric-label">Denuncias pendientes</div></div>
             <div className="metric-card"><div className="metric-num">{temporales.bloqueados.length + permanentes.bloqueados.length}</div><div className="metric-label">Doctores bloqueados</div></div>
           </div>
+          <div className="web-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', marginBottom: 12 }}>
+            <div className="metric-card"><div className="metric-num">Bs {ingresoTotal}</div><div className="metric-label">Ingresos registrados (consultas pagadas)</div></div>
+            <div className="metric-card"><div className="metric-num">{pagosPendientes}</div><div className="metric-label">Pagos de consulta pendientes de validar</div></div>
+          </div>
           <GraficaBarras
             titulo="Resumen en gráfica"
             datos={[
@@ -280,6 +317,21 @@ export default function InicioEstadisticas() {
             datos={porEstrellas}
             color="var(--ambar)"
             cargando={cargandoCalificaciones}
+          />
+          <GraficaBarras
+            titulo="Especialidades más solicitadas"
+            subtitulo="Consultas pedidas, agrupadas por especialidad del doctor."
+            datos={porEspecialidad}
+            color="var(--esmeralda)"
+            cargando={cargandoConsultas}
+          />
+          <GraficaBarras
+            titulo="Ingresos por especialidad"
+            subtitulo="Solo consultas ya pagadas y aprobadas (habilitadas o finalizadas)."
+            datos={ingresosPorEspecialidad}
+            color="var(--oro)"
+            sufijo=" Bs"
+            cargando={cargandoConsultas}
           />
         </div>
       )}
