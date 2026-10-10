@@ -1,6 +1,7 @@
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 import { nombreSeguro, subirArchivo } from '@/services/archivos'
+import { notificarAdmins } from '@/features/notificaciones/services/notificaciones'
 
 export const PLANES = {
   mensual: { etiqueta: 'Mensual', dias: 30 },
@@ -42,6 +43,11 @@ export async function subirComprobanteSuscripcion(suscripcion, archivo, onProgre
     motivoRechazo: '',
     fechaPago: serverTimestamp(),
   })
+  notificarAdmins({
+    tipo: 'suscripcion_pago',
+    texto: `${suscripcion.doctorNombre || 'Un doctor'} subió el comprobante de su suscripción (${PLANES[suscripcion.plan]?.etiqueta ?? suscripcion.plan}).`,
+    enlace: '/admin/suscripciones',
+  }).catch(() => {})
   return url
 }
 

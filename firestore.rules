@@ -154,7 +154,9 @@ service cloud.firestore {
 
     // Catálogo de especialidades: lo administra solo el equipo de DocTop.
     match /tiposProfesion/{id} {
-      allow read: if estaAutenticado();
+      // Lectura pública: el formulario de registro profesional (sin sesión todavía) necesita
+      // mostrar las categorías para elegir especialidad.
+      allow read: if true;
       allow write: if esAdmin();
     }
 
