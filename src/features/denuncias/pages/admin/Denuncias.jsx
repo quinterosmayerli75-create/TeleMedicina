@@ -29,6 +29,25 @@ const PESTANAS = [
   { clave: 'apelaciones', etiqueta: 'Apelaciones' },
 ]
 
+// Cuántos reportes tiene cada denunciado en total (cualquier estado), para detectar reincidentes.
+function useHistorialDenuncias() {
+  const [conteo, setConteo] = useState(new Map())
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'reportes'), (snap) => {
+      const mapa = new Map()
+      snap.docs.forEach((d) => {
+        const id = d.data().denunciadoId
+        if (id) mapa.set(id, (mapa.get(id) ?? 0) + 1)
+      })
+      setConteo(mapa)
+    })
+    return unsubscribe
+  }, [])
+
+  return conteo
+}
+
 // Apelaciones de usuarios bloqueados: colección "apelaciones"
 //   { usuarioId, reporteId?, mensaje, estado: 'pendiente' | 'aceptada' | 'rechazada', fecha, notaAdmin? }
 function useApelaciones() {
@@ -76,11 +95,22 @@ export default function Denuncias() {
   const temporales = useBloqueados('bloqueado_temporal')
   const permanentes = useBloqueados('bloqueado')
   const { apelaciones, cargando: cargandoApelaciones } = useApelaciones()
+  const historialDenuncias = useHistorialDenuncias()
   const [seleccion, setSeleccion] = useState(null)
   const [modal, setModal] = useState(null)
   const [motivo, setMotivo] = useState('')
   const [aviso, setAviso] = useState('')
   const [errorAccion, setErrorAccion] = useState('')
+  const [perfilViendo, setPerfilViendo] = useState(null)
+
+  async function verPerfil(usuario, id) {
+    if (!usuario) return
+    setPerfilViendo({ ...usuario, id, cargandoExtra: usuario.rol === 'profesional' })
+    if (usuario.rol === 'profesional') {
+      const snap = await getDoc(doc(db, 'profesionales', id)).catch(() => null)
+      setPerfilViendo((prev) => (prev?.id === id ? { ...prev, profesional: snap?.exists() ? snap.data() : null, cargandoExtra: false } : prev))
+    }
+  }
 
   useEffect(() => {
     const q = query(collection(db, 'reportes'), where('estado', '==', 'pendiente'))
@@ -222,8 +252,18 @@ export default function Denuncias() {
                 Denunciado: {d.denunciado?.nombre ?? '—'}
                 {d.denunciado && ` (${ETIQUETA_ROL[d.denunciado.rol] ?? d.denunciado.rol})`}
                 {d.denunciado && estadoEfectivo(d.denunciado) !== 'activo' && ` · cuenta ${ETIQUETA_ESTADO[estadoEfectivo(d.denunciado)] ?? d.denunciado.estado}`}
+                {d.denunciado && <span className="terminos-link" style={{ marginLeft: 6 }} onClick={() => verPerfil(d.denunciado, d.denunciadoId)}>Ver perfil</span>}
+                {(historialDenuncias.get(d.denunciadoId) ?? 0) > 1 && (
+                  <>
+                    {' · '}
+                    <span style={{ color: 'var(--alerta)', fontWeight: 600 }}>
+                      ⚠ {historialDenuncias.get(d.denunciadoId) - 1} denuncia{historialDenuncias.get(d.denunciadoId) - 1 === 1 ? '' : 's'} anterior{historialDenuncias.get(d.denunciadoId) - 1 === 1 ? '' : 'es'}
+                    </span>
+                  </>
+                )}
                 <br />
                 Denunciante: {d.denunciante?.nombre ?? '—'}
+                {d.denunciante && <span className="terminos-link" style={{ marginLeft: 6 }} onClick={() => verPerfil(d.denunciante, d.denuncianteId)}>Ver perfil</span>}
               </div>
               {!d.denunciado && (
                 <div className="registro-error" style={{ marginTop: 0, marginBottom: 6 }}>
@@ -265,6 +305,34 @@ export default function Denuncias() {
               </div>
             )}
             <button type="button" className="btn btn-primary" onClick={() => setModal(null)}>Cerrar</button>
+          </div>
+        </div>
+      )}
+
+      {perfilViendo && (
+        <div className="modal-fondo" onClick={() => setPerfilViendo(null)}>
+          <div className="modal-tarjeta" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-titulo">{perfilViendo.nombre ?? '—'}</div>
+            <div className="modal-sub">{ETIQUETA_ROL[perfilViendo.rol] ?? perfilViendo.rol}</div>
+            <div className="card-plain" style={{ marginTop: 12 }}>
+              <div className="admin-row"><div>Correo</div><div style={{ fontWeight: 600 }}>{perfilViendo.email ?? '—'}</div></div>
+              <div className="admin-row"><div>Celular</div><div style={{ fontWeight: 600 }}>{perfilViendo.telefono ?? '—'}</div></div>
+              <div className="admin-row" style={{ borderBottom: perfilViendo.rol === 'profesional' ? undefined : 'none' }}>
+                <div>Estado de la cuenta</div>
+                <div style={{ fontWeight: 600 }}>{ETIQUETA_ESTADO[estadoEfectivo(perfilViendo)] ?? 'activa'}</div>
+              </div>
+              {perfilViendo.rol === 'profesional' && (
+                perfilViendo.cargandoExtra ? (
+                  <div className="admin-row" style={{ borderBottom: 'none' }}><div>Cargando datos profesionales…</div><div /></div>
+                ) : (
+                  <>
+                    <div className="admin-row"><div>Profesión</div><div style={{ fontWeight: 600 }}>{perfilViendo.profesional?.profesion ?? '—'} · {perfilViendo.profesional?.especialidad ?? '—'}</div></div>
+                    <div className="admin-row" style={{ borderBottom: 'none' }}><div>Calificación</div><div style={{ fontWeight: 600 }}>{perfilViendo.profesional?.calificacionPromedio ?? 0} / 5 ({perfilViendo.profesional?.totalCalificaciones ?? 0})</div></div>
+                  </>
+                )
+              )}
+            </div>
+            <button type="button" className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setPerfilViendo(null)}>Cerrar</button>
           </div>
         </div>
       )}

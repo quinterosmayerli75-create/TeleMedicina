@@ -130,6 +130,16 @@ export default function ValidacionPagos() {
                   <button type="button" className="btn btn-danger" disabled={guardando} onClick={() => { setSeleccion(c); setMotivo(''); setModal('rechazar') }}>Rechazar</button>
                 </div>
               )}
+              {c.estado === 'habilitada' && (
+                <button type="button" className="btn btn-outline btn-auto" disabled={guardando} onClick={() => { setSeleccion(c); setMotivo(''); setModal('rechazar') }}>
+                  ¿Te equivocaste? Cambiar a rechazada
+                </button>
+              )}
+              {c.estado === 'rechazada' && (
+                <button type="button" className="btn btn-outline btn-auto" disabled={guardando} onClick={() => aprobar(c)}>
+                  ¿Te equivocaste? Cambiar a habilitada
+                </button>
+              )}
             </div>
           )
         })}

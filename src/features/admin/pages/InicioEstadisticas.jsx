@@ -36,12 +36,32 @@ function useColeccion(nombre) {
 function useGraficasConsultas() {
   const { filas: consultas, cargando } = useColeccion('consultas')
   const { filas: profesionales } = useColeccion('profesionales')
+  const { filas: usuarios } = useColeccion('usuarios')
 
   const especialidadPorDoctor = useMemo(() => {
     const mapa = new Map()
     profesionales.forEach((p) => mapa.set(p.id, p.especialidad || 'Sin especialidad'))
     return mapa
   }, [profesionales])
+
+  const nombrePorDoctor = useMemo(() => {
+    const mapa = new Map()
+    usuarios.forEach((u) => mapa.set(u.id, u.nombre || 'Profesional'))
+    return mapa
+  }, [usuarios])
+
+  // Promedio de estrellas por doctor (ya calculado en profesionales.calificacionPromedio al guardar
+  // cada calificación), con el nombre del doctor como etiqueta — para saber a quién corresponde cada nota.
+  const porDoctorCalificacion = useMemo(() => {
+    return profesionales
+      .filter((p) => (p.totalCalificaciones ?? 0) > 0)
+      .map((p) => ({
+        etiqueta: nombrePorDoctor.get(p.id) ?? 'Profesional',
+        valor: Number(p.calificacionPromedio) || 0,
+      }))
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, TOP_DOCTORES_POR_CONSULTAS)
+  }, [profesionales, nombrePorDoctor])
 
   const porDoctor = useMemo(() => {
     const conteo = new Map()
@@ -87,7 +107,7 @@ function useGraficasConsultas() {
 
   const pagosPendientes = useMemo(() => consultas.filter((c) => c.estado === 'pago_en_revision').length, [consultas])
 
-  return { porDoctor, porModalidad, porEspecialidad, ingresoTotal, ingresosPorEspecialidad, pagosPendientes, cargando }
+  return { porDoctor, porModalidad, porEspecialidad, ingresoTotal, ingresosPorEspecialidad, pagosPendientes, porDoctorCalificacion, cargando }
 }
 
 // Cuántas calificaciones de cada cantidad de estrellas (1 a 5) se dieron en total.
@@ -227,7 +247,7 @@ export default function InicioEstadisticas() {
   const { doctores, cargando } = useDoctoresActivos()
   const temporales = useBloqueados('bloqueado_temporal', { soloDoctores: true })
   const permanentes = useBloqueados('bloqueado', { soloDoctores: true })
-  const { porDoctor, porModalidad, porEspecialidad, ingresoTotal, ingresosPorEspecialidad, pagosPendientes, cargando: cargandoConsultas } = useGraficasConsultas()
+  const { porDoctor, porModalidad, porEspecialidad, ingresoTotal, ingresosPorEspecialidad, pagosPendientes, porDoctorCalificacion, cargando: cargandoConsultas } = useGraficasConsultas()
   const { porEstrellas, cargando: cargandoCalificaciones } = useGraficaCalificaciones()
 
   function exportarReporte() {
@@ -317,6 +337,14 @@ export default function InicioEstadisticas() {
             datos={porEstrellas}
             color="var(--ambar)"
             cargando={cargandoCalificaciones}
+          />
+          <GraficaBarras
+            titulo="Calificación promedio por doctor"
+            subtitulo="A quién corresponde cada nota — promedio de estrellas, por doctor."
+            datos={porDoctorCalificacion}
+            color="var(--ambar)"
+            sufijo=" ★"
+            cargando={cargandoConsultas}
           />
           <GraficaBarras
             titulo="Especialidades más solicitadas"

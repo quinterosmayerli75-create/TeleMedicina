@@ -57,6 +57,12 @@ export async function subirComprobante(consulta, archivo, onProgreso) {
     motivoRechazo: '',
     fechaPago: serverTimestamp(),
   })
+  crearNotificacion({
+    paraUid: consulta.doctorId,
+    tipo: 'pago_subido',
+    texto: `${consulta.pacienteNombre || 'Un paciente'} subió su comprobante de pago. Revísalo para habilitar la consulta.`,
+    enlace: `/doctor/validacion-pagos`,
+  }).catch(() => {})
   return url
 }
 

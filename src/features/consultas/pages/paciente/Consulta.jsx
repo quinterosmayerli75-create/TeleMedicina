@@ -56,7 +56,7 @@ export default function Consulta() {
     setProgreso(0)
     try {
       await subirComprobante(consulta, archivo, setProgreso)
-      setMensaje({ tipo: 'ok', texto: 'Comprobante enviado. Un administrador lo revisará pronto.' })
+      setMensaje({ tipo: 'ok', texto: 'Comprobante enviado. Tu doctor lo revisará pronto.' })
     } catch (err) {
       setMensaje({ tipo: 'error', texto: mensajeErrorSubida(err) })
     } finally {
@@ -130,7 +130,7 @@ export default function Consulta() {
 
           {consulta.estado === 'pago_en_revision' && (
             <div className="card-plain">
-              <p style={{ fontSize: 12.5, color: 'var(--gris)', margin: 0 }}>Tu comprobante está en revisión. Te avisaremos cuando el administrador lo valide.</p>
+              <p style={{ fontSize: 12.5, color: 'var(--gris)', margin: 0 }}>Tu comprobante está en revisión. Te avisaremos cuando tu doctor lo valide.</p>
             </div>
           )}
 
