@@ -1,0 +1,46 @@
+rules_version = '2';
+
+// Reglas de Firebase Storage. Se publican a mano en Firebase Console → Storage → Reglas
+// (igual que firestore.rules). Cada persona solo puede subir archivos a su propia carpeta.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function esImagen() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    // Foto de perfil del paciente / de la cuenta (registro y "Cambiar foto").
+    match /usuarios/{uid}/{archivo} {
+      allow read: if estaAutenticado();
+      allow write: if estaAutenticado() && request.auth.uid == uid
+        && esImagen() && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Foto de perfil, títulos y carnet del doctor.
+    match /profesionales/{uid}/{archivo} {
+      allow read: if estaAutenticado();
+      allow write: if estaAutenticado() && request.auth.uid == uid
+        && esImagen() && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Fotos de evidencia de las denuncias.
+    match /denuncias/{uid}/{archivo} {
+      allow read: if estaAutenticado();
+      allow write: if estaAutenticado() && request.auth.uid == uid
+        && esImagen() && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Adjuntos del chat: fotos, videos, audios y documentos (hasta 25 MB). La carpeta lleva el id de la
+    // conversación ("{pacienteId}_{doctorId}"), así solo sus dos participantes pueden subir.
+    match /chats/{convId}/{uid}/{archivo} {
+      allow read: if estaAutenticado() && request.auth.uid in convId.split('_');
+      allow write: if estaAutenticado() && request.auth.uid == uid
+        && request.auth.uid in convId.split('_')
+        && request.resource.size < 25 * 1024 * 1024;
+    }
+  }
+}
