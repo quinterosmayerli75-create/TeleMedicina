@@ -68,7 +68,10 @@ export default function ConsultaDetalle() {
         )}
 
         {consulta.estado === 'pago_en_revision' && (
-          <p style={{ fontSize: 12.5, color: 'var(--gris)', marginTop: 14, marginBottom: 0 }}>El paciente subió su comprobante; el administrador lo está revisando.</p>
+          <>
+            <p style={{ fontSize: 12.5, color: 'var(--gris)', marginTop: 14, marginBottom: 8 }}>Tu paciente subió su comprobante de pago. Revísalo para habilitar la consulta.</p>
+            <button type="button" className="btn btn-primary btn-auto" onClick={() => navigate('/doctor/validacion-pagos')}>Ir a validar pagos</button>
+          </>
         )}
         {consulta.estado === 'pendiente_pago' && (
           <p style={{ fontSize: 12.5, color: 'var(--gris)', marginTop: 14, marginBottom: 0 }}>El paciente todavía no sube su comprobante de pago.</p>
