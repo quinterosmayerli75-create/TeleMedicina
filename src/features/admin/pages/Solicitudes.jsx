@@ -96,10 +96,15 @@ export default function Solicitudes() {
 
   return (
     <div>
-      <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div className="admin-eyebrow">
+        VERIFICACIÓN DE PROFESIONALES
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
+      <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>Solicitudes de registro</span>
-        <span style={{ fontSize: 14, color: 'var(--gris)', fontWeight: 400 }}>{solicitudes.length} en total</span>
+        <span className="admin-total-pill">⏳ {solicitudes.length} pendiente{solicitudes.length === 1 ? '' : 's'}</span>
       </h1>
+      <p className="web-sub">Revisa el perfil profesional y aprueba, rechaza o pide corrección antes de activar la cuenta.</p>
 
       {aviso && <div className="banner-ok" role="status">{aviso}</div>}
 
@@ -126,9 +131,13 @@ export default function Solicitudes() {
 
       <div className="web-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
         {paginadas.map((s) => (
-          <div className="card-plain" key={s.id} style={{ borderColor: 'var(--oro)' }}>
+          <div className="card-plain admin-list-card" key={s.id}>
             <div style={{ display: 'flex', gap: 10 }}>
-              {s.fotoUrl && <img src={s.fotoUrl} style={{ width: 44, height: 44, objectFit: 'cover' }} alt={s.nombre} />}
+              {s.fotoUrl ? (
+                <img src={s.fotoUrl} className="admin-avatar-row" style={{ borderRadius: 10 }} alt={s.nombre} />
+              ) : (
+                <div className="admin-avatar-row" style={{ borderRadius: 10 }}>{(s.nombre?.[0] ?? '?').toUpperCase()}</div>
+              )}
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 600, fontSize: 12.5 }}>{s.nombre}</div>
                 <div style={{ fontSize: 11, color: 'var(--gris)' }}>{s.profesional?.profesion ?? '—'} · {s.profesional?.especialidad ?? '—'}</div>
