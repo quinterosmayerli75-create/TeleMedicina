@@ -101,22 +101,26 @@ export default function ValidacionPagos() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        PAGOS Y COBROS QR
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Validación de pagos</h1>
       <p className="web-sub">Revisa los comprobantes de pago que suben los pacientes y habilita o rechaza cada consulta.</p>
       {aviso && <div className="banner-ok" role="status">{aviso}</div>}
       {errorAccion && <div className="banner-error" role="alert">{errorAccion}</div>}
 
-      <div className="subtabs" role="tablist">
+      <div className="admin-subtabs" role="tablist">
         {PESTANAS.map((p) => (
           <button
             type="button"
             role="tab"
             key={p.clave}
             aria-selected={pestana === p.clave}
-            className={`subtab${pestana === p.clave ? ' on' : ''}`}
+            className={`admin-subtab${pestana === p.clave ? ' on' : ''}`}
             onClick={() => setPestana(p.clave)}
           >
-            {p.etiqueta} <span className="subtab-count">{conteos[p.clave]}</span>
+            {p.etiqueta} <span className="admin-subtab-count">{conteos[p.clave]}</span>
           </button>
         ))}
       </div>
@@ -154,7 +158,7 @@ export default function ValidacionPagos() {
         {filtradas.map((c) => {
           const estado = ESTADOS_CONSULTA[c.estado] ?? ESTADOS_CONSULTA.pendiente_pago
           return (
-            <div className="card-plain" key={c.id}>
+            <div className="card-plain admin-list-card" key={c.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={{ fontSize: 12.5, fontWeight: 600 }}>{c.paciente?.nombre ?? c.pacienteNombre} → {c.doctor?.nombre ?? c.doctorNombre}</div>
                 <span className={`status-pill ${estado.clase}`}>{estado.etiqueta}</span>

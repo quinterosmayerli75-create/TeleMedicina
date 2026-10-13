@@ -29,6 +29,10 @@ export default function Inicio() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        PORTAL DEL PACIENTE
+        <span className="vivo"><span className="punto" /> Activo</span>
+      </div>
       <h1 className="web-h1">Buenas tardes{primerNombre ? `, ${primerNombre}` : ''}</h1>
       <p className="web-sub">
         {esDoctor
@@ -36,13 +40,15 @@ export default function Inicio() {
           : '¿Con quién le gustaría hablar hoy? Todas las consultas son 100% virtuales.'}
       </p>
 
-      <input
-        type="text"
-        placeholder="Buscar por nombre o especialidad…"
-        value={busqueda}
-        onChange={(e) => setBusqueda(e.target.value)}
-        style={{ maxWidth: 420, marginBottom: 20 }}
-      />
+      <div className="admin-feature-card" style={{ maxWidth: 640, marginBottom: 20 }}>
+        <input
+          type="text"
+          placeholder="Buscar por nombre o especialidad…"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          style={{ margin: 0 }}
+        />
+      </div>
 
       <div className="chip-row" style={{ marginBottom: 20 }}>
         <div className={`chip${especialidad === 'General' ? ' on' : ''}`} onClick={() => setEspecialidad('General')}>General</div>

@@ -60,18 +60,22 @@ export default function Configuracion() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        AJUSTES Y SEGURIDAD
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Configuración de cuenta</h1>
       <div className="web-2col" style={{ maxWidth: 820 }}>
         <div>
-          <div className="card-plain">
-            <h2 className="section-title">Foto de perfil</h2>
+          <div className="card-plain admin-list-card">
+            <h2 className="section-title">🖼️ Foto de perfil</h2>
             <CambiarFotoPerfil />
           </div>
 
           <CambiarContrasena />
 
-          <form className="card-plain" onSubmit={guardarDatos}>
-            <h2 className="section-title">Mis datos</h2>
+          <form className="card-plain admin-list-card" onSubmit={guardarDatos}>
+            <h2 className="section-title">🪪 Mis datos</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div>
                 <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>

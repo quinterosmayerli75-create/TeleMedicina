@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 import { crearUsuarioAuxiliar } from '@/services/firebase/crearUsuarioSecundario'
 import { useAuth } from '@/features/auth/context/AuthContext'
+import { useConsultasDoctor } from '@/features/consultas/hooks/useConsultas'
 import HorariosAtencion from '../components/HorariosAtencion'
 import CampoContrasena from '@/shared/components/CampoContrasena'
 import { AYUDA_CONTRASENA, validarContrasena } from '@/shared/utils/validacion'
@@ -21,6 +22,7 @@ const PACIENTE_INICIAL = {
 
 export default function Panel() {
   const { usuario } = useAuth()
+  const { consultas } = useConsultasDoctor(usuario?.uid)
   const [datosUsuario, setDatosUsuario] = useState(null)
   const [datosProfesional, setDatosProfesional] = useState(null)
   const [costoConsulta, setCostoConsulta] = useState('')
@@ -148,30 +150,73 @@ export default function Panel() {
     }
   }
 
+  const consultasEsteMes = useMemo(() => {
+    const hoy = new Date()
+    return consultas.filter((c) => {
+      if (c.estado !== 'habilitada' && c.estado !== 'finalizada') return false
+      const fecha = c.fecha ? new Date(`${c.fecha}T00:00:00`) : null
+      return fecha && fecha.getMonth() === hoy.getMonth() && fecha.getFullYear() === hoy.getFullYear()
+    }).length
+  }, [consultas])
+
   if (!datosUsuario || !datosProfesional) return <p className="web-sub">Cargando…</p>
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div className="web-h1">{datosUsuario.nombre}</div>
-          <div className="web-sub">{datosProfesional.profesion} · {datosProfesional.especialidad} · Cuenta activa</div>
+      <div className="admin-eyebrow">
+        PANEL DE ESPECIALISTA
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
+      <div className="admin-feature-card" style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+          <div>
+            <div className="overline" style={{ color: 'var(--admin-accent-dark)' }}>BIENVENIDO</div>
+            <div className="web-h1" style={{ marginBottom: 4 }}>{datosUsuario.nombre}</div>
+            <div className="web-sub" style={{ marginBottom: 0 }}>
+              {datosProfesional.profesion} · {datosProfesional.especialidad}
+              {' · '}
+              <span className={`status-pill ${datosProfesional.verificado ? 'status-active' : 'status-pending'}`}>
+                {datosProfesional.verificado ? 'Cuenta verificada' : 'En revisión'}
+              </span>
+            </div>
+          </div>
+          {datosUsuario.fotoUrl && (
+            <img src={datosUsuario.fotoUrl} alt={datosUsuario.nombre} style={{ width: 56, height: 56, borderRadius: 10, border: `2px solid var(--admin-accent)`, objectFit: 'cover' }} />
+          )}
         </div>
-        {datosUsuario.fotoUrl && (
-          <img src={datosUsuario.fotoUrl} alt={datosUsuario.nombre} style={{ width: 56, height: 56, borderRadius: 6, border: '2px solid var(--oro)', objectFit: 'cover' }} />
-        )}
       </div>
 
-      <div className="web-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
-        <div className="metric-card"><div className="metric-num">{datosProfesional.calificacionPromedio ?? 0}</div><div className="metric-label">Calificación</div></div>
-        <div className="metric-card"><div className="metric-num">Bs {datosProfesional.costoConsulta ?? 0}</div><div className="metric-label">Precio de consulta</div></div>
-        <div className="metric-card"><div className="metric-num">{datosProfesional.verificado ? 'Sí' : 'En revisión'}</div><div className="metric-label">Verificado</div></div>
+      <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
+        <div className="admin-metric-card c-ambar">
+          <div className="icono">⭐</div>
+          <div className="overline">Calificación médica</div>
+          <div className="numero">{datosProfesional.calificacionPromedio ?? 0}</div>
+          <div className="caption">{datosProfesional.totalCalificaciones ?? 0} opiniones de pacientes</div>
+        </div>
+        <div className="admin-metric-card">
+          <div className="icono">💳</div>
+          <div className="overline">Honorario por sesión</div>
+          <div className="numero">Bs {datosProfesional.costoConsulta ?? 0}</div>
+          <div className="caption">Tarifa activa</div>
+        </div>
+        <div className="admin-metric-card c-azul">
+          <div className="icono">🛡️</div>
+          <div className="overline">Acreditación</div>
+          <div className="numero" style={{ fontSize: 20 }}>{datosProfesional.verificado ? 'Verificado' : 'En revisión'}</div>
+          <div className="caption">Mat. {datosProfesional.carnet || '—'}</div>
+        </div>
+        <div className="admin-metric-card c-onyx">
+          <div className="icono">📹</div>
+          <div className="overline">Consultas este mes</div>
+          <div className="numero">{consultasEsteMes}</div>
+          <div className="caption">Habilitadas o finalizadas</div>
+        </div>
       </div>
 
       <div className="web-2col">
         <div>
-          <div className="card-plain">
-            <h2 className="section-title">Disponibilidad y modalidades</h2>
+          <div className="card-plain admin-list-card">
+            <h2 className="section-title">⏱️ Disponibilidad y modalidades</h2>
             <div className="admin-row">
               <div style={{ fontSize: 12.5 }}>Disponible ahora (visible para pacientes)</div>
               <div className={`switch${datosProfesional.disponibleAhora ? ' on' : ''}`} onClick={alternarDisponible}></div>
@@ -186,14 +231,14 @@ export default function Panel() {
 
           <HorariosAtencion uid={usuario.uid} disponibilidadInicial={datosProfesional.disponibilidad} />
 
-          <div className="card-plain">
-            <h2 className="section-title">Carnet profesional</h2>
+          <div className="card-plain admin-list-card">
+            <h2 className="section-title">🪪 Carnet profesional</h2>
             <p style={{ fontSize: 12.5, fontFamily: 'var(--mono)', color: 'var(--gris)' }}>{datosProfesional.carnet || 'No registrado'}</p>
             <p style={{ fontSize: 11.5, color: 'var(--gris)' }}>{datosProfesional.experiencia}</p>
           </div>
 
-          <div className="card-plain">
-            <h2 className="section-title">Pacientes</h2>
+          <div className="card-plain admin-list-card">
+            <h2 className="section-title">👥 Pacientes</h2>
             <p style={{ fontSize: 12.5, color: 'var(--gris)' }}>
               ¿Un paciente no puede registrarse por su cuenta? Puedes crearle una cuenta aquí.
             </p>
@@ -202,8 +247,8 @@ export default function Panel() {
         </div>
 
         <div>
-          <form className="card-plain" onSubmit={guardarPrecioYDescripcion}>
-            <h2 className="section-title">Mi perfil público</h2>
+          <form className="card-plain admin-list-card" onSubmit={guardarPrecioYDescripcion}>
+            <h2 className="section-title">🧾 Mi perfil público y tarifa</h2>
             <label className="campo-label" htmlFor="costo">Costo de la consulta (Bs)</label>
             <input id="costo" type="number" value={costoConsulta} onChange={(e) => setCostoConsulta(e.target.value)} />
             <label className="campo-label" htmlFor="descripcion">Descripción</label>
@@ -212,8 +257,8 @@ export default function Panel() {
             <button type="submit" className="btn btn-primary btn-auto" style={{ marginTop: 8 }}>Guardar</button>
           </form>
 
-          <form className="card-plain" onSubmit={guardarDatosPago}>
-            <h2 className="section-title" style={{ marginTop: 0 }}>Mi QR de pago</h2>
+          <form className="card-plain admin-list-card" onSubmit={guardarDatosPago}>
+            <h2 className="section-title" style={{ marginTop: 0 }}>📲 Cobro y QR de pago</h2>
             <p style={{ fontSize: 12.5, color: 'var(--gris)', marginTop: 0 }}>Este QR se le muestra a tus pacientes cuando pagan su consulta — el pago te llega directo a ti.</p>
             {datosProfesional.qrPagoUrl && (
               <div style={{ textAlign: 'center', marginBottom: 10 }}>

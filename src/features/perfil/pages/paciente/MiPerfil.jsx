@@ -20,6 +20,10 @@ export default function MiPerfil() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        MI PERFIL DE SALUD
+        <span className="vivo"><span className="punto" /> Verificado</span>
+      </div>
       <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
         <CambiarFotoPerfil compacto />
         <div>
@@ -28,7 +32,7 @@ export default function MiPerfil() {
         </div>
       </div>
 
-      <div className="card-plain" style={{ maxWidth: 520 }}>
+      <div className="card-plain admin-list-card" style={{ maxWidth: 520 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, fontSize: 12.5 }}>
           <div><div style={{ color: 'var(--gris)' }}>Edad</div><div>{datos.edad ?? '—'} años</div></div>
           <div><div style={{ color: 'var(--gris)' }}>Sexo</div><div>{datos.sexo ?? '—'}</div></div>

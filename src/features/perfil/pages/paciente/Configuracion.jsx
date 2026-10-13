@@ -60,6 +60,10 @@ export default function Configuracion() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        AJUSTES Y SEGURIDAD
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Configuración de cuenta</h1>
       <div className="web-2col" style={{ maxWidth: 820 }}>
         <div>

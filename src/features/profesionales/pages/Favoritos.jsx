@@ -9,6 +9,10 @@ export default function Favoritos() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        RED MÉDICA DE CONFIANZA
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Mis doctores de confianza</h1>
       {cargando && <p className="web-sub">Cargando…</p>}
       {!cargando && doctores.length === 0 ? (

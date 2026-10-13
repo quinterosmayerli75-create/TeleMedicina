@@ -81,36 +81,61 @@ export default function Roles() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        SEGURIDAD Y ACCESOS
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Permisos por rol</h1>
       <p className="web-sub" style={{ marginTop: -2 }}>Solo de referencia: muestra qué puede hacer cada rol, no son botones.</p>
       <div className="web-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', maxWidth: 1100 }}>
-        <div className="card-plain">
-          <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 6 }}>Paciente</div>
+        <div className="card-plain admin-list-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <div className="admin-cat-icon">🙂</div>
+            <div style={{ fontWeight: 600, fontSize: 12.5 }}>Paciente</div>
+          </div>
           <div className="chip-row">
             <div className="chip on chip-static">Ver doctores</div><div className="chip on chip-static">Mensajes</div>
             <div className="chip on chip-static">Calificar</div><div className="chip on chip-static">Denunciar</div>
           </div>
         </div>
-        <div className="card-plain">
-          <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 6 }}>Doctor</div>
+        <div className="card-plain admin-list-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <div className="admin-cat-icon">🩺</div>
+            <div style={{ fontWeight: 600, fontSize: 12.5 }}>Doctor</div>
+          </div>
           <div className="chip-row">
             <div className="chip on chip-static">Editar perfil</div><div className="chip on chip-static">Trabajos</div>
             <div className="chip on chip-static">Horario</div><div className="chip on chip-static">Denunciar</div>
           </div>
         </div>
-        <div className="card-plain">
-          <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 6 }}>Administrador</div>
+        <div className="card-plain admin-list-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <div className="admin-cat-icon">🔑</div>
+            <div style={{ fontWeight: 600, fontSize: 12.5 }}>Administrador</div>
+          </div>
           <div className="chip-row">
             <div className="chip on chip-static">Aprobar registros</div><div className="chip on chip-static">Bloquear</div>
             <div className="chip on chip-static">Categorías</div><div className="chip on chip-static">Denuncias</div>
           </div>
         </div>
-        <div className="card-plain" style={{ borderColor: 'var(--oro)' }}>
-          <div style={{ fontWeight: 600, fontSize: 12.5, marginBottom: 6 }}>Super admin</div>
+        <div className="card-plain admin-list-card" style={{ borderTopColor: 'var(--admin-accent-dark)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <div className="admin-cat-icon">👑</div>
+            <div style={{ fontWeight: 600, fontSize: 12.5 }}>Super admin</div>
+          </div>
           <div className="chip-row">
             <div className="chip on chip-static">Todo lo del administrador</div>
             <div className="chip on chip-static">Crear administradores</div>
           </div>
+        </div>
+      </div>
+
+      <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', margin: '16px 0' }}>
+        <div className="admin-metric-card c-azul">
+          <div className="icono">👥</div>
+          <div className="overline">Administradores con acceso</div>
+          <div className="numero">{admins.length}</div>
+          <div className="caption">{haySuperAdmin ? 'Incluye al super admin' : 'Sin super admin asignado'}</div>
         </div>
       </div>
 

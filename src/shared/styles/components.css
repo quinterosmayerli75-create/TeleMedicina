@@ -69,7 +69,7 @@ input[type=range] { width: 100%; accent-color: var(--oro); }
 .status-pending { background: #E4EFF7; color: #2C6FA6; }
 .status-warn { background: #F7EEDC; color: var(--ambar); }
 
-.seal { width: 18px; height: 18px; border-radius: 50%; background: var(--onyx); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: var(--oro-claro); border: 1.5px solid var(--oro); }
+.seal { width: 18px; height: 18px; border-radius: 50%; background: var(--admin-accent); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; border: none; }
 .stars { color: var(--oro); font-size: 14px; }
 
 .switch { width: 40px; height: 22px; border-radius: 12px; background: var(--marfil-osc); position: relative; cursor: pointer; flex: 0 0 40px; border: none; }
@@ -82,12 +82,13 @@ input[type=range] { width: 100%; accent-color: var(--oro); }
 .cat-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--marfil-osc); font-size: 14px; }
 
 /* Tarjeta de profesional (buscar / inicio / favoritos) */
-.doc-card { background: var(--blanco); border: 1px solid var(--marfil-osc); border-radius: 6px; padding: 16px; display: flex; gap: 14px; margin-bottom: 14px; position: relative; cursor: pointer; }
-.doc-card img.avatar { width: 64px; height: 64px; border-radius: 4px; object-fit: cover; }
+.doc-card { background: var(--blanco); border: 1px solid var(--marfil-osc); border-radius: 12px; padding: 16px; display: flex; gap: 14px; margin-bottom: 14px; position: relative; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
+.doc-card:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(15, 20, 23, .07); }
+.doc-card img.avatar { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
 .doc-name { font-family: var(--display); font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 6px; }
-.doc-spec { font-size: 11.5px; color: var(--oro); margin-top: 3px; text-transform: uppercase; letter-spacing: .6px; font-weight: 600; }
+.doc-spec { font-size: 11.5px; color: var(--admin-accent-dark); margin-top: 3px; text-transform: uppercase; letter-spacing: .6px; font-weight: 600; }
 .doc-meta { font-size: 12.5px; color: var(--gris); margin-top: 5px; }
-.rank-badge { position: absolute; top: 12px; left: 12px; background: var(--oro); color: var(--onyx); font-family: var(--mono); font-size: 10.5px; font-weight: 600; padding: 3px 8px; }
+.rank-badge { position: absolute; top: 12px; left: 12px; background: var(--admin-accent); color: #fff; font-family: var(--mono); font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 5px; }
 .fav-heart { position: absolute; top: 12px; right: 12px; font-size: 20px; color: var(--gris); cursor: pointer; line-height: 1; }
 .fav-heart.on { color: var(--alerta); }
 .doc-status { font-size: 11.5px; font-weight: 600; margin-top: 5px; }
@@ -100,7 +101,7 @@ input[type=range] { width: 100%; accent-color: var(--oro); }
 /* Mensajería */
 .chat-row { display: flex; gap: 14px; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--marfil-osc); cursor: pointer; }
 .avatar-wrap { position: relative; flex: 0 0 54px; }
-.avatar-wrap img { width: 54px; height: 54px; border-radius: 4px; object-fit: cover; display: block; }
+.avatar-wrap img { width: 54px; height: 54px; border-radius: 10px; object-fit: cover; display: block; }
 .status-dot { position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--blanco); }
 .status-dot.on { background: var(--esmeralda); }
 .status-dot.off { background: var(--gris); }
@@ -113,10 +114,10 @@ input[type=range] { width: 100%; accent-color: var(--oro); }
 .spec-tag { font-size: 11px; color: var(--oro); text-transform: uppercase; font-weight: 600; }
 
 .chat-header { background: var(--onyx); color: var(--marfil); padding: 16px 18px; display: flex; align-items: center; gap: 12px; }
-.chat-header img { width: 42px; height: 42px; border-radius: 4px; object-fit: cover; border: 1px solid var(--oro); cursor: pointer; }
+.chat-header img { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; border: 1px solid var(--admin-accent); cursor: pointer; }
 .chat-header .name { font-family: var(--display); font-size: 15px; font-weight: 600; }
-.chat-header .status { font-size: 11.5px; color: var(--oro-claro); }
-.chat-header .icn { font-size: 17px; color: var(--oro-claro); padding: 4px; cursor: pointer; }
+.chat-header .status { font-size: 11.5px; color: #5FE3B3; }
+.chat-header .icn { font-size: 17px; color: #5FE3B3; padding: 4px; cursor: pointer; }
 .chat-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .bubble { max-width: 74%; padding: 12px 15px; font-size: 14px; line-height: 1.5; border-radius: 4px; }
 .bubble.in { align-self: flex-start; background: var(--blanco); border: 1px solid var(--marfil-osc); }
@@ -334,9 +335,12 @@ button.attach-btn:hover { border-color: var(--oro); }
 .llamada-videos video { background: #000; }
 .llamada-video-propio { position: absolute; bottom: 90px; right: 20px; width: 140px; height: 190px; border-radius: 6px; overflow: hidden; border: 2px solid var(--oro); }
 .llamada-audio-indicador { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.llamada-controles { position: absolute; bottom: 24px; left: 0; right: 0; display: flex; justify-content: center; gap: 16px; }
-.llamada-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: var(--marfil-osc); color: var(--onyx); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.llamada-btn.off { background: var(--oro); }
+.llamada-header { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: center; padding: 16px; background: linear-gradient(to bottom, rgba(0,0,0,.55), transparent); z-index: 1; }
+.llamada-header-chip { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,.35); backdrop-filter: blur(4px); padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+.llamada-controles { position: absolute; bottom: 32px; left: 0; right: 0; display: flex; justify-content: center; gap: 20px; }
+.llamada-btn { width: 58px; height: 58px; border-radius: 50%; border: none; background: rgba(255, 255, 255, .14); color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0, 0, 0, .3); transition: transform .12s ease; }
+.llamada-btn:hover { transform: translateY(-2px); }
+.llamada-btn.off { background: var(--admin-accent); color: #fff; }
 .llamada-btn.colgar { background: var(--alerta); color: #fff; }
 .llamada-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 150; background: var(--esmeralda); color: #fff; padding: 10px 18px; display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 13.5px; cursor: pointer; animation: latido 1.8s infinite; }
 .llamada-banner .btn { padding: 6px 14px; }

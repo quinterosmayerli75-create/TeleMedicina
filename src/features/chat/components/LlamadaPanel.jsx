@@ -57,6 +57,11 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
 
       {llamada.estado === 'conectada' && (
         <div className="llamada-activa">
+          {esVideo && (
+            <div className="llamada-header">
+              <div className="llamada-header-chip">🟢 {otro.nombre}</div>
+            </div>
+          )}
           {esVideo ? (
             <div className="llamada-videos">
               <VideoStream stream={remoteStream} />

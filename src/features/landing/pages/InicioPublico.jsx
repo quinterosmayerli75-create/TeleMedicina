@@ -3,6 +3,21 @@ import Logo from '@/shared/components/Logo'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import './InicioPublico.css'
 
+// Solo decorativo: un ícono aproximado según palabras clave del nombre de la especialidad.
+const ICONOS_POR_PALABRA = [
+  [/odont|dent/i, '🦷'],
+  [/cardio/i, '❤️'],
+  [/nutri/i, '🥗'],
+  [/dermat/i, '🧴'],
+  [/pediatr/i, '🧒'],
+  [/gineco|obstetr/i, '🤰'],
+  [/psico|mental/i, '🧠'],
+  [/general|medicina/i, '🩺'],
+]
+function iconoEspecialidad(nombre = '') {
+  return ICONOS_POR_PALABRA.find(([regex]) => regex.test(nombre))?.[1] ?? '🏷️'
+}
+
 const PASOS = [
   { titulo: 'Busca a tu profesional', texto: 'Filtra por especialidad, precio y disponibilidad entre profesionales verificados.' },
   { titulo: 'Elige la modalidad', texto: 'Chat de texto, llamada de voz o videollamada — como te sea más cómodo.' },
@@ -24,7 +39,7 @@ export default function InicioPublico() {
       )}
       <header className="landing-nav">
         <div className="landing-logo">
-          <Logo color="var(--oro-claro)" />
+          <Logo color="var(--admin-accent)" />
           <span>DOCTOP</span>
         </div>
         <nav className="landing-nav-links">
@@ -35,6 +50,7 @@ export default function InicioPublico() {
       </header>
 
       <section className="landing-hero">
+        <div className="landing-hero-tag">🩺 Red médica digital · 100% virtual</div>
         <h1>Atención médica 100% virtual, cuando la necesites.</h1>
         <p>
           DocTop conecta a pacientes con profesionales de la salud verificados para consultas por
@@ -61,12 +77,18 @@ export default function InicioPublico() {
 
       <section className="landing-section landing-section-oscura" id="especialidades">
         <h2 className="section-title" style={{ textAlign: 'center', color: 'var(--marfil)' }}>Especialidades disponibles</h2>
-        <div className="chip-row" style={{ justifyContent: 'center' }}>
-          {tipos.length === 0 && <span style={{ color: '#9aa0a3', fontSize: 13 }}>Muy pronto vamos a sumar especialidades.</span>}
-          {tipos.map((t) => (
-            <div className="chip on" key={t.id}>{t.nombre}</div>
-          ))}
-        </div>
+        {tipos.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#9aa0a3', fontSize: 13 }}>Muy pronto vamos a sumar especialidades.</p>
+        ) : (
+          <div className="web-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginTop: 32 }}>
+            {tipos.map((t) => (
+              <div key={t.id} style={{ background: 'rgba(255,255,255,.06)', borderRadius: 10, padding: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: 22 }}>{iconoEspecialidad(t.nombre)}</div>
+                <div style={{ color: 'var(--marfil)', fontSize: 13, fontWeight: 600, marginTop: 8 }}>{t.nombre}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <footer className="landing-footer">

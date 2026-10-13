@@ -199,6 +199,9 @@ export default function RegistroProfesional() {
   return (
     <div className="registro-fondo">
       <div className="registro-card">
+        <div className="admin-eyebrow">
+          <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}>🩺 PORTAL DE COLEGIADOS Y ESPECIALISTAS</span>
+        </div>
         <h1 className="registro-titulo">Registro profesional</h1>
         <p className="registro-sub">DocTop es 100% virtual: complete sus datos para atender consultas a distancia.</p>
         {error && (
@@ -211,7 +214,7 @@ export default function RegistroProfesional() {
           <div className="registro-grid">
             <div>
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">Datos de acceso</h2>
+                <h2 className="seccion-titulo">🔑 Datos de acceso</h2>
                 <div className="campos-2col">
                   <div>
                     <label className="campo-label" htmlFor="email">Correo electrónico</label>
@@ -238,7 +241,7 @@ export default function RegistroProfesional() {
               </div>
 
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">Datos personales</h2>
+                <h2 className="seccion-titulo">🧾 Datos personales</h2>
                 <div className="campos-2col">
                   <div>
                     <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>
@@ -259,7 +262,7 @@ export default function RegistroProfesional() {
               </div>
 
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">Datos profesionales</h2>
+                <h2 className="seccion-titulo">🩺 Datos profesionales y acreditación</h2>
                 <label className="campo-label" htmlFor="nombre">Nombre completo</label>
                 <input id="nombre" type="text" placeholder="Dr./Dra. Nombre Apellido" value={datos.nombre} onChange={actualizarCampo('nombre')} />
                 <CampoError campo="nombre" faltantes={faltantes} />
@@ -338,8 +341,8 @@ export default function RegistroProfesional() {
             </div>
 
             <div>
-              <div className="registro-seccion" style={{ borderColor: 'var(--oro)' }}>
-                <h2 className="seccion-titulo">Modalidades de atención</h2>
+              <div className="registro-seccion" style={{ borderColor: 'var(--admin-accent)' }}>
+                <h2 className="seccion-titulo">💻 Modalidades de atención</h2>
                 {MODALIDADES.map((m) => (
                   <div className="admin-row" key={m.clave}>
                     <label style={{ fontSize: 12.5 }}>
@@ -353,8 +356,8 @@ export default function RegistroProfesional() {
                 ))}
               </div>
 
-              <div style={{ background: '#EAF3FA', borderLeft: '2px solid var(--oro)', padding: 12, fontSize: 11.5, lineHeight: 1.6, color: '#3a4750' }}>
-                No hay membresía ni pago para registrarse. Un administrador de DocTop revisará su carnet
+              <div style={{ background: 'var(--admin-accent-soft)', borderLeft: `2px solid var(--admin-accent)`, padding: 12, fontSize: 11.5, lineHeight: 1.6, color: '#1d4d3b' }}>
+                Sin membresía ni costo de registro. Un administrador de DocTop revisará su carnet
                 profesional y sus documentos antes de activar su cuenta.
               </div>
 

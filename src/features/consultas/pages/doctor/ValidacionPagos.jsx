@@ -28,6 +28,8 @@ export default function ValidacionPagos() {
 
   const conteos = Object.fromEntries(PESTANAS.map((p) => [p.clave, consultas.filter((c) => c.estado === p.clave).length]))
   const filtradas = consultas.filter((c) => c.estado === pestana)
+  const pendientesDeValidar = consultas.filter((c) => c.estado === 'pago_en_revision')
+  const montoPendiente = pendientesDeValidar.reduce((suma, c) => suma + (Number(c.costoConsulta) || 0), 0)
 
   async function aprobar(c) {
     setAviso('')
@@ -73,22 +75,37 @@ export default function ValidacionPagos() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        MÓDULO FINANCIERO
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Validación de pagos</h1>
       <p className="web-sub">Revisa los comprobantes que te suben tus pacientes y habilita o rechaza cada consulta.</p>
       {aviso && <div className="banner-ok" role="status">{aviso}</div>}
       {errorAccion && <div className="banner-error" role="alert">{errorAccion}</div>}
 
-      <div className="subtabs" role="tablist">
+      {pendientesDeValidar.length > 0 && (
+        <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(1, 260px)', marginBottom: 16 }}>
+          <div className="admin-metric-card c-ambar">
+            <div className="icono">⏳</div>
+            <div className="overline">Pendiente por autorizar</div>
+            <div className="numero">Bs {montoPendiente}</div>
+            <div className="caption">{pendientesDeValidar.length} comprobante{pendientesDeValidar.length === 1 ? '' : 's'} por validar</div>
+          </div>
+        </div>
+      )}
+
+      <div className="admin-subtabs" role="tablist">
         {PESTANAS.map((p) => (
           <button
             type="button"
             role="tab"
             key={p.clave}
             aria-selected={pestana === p.clave}
-            className={`subtab${pestana === p.clave ? ' on' : ''}`}
+            className={`admin-subtab${pestana === p.clave ? ' on' : ''}`}
             onClick={() => setPestana(p.clave)}
           >
-            {p.etiqueta} <span className="subtab-count">{conteos[p.clave]}</span>
+            {p.etiqueta} <span className="admin-subtab-count">{conteos[p.clave]}</span>
           </button>
         ))}
       </div>
@@ -100,9 +117,12 @@ export default function ValidacionPagos() {
         {filtradas.map((c) => {
           const estado = ESTADOS_CONSULTA[c.estado] ?? ESTADOS_CONSULTA.pendiente_pago
           return (
-            <div className="card-plain" key={c.id}>
+            <div className="card-plain admin-list-card" key={c.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ fontSize: 12.5, fontWeight: 600 }}>{c.paciente?.nombre ?? c.pacienteNombre}</div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div className="admin-avatar-row">{(c.paciente?.nombre ?? c.pacienteNombre ?? '?')[0].toUpperCase()}</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 600 }}>{c.paciente?.nombre ?? c.pacienteNombre}</div>
+                </div>
                 <span className={`status-pill ${estado.clase}`}>{estado.etiqueta}</span>
               </div>
               <div style={{ fontSize: 11, color: 'var(--gris)', margin: '4px 0 10px' }}>

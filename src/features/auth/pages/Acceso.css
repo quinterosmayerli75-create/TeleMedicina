@@ -1,22 +1,60 @@
 .acceso-fondo {
   min-height: 100vh;
   display: flex;
+  background: var(--marfil);
+}
+
+.acceso-panel {
+  flex: 1 1 46%;
+  background: linear-gradient(160deg, var(--admin-navy), var(--admin-accent-dark));
+  color: #fff;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+}
+
+.acceso-panel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  background: rgba(255, 255, 255, .12);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.acceso-panel h1 {
+  font-family: var(--display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 10px 0;
+}
+
+.acceso-panel p {
+  font-size: 14px;
+  color: #CFE8DE;
+  max-width: 420px;
+}
+
+.acceso-formulario {
+  flex: 1 1 54%;
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--onyx);
   padding: 40px 20px;
 }
 
 .acceso-card {
   width: 100%;
   max-width: 420px;
-  background: var(--blanco);
-  border-radius: 8px;
-  padding: 36px 32px;
 }
 
 .acceso-marca {
-  text-align: center;
   margin-bottom: 24px;
 }
 
@@ -42,6 +80,7 @@
 
 .acceso-card .btn-primary {
   margin-top: 20px;
+  background: var(--admin-accent);
 }
 
 .acceso-divisor {
@@ -49,4 +88,9 @@
   font-size: 11px;
   color: var(--gris);
   margin: 18px 0 10px;
+}
+
+@media (max-width: 860px) {
+  .acceso-fondo { flex-direction: column; }
+  .acceso-panel { padding: 32px; }
 }

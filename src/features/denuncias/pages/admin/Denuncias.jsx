@@ -203,22 +203,47 @@ export default function Denuncias() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        DENUNCIAS Y MODERACIÓN
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Denuncias</h1>
       <p className="web-sub">Denuncias recibidas, bloqueos aplicados y apelaciones de los usuarios bloqueados.</p>
       {aviso && <div className="banner-ok" role="status" data-testid="aviso-ok">{aviso}</div>}
       {errorAccion && <div className="banner-error" role="alert" data-testid="aviso-error">{errorAccion}</div>}
 
-      <div className="subtabs" role="tablist">
+      <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 16 }}>
+        <div className="admin-metric-card c-rojo">
+          <div className="icono">🛡️</div>
+          <div className="overline">Denuncias pendientes</div>
+          <div className="numero">{denuncias.length}</div>
+          <div className="caption">Por revisar</div>
+        </div>
+        <div className="admin-metric-card c-onyx">
+          <div className="icono">🚫</div>
+          <div className="overline">Bloqueos aplicados</div>
+          <div className="numero">{temporales.bloqueados.length + permanentes.bloqueados.length}</div>
+          <div className="caption">Temporal + permanente</div>
+        </div>
+        <div className="admin-metric-card c-ambar">
+          <div className="icono">📨</div>
+          <div className="overline">Apelaciones pendientes</div>
+          <div className="numero">{pendientes}</div>
+          <div className="caption">De usuarios bloqueados</div>
+        </div>
+      </div>
+
+      <div className="admin-subtabs" role="tablist">
         {PESTANAS.map((p) => (
           <button
             type="button"
             role="tab"
             key={p.clave}
             aria-selected={pestana === p.clave}
-            className={`subtab${pestana === p.clave ? ' on' : ''}`}
+            className={`admin-subtab${pestana === p.clave ? ' on' : ''}`}
             onClick={() => setPestana(p.clave)}
           >
-            {p.etiqueta} <span className="subtab-count">{conteos[p.clave]}</span>
+            {p.etiqueta} <span className="admin-subtab-count">{conteos[p.clave]}</span>
           </button>
         ))}
       </div>
@@ -243,7 +268,7 @@ export default function Denuncias() {
       {pestana === 'denuncias' && (
         <div className="web-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
           {denuncias.map((d) => (
-            <div className="card-plain" key={d.id}>
+            <div className="card-plain admin-list-card" key={d.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={{ fontSize: 12.5, fontWeight: 600 }}>{d.motivo}</div>
                 <span className="status-pill status-pending">Pendiente</span>

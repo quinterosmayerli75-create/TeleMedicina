@@ -57,6 +57,10 @@ export default function Informes() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        EXPEDIENTES CLÍNICOS
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <div>
           <div className="web-h1">Informes médicos</div>
@@ -65,7 +69,7 @@ export default function Informes() {
         <button type="button" className="btn btn-primary btn-auto" onClick={() => navigate('/doctor/informes/nuevo')}>+ Nuevo informe</button>
       </div>
 
-      <div className="card-plain">
+      <div className="card-plain admin-list-card">
         <div className="informes-filtros">
           <div>
             <label className="campo-label" htmlFor="filtro-nombre">Paciente</label>
@@ -108,6 +112,7 @@ export default function Informes() {
 
       {visibles.map((informe) => (
         <div className="informe-fila" key={informe.id}>
+          <div className="admin-avatar-row" style={{ flex: '0 0 auto' }}>{(informe.pacienteNombre?.[0] ?? '?').toUpperCase()}</div>
           <div className="informe-fecha">{formatearFecha(informe.fecha)}</div>
           <div className="informe-cuerpo" onClick={() => navigate(`/doctor/informes/${informe.id}`)}>
             <div className="informe-paciente">{informe.pacienteNombre}</div>

@@ -40,6 +40,10 @@ export default function MisConsultas() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        HISTORIAL DE TELEMEDICINA
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Mis consultas</h1>
       <p className="web-sub">Solicitudes de consulta, su pago y su estado.</p>
 
@@ -76,17 +80,17 @@ export default function MisConsultas() {
       )}
 
       {consultas.length > 0 && (
-        <div className="subtabs" role="tablist" style={{ marginBottom: 20 }}>
+        <div className="admin-subtabs" role="tablist" style={{ marginBottom: 20 }}>
           {PESTANAS.map((p) => (
             <button
               type="button"
               role="tab"
               key={p.clave || 'todas'}
               aria-selected={pestana === p.clave}
-              className={`subtab${pestana === p.clave ? ' on' : ''}`}
+              className={`admin-subtab${pestana === p.clave ? ' on' : ''}`}
               onClick={() => setPestana(p.clave)}
             >
-              {p.etiqueta} <span className="subtab-count">{conteos[p.clave] ?? 0}</span>
+              {p.etiqueta} <span className="admin-subtab-count">{conteos[p.clave] ?? 0}</span>
             </button>
           ))}
         </div>
@@ -95,16 +99,19 @@ export default function MisConsultas() {
       {consultas.length > 0 && filtradas.length === 0 && <p className="web-sub">No hay consultas en esta categoría.</p>}
 
       {filtradas.length > 0 && (
-        <div className="card-plain" style={{ maxWidth: 820 }}>
+        <div className="card-plain admin-list-card" style={{ maxWidth: 820 }}>
           {filtradas.map((c) => {
             const estado = ESTADOS_CONSULTA[c.estado] ?? ESTADOS_CONSULTA.pendiente_pago
             return (
               <div className="admin-row" key={c.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/paciente/consultas/${c.id}`)}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>{c.doctor?.nombre ?? c.doctorNombre}</div>
-                  <div className="rank-meta">
-                    {MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta} · Bs {c.costoConsulta}
-                    {c.fecha && ` · 📅 ${c.fecha} ${c.hora ?? ''}`}
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <div className="admin-avatar-row">{(c.doctor?.nombre ?? c.doctorNombre ?? '?')[0].toUpperCase()}</div>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{c.doctor?.nombre ?? c.doctorNombre}</div>
+                    <div className="rank-meta">
+                      {MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta} · Bs {c.costoConsulta}
+                      {c.fecha && ` · 📅 ${c.fecha} ${c.hora ?? ''}`}
+                    </div>
                   </div>
                 </div>
                 <span className={`status-pill ${estado.clase}`}>{estado.etiqueta}</span>
