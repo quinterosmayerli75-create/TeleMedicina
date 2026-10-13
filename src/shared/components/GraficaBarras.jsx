@@ -5,7 +5,7 @@ const PALETA = ['var(--oro)', 'var(--esmeralda)', 'var(--alerta)', 'var(--ambar)
 
 // Gráfica de columnas de colores, animada al aparecer (crecen desde 0 hasta su altura final).
 // Sin librerías externas: solo CSS + una transición disparada después del primer render.
-export default function GraficaBarras({ titulo, subtitulo, datos, sufijo = '', cargando = false }) {
+export default function GraficaBarras({ titulo, subtitulo, datos, sufijo = '', cargando = false, icono = '📊' }) {
   const [animar, setAnimar] = useState(false)
   const max = Math.max(1, ...datos.map((d) => d.valor))
 
@@ -17,9 +17,14 @@ export default function GraficaBarras({ titulo, subtitulo, datos, sufijo = '', c
   }, [cargando, datos])
 
   return (
-    <div className="card-plain">
-      <h2 className="section-title" style={{ marginTop: 0 }}>{titulo}</h2>
-      {subtitulo && <p className="web-sub" style={{ marginTop: -6 }}>{subtitulo}</p>}
+    <div className="admin-chart-card">
+      <div className="cabecera">
+        <div className="icono">{icono}</div>
+        <div>
+          <div className="titulo">{titulo}</div>
+          {subtitulo && <div className="sub">{subtitulo}</div>}
+        </div>
+      </div>
 
       {cargando && <p className="web-sub" style={{ margin: 0 }}>Cargando…</p>}
       {!cargando && datos.length === 0 && <p className="web-sub" style={{ margin: 0 }}>Todavía no hay datos suficientes.</p>}

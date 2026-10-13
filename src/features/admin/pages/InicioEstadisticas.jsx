@@ -267,42 +267,84 @@ export default function InicioEstadisticas() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        PLATAFORMA DOCTOP
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>Inicio y estadísticas</span>
         <button type="button" className="btn btn-outline btn-auto" onClick={exportarReporte}>📄 Descargar reporte PDF</button>
       </h1>
       <p className="web-sub">Vista general de la actividad de DocTop.</p>
 
-      <div className="subtabs" role="tablist">
-        <button type="button" role="tab" aria-selected={pestana === 'resumen'} className={`subtab${pestana === 'resumen' ? ' on' : ''}`} onClick={() => setPestana('resumen')}>
-          Resumen
+      <div className="admin-subtabs" role="tablist">
+        <button type="button" role="tab" aria-selected={pestana === 'resumen'} className={`admin-subtab${pestana === 'resumen' ? ' on' : ''}`} onClick={() => setPestana('resumen')}>
+          🏠 Resumen general
         </button>
-        <button type="button" role="tab" aria-selected={pestana === 'graficas'} className={`subtab${pestana === 'graficas' ? ' on' : ''}`} onClick={() => setPestana('graficas')}>
-          Gráficas
+        <button type="button" role="tab" aria-selected={pestana === 'graficas'} className={`admin-subtab${pestana === 'graficas' ? ' on' : ''}`} onClick={() => setPestana('graficas')}>
+          📊 Gráficas y métricas
         </button>
-        <button type="button" role="tab" aria-selected={pestana === 'bloqueados'} className={`subtab${pestana === 'bloqueados' ? ' on' : ''}`} onClick={() => setPestana('bloqueados')}>
-          Doctores bloqueados temporalmente <span className="subtab-count">{temporales.bloqueados.length}</span>
+        <button type="button" role="tab" aria-selected={pestana === 'bloqueados'} className={`admin-subtab${pestana === 'bloqueados' ? ' on' : ''}`} onClick={() => setPestana('bloqueados')}>
+          ⏱️ Doctores bloqueados temporalmente <span className="admin-subtab-count">{temporales.bloqueados.length}</span>
         </button>
-        <button type="button" role="tab" aria-selected={pestana === 'permanentes'} className={`subtab${pestana === 'permanentes' ? ' on' : ''}`} onClick={() => setPestana('permanentes')}>
-          Doctores bloqueados permanentemente <span className="subtab-count">{permanentes.bloqueados.length}</span>
+        <button type="button" role="tab" aria-selected={pestana === 'permanentes'} className={`admin-subtab${pestana === 'permanentes' ? ' on' : ''}`} onClick={() => setPestana('permanentes')}>
+          🛡️ Doctores bloqueados permanentemente <span className="admin-subtab-count">{permanentes.bloqueados.length}</span>
         </button>
       </div>
 
       {pestana === 'resumen' && (
         <>
-          <div className="web-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', marginBottom: 12 }}>
-            <div className="metric-card"><div className="metric-num">{doctoresActivos}</div><div className="metric-label">Doctores activos</div></div>
-            <div className="metric-card"><div className="metric-num">{pacientes}</div><div className="metric-label">Pacientes registrados</div></div>
-            <div className="metric-card"><div className="metric-num">{solicitudesPendientes}</div><div className="metric-label">Solicitudes pendientes</div></div>
-            <div className="metric-card"><div className="metric-num">{denunciasPendientes}</div><div className="metric-label">Denuncias pendientes</div></div>
-            <div className="metric-card"><div className="metric-num">{temporales.bloqueados.length + permanentes.bloqueados.length}</div><div className="metric-label">Doctores bloqueados</div></div>
+          <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', marginBottom: 16 }}>
+            <div className="admin-metric-card">
+              <div className="icono">🩺</div>
+              <div className="overline">Doctores activos</div>
+              <div className="numero">{doctoresActivos}</div>
+              <div className="caption">Disponibles para teleconsulta</div>
+            </div>
+            <div className="admin-metric-card c-azul">
+              <div className="icono">👥</div>
+              <div className="overline">Pacientes registrados</div>
+              <div className="numero">{pacientes}</div>
+              <div className="caption">Cuentas activas</div>
+            </div>
+            <div className="admin-metric-card c-rojo">
+              <div className="icono">📝</div>
+              <div className="overline">Solicitudes pendientes</div>
+              <div className="numero">{solicitudesPendientes}</div>
+              <div className="caption">Validación de título y matrícula</div>
+            </div>
+            <div className="admin-metric-card c-ambar">
+              <div className="icono">🛡️</div>
+              <div className="overline">Denuncias pendientes</div>
+              <div className="numero">{denunciasPendientes}</div>
+              <div className="caption">Por revisar</div>
+            </div>
+            <div className="admin-metric-card c-onyx">
+              <div className="icono">🚫</div>
+              <div className="overline">Doctores bloqueados</div>
+              <div className="numero">{temporales.bloqueados.length + permanentes.bloqueados.length}</div>
+              <div className="caption">Temporal + permanente</div>
+            </div>
           </div>
-          <div className="web-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', marginBottom: 12 }}>
-            <div className="metric-card"><div className="metric-num">Bs {ingresoTotal}</div><div className="metric-label">Ingresos registrados (consultas pagadas)</div></div>
-            <div className="metric-card"><div className="metric-num">{pagosPendientes}</div><div className="metric-label">Pagos de consulta pendientes de validar</div></div>
+          <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', marginBottom: 16 }}>
+            <div className="admin-feature-card">
+              <div className="icono">💳</div>
+              <div className="overline">Pagos de consultas</div>
+              <div className="titulo">Ingresos registrados en plataforma</div>
+              <div className="sub">Consultas completadas y liquidadas entre doctor y paciente.</div>
+              <div className="numero">Bs {ingresoTotal}</div>
+            </div>
+            <div className="admin-feature-card c-ambar">
+              <div className="icono">⏳</div>
+              <div className="overline">Validación de pagos</div>
+              <div className="titulo">Pagos pendientes de validar</div>
+              <div className="sub">Comprobantes subidos por pacientes, a la espera del doctor.</div>
+              <div className="numero">{pagosPendientes}</div>
+            </div>
           </div>
           <GraficaBarras
             titulo="Resumen en gráfica"
+            icono="📊"
             datos={[
               { etiqueta: 'Doctores activos', valor: doctoresActivos },
               { etiqueta: 'Pacientes registrados', valor: pacientes },
@@ -320,44 +362,44 @@ export default function InicioEstadisticas() {
           <GraficaBarras
             titulo="Doctores con más consultas"
             subtitulo="Cantidad total de consultas solicitadas, por doctor."
+            icono="📈"
             datos={porDoctor}
-            color="var(--oro)"
             cargando={cargandoConsultas}
           />
           <GraficaBarras
             titulo="Modalidad más usada"
             subtitulo="Cómo prefieren atenderse los pacientes."
+            icono="💻"
             datos={porModalidad}
-            color="var(--esmeralda)"
             cargando={cargandoConsultas}
           />
           <GraficaBarras
             titulo="Calificaciones de los pacientes"
             subtitulo="Cuántas veces se dio cada cantidad de estrellas."
+            icono="⭐"
             datos={porEstrellas}
-            color="var(--ambar)"
             cargando={cargandoCalificaciones}
           />
           <GraficaBarras
             titulo="Calificación promedio por doctor"
             subtitulo="A quién corresponde cada nota — promedio de estrellas, por doctor."
+            icono="⭐"
             datos={porDoctorCalificacion}
-            color="var(--ambar)"
             sufijo=" ★"
             cargando={cargandoConsultas}
           />
           <GraficaBarras
             titulo="Especialidades más solicitadas"
             subtitulo="Consultas pedidas, agrupadas por especialidad del doctor."
+            icono="🏷️"
             datos={porEspecialidad}
-            color="var(--esmeralda)"
             cargando={cargandoConsultas}
           />
           <GraficaBarras
             titulo="Ingresos por especialidad"
             subtitulo="Solo consultas ya pagadas y aprobadas (habilitadas o finalizadas)."
+            icono="💰"
             datos={ingresosPorEspecialidad}
-            color="var(--oro)"
             sufijo=" Bs"
             cargando={cargandoConsultas}
           />
