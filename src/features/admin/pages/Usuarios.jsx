@@ -115,10 +115,41 @@ export default function Usuarios() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        GESTIÓN DE PACIENTES
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <span>Usuarios registrados</span>
-        <span style={{ fontSize: 14, color: 'var(--gris)', fontWeight: 400 }}>{usuarios.length} en total</span>
+        <span className="admin-total-pill">👥 {usuarios.length} en total</span>
       </h1>
+
+      <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 16 }}>
+        <div className="admin-metric-card">
+          <div className="icono">👥</div>
+          <div className="overline">Total pacientes</div>
+          <div className="numero">{usuarios.length}</div>
+          <div className="caption">Cuentas registradas</div>
+        </div>
+        <div className="admin-metric-card c-azul">
+          <div className="icono">✅</div>
+          <div className="overline">Activos</div>
+          <div className="numero">{conteoEstado.activo ?? 0}</div>
+          <div className="caption">Cuentas sin bloqueo</div>
+        </div>
+        <div className="admin-metric-card c-ambar">
+          <div className="icono">⏱️</div>
+          <div className="overline">Bloqueados temporalmente</div>
+          <div className="numero">{conteoEstado.bloqueado_temporal ?? 0}</div>
+          <div className="caption">Con fecha de reactivación</div>
+        </div>
+        <div className="admin-metric-card c-onyx">
+          <div className="icono">🚫</div>
+          <div className="overline">Bloqueados permanentemente</div>
+          <div className="numero">{conteoEstado.bloqueado ?? 0}</div>
+          <div className="caption">Sin acceso a la plataforma</div>
+        </div>
+      </div>
 
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 20 }}>
         <input
@@ -147,9 +178,12 @@ export default function Usuarios() {
       <div className="card-plain" style={{ maxWidth: 960 }}>
         {paginados.map((u) => (
           <div className="admin-row" key={u.id}>
-            <div>
-              {u.nombre} {u.apellido}
-              <div className="rank-meta">{u.email}{u.telefono && ` · ${u.telefono}`}</div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <div className="admin-avatar-row">{(u.nombre?.[0] ?? '?').toUpperCase()}</div>
+              <div>
+                {u.nombre} {u.apellido}
+                <div className="rank-meta">{u.email}{u.telefono && ` · ${u.telefono}`}</div>
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className={`status-pill ${u.estado === 'activo' ? 'status-active' : 'status-blocked'}`}>

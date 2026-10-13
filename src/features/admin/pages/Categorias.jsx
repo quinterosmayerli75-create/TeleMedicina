@@ -3,8 +3,24 @@ import { useNavigate } from 'react-router-dom'
 import { deleteDoc, doc, onSnapshot, updateDoc, collection } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 
+// Solo decorativo: un ícono aproximado según palabras clave del nombre de la categoría.
+const ICONOS_POR_PALABRA = [
+  [/odont|dent/i, '🦷'],
+  [/cardio/i, '❤️'],
+  [/nutri/i, '🥗'],
+  [/dermat/i, '🧴'],
+  [/pediatr/i, '🧒'],
+  [/gineco|obstetr/i, '🤰'],
+  [/psico|mental/i, '🧠'],
+  [/general|medicina/i, '🩺'],
+]
+function iconoCategoria(nombre = '') {
+  return ICONOS_POR_PALABRA.find(([regex]) => regex.test(nombre))?.[1] ?? '🏷️'
+}
+
 export default function Categorias() {
   const [categorias, setCategorias] = useState([])
+  const [profesionales, setProfesionales] = useState([])
   const [busqueda, setBusqueda] = useState('')
   const [editando, setEditando] = useState(null)
   const [nombreEdicion, setNombreEdicion] = useState('')
@@ -17,6 +33,31 @@ export default function Categorias() {
     })
     return unsubscribe
   }, [])
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'profesionales'), (snap) => {
+      setProfesionales(snap.docs.map((d) => d.data()))
+    })
+    return unsubscribe
+  }, [])
+
+  // Cuántos doctores tiene cada especialidad ahora mismo (dato real, no estimado).
+  const medicosPorCategoria = useMemo(() => {
+    const conteo = new Map()
+    profesionales.forEach((p) => {
+      if (!p.especialidad) return
+      conteo.set(p.especialidad, (conteo.get(p.especialidad) ?? 0) + 1)
+    })
+    return conteo
+  }, [profesionales])
+
+  const masSolicitada = useMemo(() => {
+    let top = null
+    medicosPorCategoria.forEach((total, nombre) => {
+      if (!top || total > top.total) top = { nombre, total }
+    })
+    return top
+  }, [medicosPorCategoria])
 
   const filtradas = useMemo(() => {
     if (!busqueda) return categorias
@@ -35,7 +76,38 @@ export default function Categorias() {
 
   return (
     <div>
-      <h1 className="web-h1">Categorías de especialidad</h1>
+      <div className="admin-eyebrow">
+        CATÁLOGO CLÍNICO
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
+      <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>Categorías de especialidad</span>
+        <button type="button" className="btn btn-primary btn-auto" onClick={() => navigate('/admin/categorias/nueva')}>
+          + Nueva categoría
+        </button>
+      </h1>
+      <p className="web-sub">Especialidades disponibles para búsqueda de pacientes y registro de doctores.</p>
+
+      <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 16 }}>
+        <div className="admin-metric-card">
+          <div className="icono">🏷️</div>
+          <div className="overline">Total categorías</div>
+          <div className="numero">{categorias.length}</div>
+          <div className="caption">Registradas en el catálogo</div>
+        </div>
+        <div className="admin-metric-card c-azul">
+          <div className="icono">🩺</div>
+          <div className="overline">Con médicos activos</div>
+          <div className="numero">{categorias.filter((c) => (medicosPorCategoria.get(c.nombre) ?? 0) > 0).length}</div>
+          <div className="caption">De {categorias.length} categorías</div>
+        </div>
+        <div className="admin-metric-card c-ambar">
+          <div className="icono">⭐</div>
+          <div className="overline">Especialidad más solicitada</div>
+          <div className="numero" style={{ fontSize: 20 }}>{masSolicitada?.nombre ?? '—'}</div>
+          <div className="caption">{masSolicitada ? `${masSolicitada.total} médico${masSolicitada.total === 1 ? '' : 's'}` : 'Sin datos todavía'}</div>
+        </div>
+      </div>
 
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         <input
@@ -45,16 +117,19 @@ export default function Categorias() {
           onChange={(e) => setBusqueda(e.target.value)}
           style={{ maxWidth: 420 }}
         />
-        <button type="button" className="btn btn-primary btn-auto" onClick={() => navigate('/admin/categorias/nueva')}>
-          + Nueva categoría
-        </button>
       </div>
 
-      <div className="card-plain" style={{ maxWidth: 720 }}>
+      <div className="card-plain admin-list-card" style={{ maxWidth: 760 }}>
         {filtradas.length === 0 && <p className="web-sub" style={{ marginBottom: 0 }}>No se encontraron categorías.</p>}
         {filtradas.map((c) => (
           <div className="cat-row" key={c.id}>
-            <div>{c.nombre}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="admin-cat-icon">{iconoCategoria(c.nombre)}</div>
+              <div>
+                <div style={{ fontWeight: 600 }}>{c.nombre}</div>
+                <div className="rank-meta">{medicosPorCategoria.get(c.nombre) ?? 0} médico{(medicosPorCategoria.get(c.nombre) ?? 0) === 1 ? '' : 's'} activo{(medicosPorCategoria.get(c.nombre) ?? 0) === 1 ? '' : 's'}</div>
+              </div>
+            </div>
             <div style={{ display: 'flex', gap: 6 }}>
               <button type="button" className="mini-btn" onClick={() => { setEditando(c); setNombreEdicion(c.nombre) }}>Editar</button>
               <button type="button" className="mini-btn danger" onClick={() => setAEliminar(c)}>Eliminar</button>

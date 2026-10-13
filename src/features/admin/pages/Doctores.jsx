@@ -11,6 +11,8 @@ import FotosDoctorAdmin from '../components/FotosDoctorAdmin'
 import CampoContrasena from '@/shared/components/CampoContrasena'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import { descargarCSV } from '@/shared/utils/exportar'
+import { suscripcionVigente } from '@/features/profesionales/hooks/useProfesionalesActivos'
+import { PLANES } from '@/features/consultas/services/suscripciones'
 
 const COLUMNAS_EXPORTAR = [
   { clave: 'nombre', etiqueta: 'Nombre' },
@@ -141,6 +143,11 @@ export default function Doctores() {
     return conteo
   }, [doctores])
 
+  const metricas = useMemo(() => ({
+    suscripcionVigente: doctores.filter((d) => suscripcionVigente(d.profesional)).length,
+    disponiblesAhora: doctores.filter((d) => d.profesional?.disponibleAhora).length,
+  }), [doctores])
+
   function abrirNuevo() {
     setNuevo({ ...NUEVO_INICIAL, especialidad: tiposProfesion[0]?.nombre ?? '' })
     setError('')
@@ -244,10 +251,41 @@ export default function Doctores() {
 
   return (
     <div className="con-fab">
+      <div className="admin-eyebrow">
+        DIRECTORIO DE PROFESIONALES
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <span>Doctores registrados</span>
-        <span style={{ fontSize: 14, color: 'var(--gris)', fontWeight: 400 }}>{doctores.length} en total</span>
+        <span className="admin-total-pill">🩺 {doctores.length} en total</span>
       </h1>
+
+      <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 16 }}>
+        <div className="admin-metric-card">
+          <div className="icono">🩺</div>
+          <div className="overline">Doctores activos</div>
+          <div className="numero">{conteoEstado.activo ?? 0}</div>
+          <div className="caption">Habilitados en la plataforma</div>
+        </div>
+        <div className="admin-metric-card c-azul">
+          <div className="icono">💳</div>
+          <div className="overline">Suscripción vigente</div>
+          <div className="numero">{metricas.suscripcionVigente}</div>
+          <div className="caption">De {doctores.length} doctores</div>
+        </div>
+        <div className="admin-metric-card">
+          <div className="icono">🟢</div>
+          <div className="overline">Disponibles ahora</div>
+          <div className="numero">{metricas.disponiblesAhora}</div>
+          <div className="caption">Marcados como "disponible ahora"</div>
+        </div>
+        <div className="admin-metric-card c-onyx">
+          <div className="icono">🚫</div>
+          <div className="overline">Bloqueados</div>
+          <div className="numero">{(conteoEstado.bloqueado_temporal ?? 0) + (conteoEstado.bloqueado ?? 0)}</div>
+          <div className="caption">Temporal + permanente</div>
+        </div>
+      </div>
 
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
         <input
@@ -298,13 +336,21 @@ export default function Doctores() {
               const bloqueado = esBloqueo(d.estado)
               return (
                 <div className="admin-row" key={d.id} data-testid={`fila-doctor-${d.id}`}>
-                  <div>
-                    {d.nombre}
-                    {d.profesional?.notaEstado && (
-                      <span className="status-pill status-warn" style={{ marginLeft: 8 }}>{d.profesional.notaEstado}</span>
-                    )}
-                    <div className="rank-meta">{d.email}{d.telefono && ` · ${d.telefono}`}</div>
-                    {bloqueado && (d.motivoBloqueo) && <div className="rank-meta">Motivo: {d.motivoBloqueo}</div>}
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    {d.fotoUrl ? <img src={d.fotoUrl} className="admin-avatar-row" alt={d.nombre} /> : <div className="admin-avatar-row">{(d.nombre?.[0] ?? '?').toUpperCase()}</div>}
+                    <div>
+                      {d.nombre}
+                      {d.profesional?.notaEstado && (
+                        <span className="status-pill status-warn" style={{ marginLeft: 8 }}>{d.profesional.notaEstado}</span>
+                      )}
+                      <div className="rank-meta">{d.email}{d.telefono && ` · ${d.telefono}`}</div>
+                      <div className="rank-meta">
+                        {d.profesional?.suscripcionPlan
+                          ? `Plan ${PLANES[d.profesional.suscripcionPlan]?.etiqueta ?? d.profesional.suscripcionPlan}${d.profesional.suscripcionVenceEl ? ` · vence ${d.profesional.suscripcionVenceEl}` : ''}`
+                          : 'Sin suscripción activa'}
+                      </div>
+                      {bloqueado && (d.motivoBloqueo) && <div className="rank-meta">Motivo: {d.motivoBloqueo}</div>}
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span className={`status-pill ${etiqueta.clase}`}>

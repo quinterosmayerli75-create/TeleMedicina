@@ -466,6 +466,12 @@ button.attach-btn:hover { border-color: var(--oro); }
 .admin-chart-card .titulo { font-family: var(--display); font-size: 15.5px; font-weight: 700; }
 .admin-chart-card .sub { font-size: 11.5px; color: var(--gris); margin-top: 2px; }
 
+.admin-content .chip.on { background: var(--admin-accent); color: #fff; border-color: var(--admin-accent); }
+.admin-avatar-row { width: 40px; height: 40px; border-radius: 50%; background: var(--admin-accent-soft); color: var(--admin-accent-dark); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex: 0 0 auto; object-fit: cover; }
+.admin-cat-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--admin-accent-soft); color: var(--admin-accent-dark); display: flex; align-items: center; justify-content: center; font-size: 17px; flex: 0 0 auto; }
+.admin-list-card { border-radius: 12px; border-top: 3px solid var(--admin-accent); }
+.admin-total-pill { display: inline-flex; align-items: center; gap: 7px; background: var(--admin-accent-soft); color: var(--admin-accent-dark); font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; }
+
 @media (max-width: 860px) {
   .admin-shell { flex-direction: column; }
   .admin-sidebar { width: 100%; flex-direction: row; overflow-x: auto; height: auto; position: static; gap: 6px; }
