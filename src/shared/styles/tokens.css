@@ -12,6 +12,12 @@
   --ambar: #B07A2A;
   --blanco: #FFFFFF;
 
+  /* Panel de administrador (2026-10-13): paleta propia, no reemplaza la de doctor/paciente. */
+  --admin-navy: #0B1120;
+  --admin-accent: #16A974;
+  --admin-accent-dark: #0E7A57;
+  --admin-accent-soft: #E3F6EC;
+
   --display: 'Playfair Display', serif;
   --sans: 'Jost', sans-serif;
   --mono: 'JetBrains Mono', monospace;
