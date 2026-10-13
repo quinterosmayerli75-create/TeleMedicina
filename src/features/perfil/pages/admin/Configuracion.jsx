@@ -111,11 +111,25 @@ export default function Configuracion() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        CONFIGURACIÓN GENERAL
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Mi cuenta</h1>
       <div className="web-2col" style={{ maxWidth: 820 }}>
-        <CambiarContrasena mostrarCorreo textoBoton="Guardar cambios" />
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <div className="admin-cat-icon">🔒</div>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>Seguridad y credenciales</div>
+          </div>
+          <CambiarContrasena mostrarCorreo textoBoton="Guardar cambios" />
+        </div>
 
         <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <div className="admin-cat-icon">💳</div>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>QR y tarifas de membresía</div>
+          </div>
           <ConfigPagos />
           <div className="card-plain">
             <h2 className="section-title">Notificaciones</h2>

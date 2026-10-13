@@ -60,10 +60,16 @@ export default function Buscar() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        DIRECTORIO CLÍNICO
+        <span className="vivo"><span className="punto" /> Telemedicina en vivo</span>
+      </div>
       <h1 className="web-h1">Buscar especialista</h1>
+      <p className="web-sub">Encuentra profesionales de la salud para consultas virtuales por chat, llamada o video.</p>
+
       <div className="web-2col">
         <div>
-          <h2 className="section-title">{cargando ? 'Cargando…' : `${resultados.length} resultados`}</h2>
+          <h2 className="section-title">{cargando ? 'Cargando…' : `${resultados.length} resultado${resultados.length === 1 ? '' : 's'}`}</h2>
           <div className="web-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
             {resultados.map((doctor) => (
               <TarjetaDoctor key={doctor.id} doctor={doctor} />
@@ -74,8 +80,8 @@ export default function Buscar() {
           </div>
         </div>
 
-        <div className="card-plain">
-          <h2 className="section-title">Filtros</h2>
+        <div className="card-plain admin-list-card">
+          <h2 className="section-title">🧮 Filtros</h2>
           <label className="campo-label" htmlFor="texto">Nombre, profesión o especialidad</label>
           <input id="texto" type="text" placeholder="Cardiólogo, Médico…" value={texto} onChange={(e) => setTexto(e.target.value)} />
 

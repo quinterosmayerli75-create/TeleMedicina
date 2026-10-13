@@ -127,8 +127,13 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
           <div className="name">{otro.nombre}</div>
           <div className="status">{subtitulo}</div>
         </div>
+        <button type="button" className="btn btn-outline btn-auto" style={{ borderColor: 'var(--admin-accent)', color: '#5FE3B3' }} onClick={() => navigate(rutaPerfil)}>
+          Ver perfil
+        </button>
         <div className="icn" title="Llamada de voz" onClick={() => !llamada.llamada && llamada.iniciar('audio')}>📞</div>
-        <div className="icn" title="Videollamada" onClick={() => !llamada.llamada && llamada.iniciar('video')}>🎥</div>
+        <button type="button" className="btn btn-primary btn-auto" style={{ background: 'var(--admin-accent)' }} onClick={() => !llamada.llamada && llamada.iniciar('video')}>
+          🎥 Iniciar videollamada
+        </button>
         <div className="icn" style={{ color: 'var(--alerta)' }} title="Denunciar" onClick={() => navigate(rutaDenuncia)}>⚑</div>
       </div>
 

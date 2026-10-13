@@ -38,10 +38,21 @@ export default function MisConsultas() {
     })
   }, [consultas, pestana, busqueda, fechaFiltro])
 
+  const pacientesUnicos = useMemo(() => new Set(consultas.map((c) => c.pacienteId)).size, [consultas])
+
   return (
     <div>
-      <h1 className="web-h1">Mis consultas</h1>
-      <p className="web-sub">Consultas solicitadas por pacientes y su estado de pago.</p>
+      <div className="admin-eyebrow">
+        GESTIÓN DE CITAS MÉDICAS
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
+      <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+        <span>Mis consultas</span>
+        {consultas.length > 0 && (
+          <span className="admin-total-pill">📅 {consultas.length} programadas · {pacientesUnicos} pacientes</span>
+        )}
+      </h1>
+      <p className="web-sub">Consultas solicitadas por pacientes y su estado de pago. Supervisa la confirmación de pagos y accede a las salas virtuales.</p>
 
       {cargando && <p className="web-sub">Cargando…</p>}
 
@@ -75,17 +86,17 @@ export default function MisConsultas() {
       )}
 
       {consultas.length > 0 && (
-        <div className="subtabs" role="tablist" style={{ marginBottom: 20 }}>
+        <div className="admin-subtabs" role="tablist" style={{ marginBottom: 20 }}>
           {PESTANAS.map((p) => (
             <button
               type="button"
               role="tab"
               key={p.clave || 'todas'}
               aria-selected={pestana === p.clave}
-              className={`subtab${pestana === p.clave ? ' on' : ''}`}
+              className={`admin-subtab${pestana === p.clave ? ' on' : ''}`}
               onClick={() => setPestana(p.clave)}
             >
-              {p.etiqueta} <span className="subtab-count">{conteos[p.clave] ?? 0}</span>
+              {p.etiqueta} <span className="admin-subtab-count">{conteos[p.clave] ?? 0}</span>
             </button>
           ))}
         </div>
@@ -94,16 +105,19 @@ export default function MisConsultas() {
       {consultas.length > 0 && filtradas.length === 0 && <p className="web-sub">No hay consultas en esta categoría.</p>}
 
       {filtradas.length > 0 && (
-        <div className="card-plain" style={{ maxWidth: 820 }}>
+        <div className="card-plain admin-list-card" style={{ maxWidth: 820 }}>
           {filtradas.map((c) => {
             const estado = ESTADOS_CONSULTA[c.estado] ?? ESTADOS_CONSULTA.pendiente_pago
             return (
               <div className="admin-row" key={c.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/doctor/consultas/${c.id}`)}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>{c.paciente?.nombre ?? c.pacienteNombre}</div>
-                  <div className="rank-meta">
-                    {MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta} · Bs {c.costoConsulta}
-                    {c.fecha && ` · 📅 ${c.fecha} ${c.hora ?? ''}`}
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <div className="admin-avatar-row">{(c.paciente?.nombre ?? c.pacienteNombre ?? '?')[0].toUpperCase()}</div>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{c.paciente?.nombre ?? c.pacienteNombre}</div>
+                    <div className="rank-meta">
+                      {MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta} · Bs {c.costoConsulta}
+                      {c.fecha && ` · 📅 ${c.fecha} ${c.hora ?? ''}`}
+                    </div>
                   </div>
                 </div>
                 <span className={`status-pill ${estado.clase}`}>{estado.etiqueta}</span>

@@ -167,6 +167,9 @@ export default function RegistroPaciente() {
   return (
     <div className="registro-fondo">
       <div className="registro-card">
+        <div className="admin-eyebrow">
+          <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}>🛡️ PROTOCOLO DE REGISTRO CLÍNICO</span>
+        </div>
         <h1 className="registro-titulo">Registro de paciente</h1>
         <p className="registro-sub">Sus datos se usan para que el doctor pueda emitir su informe médico.</p>
         {error && (
@@ -179,7 +182,7 @@ export default function RegistroPaciente() {
           <div className="registro-grid">
             <div>
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">Datos de acceso</h2>
+                <h2 className="seccion-titulo">🔑 Datos de acceso</h2>
                 <div className="campos-2col">
                   <div>
                     <label className="campo-label" htmlFor="email">Correo electrónico</label>
@@ -206,7 +209,7 @@ export default function RegistroPaciente() {
               </div>
 
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">Datos personales</h2>
+                <h2 className="seccion-titulo">🧾 Datos personales</h2>
                 <div className="campos-2col">
                   <div>
                     <label className="campo-label" htmlFor="nombre">Nombre</label>
@@ -249,7 +252,7 @@ export default function RegistroPaciente() {
 
             <div>
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">Foto de perfil (obligatoria)</h2>
+                <h2 className="seccion-titulo">📷 Foto de perfil (obligatoria)</h2>
                 <SelectorFotos
                   archivos={fotos}
                   onChange={setFotos}

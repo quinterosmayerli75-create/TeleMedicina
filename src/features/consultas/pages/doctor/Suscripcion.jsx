@@ -67,25 +67,36 @@ export default function Suscripcion() {
 
   return (
     <div>
+      <div className="admin-eyebrow">
+        MEMBRESÍA PROFESIONAL
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Suscripción a DocTop</h1>
       <p className="web-sub">Para aparecer en las búsquedas y recibir consultas, tu suscripción debe estar activa.</p>
 
-      <div className="card-plain" style={{ maxWidth: 520 }}>
-        <h2 className="section-title" style={{ marginTop: 0 }}>Estado actual</h2>
+      <div className={`admin-feature-card${activa ? '' : ' c-ambar'}`} style={{ maxWidth: 520 }}>
+        <div className="icono">{activa ? '✅' : '⚠️'}</div>
+        <div className="overline">Estado de la cuenta</div>
         {activa ? (
-          <p style={{ fontSize: 13 }}>
-            ✓ Activa hasta el <b>{datosProfesional.suscripcionVenceEl}</b> ({PLANES[datosProfesional.suscripcionPlan]?.etiqueta ?? '—'}).
-          </p>
+          <>
+            <div className="titulo">Membresía activa</div>
+            <p style={{ fontSize: 13, marginTop: 8 }}>
+              Vigente hasta el <b>{datosProfesional.suscripcionVenceEl}</b> ({PLANES[datosProfesional.suscripcionPlan]?.etiqueta ?? '—'}).
+            </p>
+          </>
         ) : (
-          <p style={{ fontSize: 13, color: 'var(--alerta)' }}>
-            Tu suscripción no está activa. No apareces en las búsquedas de pacientes hasta que la pagues y sea aprobada.
-          </p>
+          <>
+            <div className="titulo">Sin membresía activa</div>
+            <p style={{ fontSize: 13, color: 'var(--alerta)', marginTop: 8 }}>
+              No apareces en las búsquedas de pacientes hasta que la pagues y sea aprobada.
+            </p>
+          </>
         )}
       </div>
 
       {!enCurso && (
-        <div className="card-plain" style={{ maxWidth: 520 }}>
-          <h2 className="section-title" style={{ marginTop: 0 }}>{activa ? 'Renovar' : 'Pagar suscripción'}</h2>
+        <div className="card-plain admin-list-card" style={{ maxWidth: 520 }}>
+          <h2 className="section-title" style={{ marginTop: 0 }}>💳 {activa ? 'Renovar' : 'Pagar suscripción'}</h2>
           <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
             {Object.entries(PLANES).map(([clave, info]) => (
               <label key={clave} className="card-plain" style={{ margin: 0, padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', border: plan === clave ? '2px solid var(--esmeralda)' : undefined }}>
@@ -104,7 +115,7 @@ export default function Suscripcion() {
       )}
 
       {enCurso && (
-        <div className="card-plain" style={{ maxWidth: 520 }}>
+        <div className="card-plain admin-list-card" style={{ maxWidth: 520 }}>
           <h2 className="section-title" style={{ marginTop: 0 }}>
             {PLANES[enCurso.plan]?.etiqueta} · Bs {enCurso.precio} <span className={`status-pill ${ESTADOS_SUSCRIPCION[enCurso.estado]?.clase}`} style={{ marginLeft: 8 }}>{ESTADOS_SUSCRIPCION[enCurso.estado]?.etiqueta}</span>
           </h2>
@@ -142,8 +153,8 @@ export default function Suscripcion() {
       )}
 
       {suscripciones.length > 0 && (
-        <div className="card-plain" style={{ maxWidth: 520 }}>
-          <h2 className="section-title" style={{ marginTop: 0 }}>Historial</h2>
+        <div className="card-plain admin-list-card" style={{ maxWidth: 520 }}>
+          <h2 className="section-title" style={{ marginTop: 0 }}>🧾 Historial de pagos</h2>
           {suscripciones.map((s) => (
             <div className="admin-row" key={s.id}>
               <div>

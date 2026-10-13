@@ -51,7 +51,12 @@ export default function TutorialInicio() {
   return (
     <div className="modal-fondo" onClick={cerrar}>
       <div className="modal-tarjeta" style={{ maxWidth: 420, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ fontSize: 44, marginBottom: 6 }}>{actual.icono}</div>
+        <div style={{
+          width: 64, height: 64, borderRadius: 16, margin: '0 auto 14px', fontSize: 30,
+          background: 'var(--admin-accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {actual.icono}
+        </div>
         <div className="modal-titulo">{actual.titulo}</div>
         <p style={{ fontSize: 13, lineHeight: 1.6, color: '#3a4750' }}>{actual.texto}</p>
 
@@ -60,8 +65,8 @@ export default function TutorialInicio() {
             <span
               key={i}
               style={{
-                width: 7, height: 7, borderRadius: '50%',
-                background: i === paso ? 'var(--onyx)' : 'var(--marfil-osc)',
+                width: i === paso ? 18 : 7, height: 7, borderRadius: 4, transition: 'width .2s ease',
+                background: i === paso ? 'var(--admin-accent)' : 'var(--marfil-osc)',
               }}
             />
           ))}
@@ -69,7 +74,7 @@ export default function TutorialInicio() {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
           <button type="button" className="btn btn-outline" onClick={cerrar}>Omitir</button>
-          <button type="button" className="btn btn-primary" onClick={() => (esUltimo ? cerrar() : setPaso((p) => p + 1))}>
+          <button type="button" className="btn btn-primary" style={{ background: 'var(--admin-accent)' }} onClick={() => (esUltimo ? cerrar() : setPaso((p) => p + 1))}>
             {esUltimo ? 'Comenzar' : 'Siguiente'}
           </button>
         </div>

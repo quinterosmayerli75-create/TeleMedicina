@@ -64,7 +64,7 @@ export default function PaginaMensajes({ rol, encabezadoLista = null }) {
             <div
               key={fila.id}
               className="chat-row"
-              style={fila.otroId === idActivo ? { background: 'var(--marfil)' } : undefined}
+              style={fila.otroId === idActivo ? { background: 'var(--admin-accent-soft)' } : undefined}
               onClick={() => navigate(`${base}/mensajes/${fila.otroId}`)}
             >
               <div className="avatar-wrap">

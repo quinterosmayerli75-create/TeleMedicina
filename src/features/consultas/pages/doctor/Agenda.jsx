@@ -37,10 +37,25 @@ export default function Agenda() {
     return [...porFecha.entries()]
   }, [consultas, busqueda, modalidadSel])
 
+  const consultasHoy = grupos.find(([fecha]) => fecha === HOY)?.[1]?.length ?? 0
+
   return (
     <div>
+      <div className="admin-eyebrow">
+        PLANIFICACIÓN CLÍNICA
+        <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
+      </div>
       <h1 className="web-h1">Agenda</h1>
       <p className="web-sub">Tus próximas consultas ya habilitadas (pago aprobado), por fecha.</p>
+
+      <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(1, 220px)', marginBottom: 16 }}>
+        <div className="admin-metric-card">
+          <div className="icono">📅</div>
+          <div className="overline">Consultas de hoy</div>
+          <div className="numero">{consultasHoy}</div>
+          <div className="caption">Habilitadas para hoy</div>
+        </div>
+      </div>
 
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
         <input
@@ -69,13 +84,16 @@ export default function Agenda() {
       {!cargando && grupos.length === 0 && <p className="web-sub">No tienes consultas agendadas por ahora.</p>}
 
       {grupos.map(([fecha, lista]) => (
-        <div key={fecha} className="card-plain" style={{ maxWidth: 820 }}>
+        <div key={fecha} className="card-plain admin-list-card" style={{ maxWidth: 820 }}>
           <h2 className="section-title" style={{ marginTop: 0 }}>{formatearFechaLarga(fecha)}</h2>
           {lista.map((c) => (
             <div className="admin-row" key={c.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/doctor/consultas/${c.id}`)}>
-              <div>
-                <div style={{ fontWeight: 600 }}>{c.hora} · {c.paciente?.nombre ?? c.pacienteNombre}</div>
-                <div className="rank-meta">{MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta}</div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <div className="admin-avatar-row">{(c.paciente?.nombre ?? c.pacienteNombre ?? '?')[0].toUpperCase()}</div>
+                <div>
+                  <div style={{ fontWeight: 600 }}>{c.hora} · {c.paciente?.nombre ?? c.pacienteNombre}</div>
+                  <div className="rank-meta">{MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta}</div>
+                </div>
               </div>
             </div>
           ))}
