@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { BarChart3 } from 'lucide-react'
 
 const ALTURA_MAX = 150
 const PALETA = ['var(--oro)', 'var(--esmeralda)', 'var(--alerta)', 'var(--ambar)', 'var(--oro-claro)']
 
 // Gráfica de columnas de colores, animada al aparecer (crecen desde 0 hasta su altura final).
 // Sin librerías externas: solo CSS + una transición disparada después del primer render.
-export default function GraficaBarras({ titulo, subtitulo, datos, sufijo = '', cargando = false, icono = '📊' }) {
+export default function GraficaBarras({ titulo, subtitulo, datos, sufijo = '', cargando = false, Icono = BarChart3 }) {
   const [animar, setAnimar] = useState(false)
   const max = Math.max(1, ...datos.map((d) => d.valor))
 
@@ -19,7 +20,7 @@ export default function GraficaBarras({ titulo, subtitulo, datos, sufijo = '', c
   return (
     <div className="admin-chart-card">
       <div className="cabecera">
-        <div className="icono">{icono}</div>
+        <div className="icono"><Icono size={17} strokeWidth={2} /></div>
         <div>
           <div className="titulo">{titulo}</div>
           {subtitulo && <div className="sub">{subtitulo}</div>}

@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { collection, deleteDoc, doc, getDoc, onSnapshot, query, serverTimestamp, setDoc, where } from 'firebase/firestore'
+import { useSearchParams } from 'react-router-dom'
+import { collection, deleteDoc, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
-import { crearUsuarioAuxiliar } from '@/services/firebase/crearUsuarioSecundario'
 import { bloquearUsuario, levantarBloqueo, mensajeErrorBloqueo } from '@/features/bloqueos/services/bloqueos'
 import ModalBloqueo from '@/features/bloqueos/components/ModalBloqueo'
 import { esBloqueo } from '@/features/bloqueos/utils/bloqueos'
 import { diasRestantes, formatearFecha } from '@/shared/utils/fechas'
-import { AYUDA_CONTRASENA, validarContrasena } from '@/shared/utils/validacion'
 import FotosDoctorAdmin from '../components/FotosDoctorAdmin'
-import CampoContrasena from '@/shared/components/CampoContrasena'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import { descargarCSV } from '@/shared/utils/exportar'
 import { suscripcionVigente } from '@/features/profesionales/hooks/useProfesionalesActivos'
@@ -44,18 +42,11 @@ const FILTROS_ESTADO = [
   { clave: 'bloqueado', etiqueta: 'Bloqueados permanentemente' },
 ]
 
-const PROFESIONES = ['Médico', 'Odontólogo', 'Psicólogo', 'Nutricionista']
-
-const NUEVO_INICIAL = {
-  nombre: '', email: '', contrasena: '', telefono: '',
-  profesion: PROFESIONES[0], especialidad: '',
-  carnet: '', experiencia: '', descripcion: '', costoConsulta: '',
-}
-
 export default function Doctores() {
   const [doctores, setDoctores] = useState([])
   const [cargando, setCargando] = useState(true)
-  const [busqueda, setBusqueda] = useState('')
+  const [searchParams] = useSearchParams()
+  const [busqueda, setBusqueda] = useState(searchParams.get('q') ?? '')
   const [especialidadSel, setEspecialidadSel] = useState('')
   const [estadoSel, setEstadoSel] = useState('')
   const [aviso, setAviso] = useState('')
@@ -64,9 +55,6 @@ export default function Doctores() {
 
   const [modal, setModal] = useState(null)
   const [seleccion, setSeleccion] = useState(null)
-  const [nuevo, setNuevo] = useState(NUEVO_INICIAL)
-  const [error, setError] = useState('')
-  const [enviando, setEnviando] = useState(false)
 
   useEffect(() => {
     // Todos los doctores, incluidos los bloqueados: así el bloqueo (temporal o permanente) se ve aquí.
@@ -147,58 +135,6 @@ export default function Doctores() {
     suscripcionVigente: doctores.filter((d) => suscripcionVigente(d.profesional)).length,
     disponiblesAhora: doctores.filter((d) => d.profesional?.disponibleAhora).length,
   }), [doctores])
-
-  function abrirNuevo() {
-    setNuevo({ ...NUEVO_INICIAL, especialidad: tiposProfesion[0]?.nombre ?? '' })
-    setError('')
-    setModal('nuevo')
-  }
-
-  async function crearDoctor(e) {
-    e.preventDefault()
-    setError('')
-    const errorContrasena = validarContrasena(nuevo.contrasena)
-    if (errorContrasena) {
-      setError(errorContrasena)
-      return
-    }
-    setEnviando(true)
-    try {
-      // El perfil se guarda mientras la sesión auxiliar está abierta: si falla, la cuenta de acceso se
-      // anula y se puede reintentar con el mismo correo.
-      await crearUsuarioAuxiliar(nuevo.email, nuevo.contrasena, async (uid) => {
-        await setDoc(doc(db, 'usuarios', uid), {
-          email: nuevo.email,
-          nombre: nuevo.nombre,
-          telefono: nuevo.telefono,
-          rol: 'profesional',
-          estado: 'activo',
-          fotoUrl: '',
-          fechaRegistro: serverTimestamp(),
-        })
-        await setDoc(doc(db, 'profesionales', uid), {
-          profesion: nuevo.profesion,
-          especialidad: nuevo.especialidad,
-          carnet: nuevo.carnet,
-          experiencia: nuevo.experiencia,
-          descripcion: nuevo.descripcion,
-          costoConsulta: nuevo.costoConsulta ? Number(nuevo.costoConsulta) : 0,
-          calificacionPromedio: 0,
-          verificado: true,
-          disponibleAhora: false,
-          modalidades: [true, true, false],
-          disponibilidad: {},
-          documentosVerificacion: [],
-          notaEstado: '',
-        })
-      })
-      setModal(null)
-    } catch (err) {
-      setError(err.code === 'auth/email-already-in-use' ? 'Ya existe una cuenta con ese correo.' : 'No se pudo crear el doctor.')
-    } finally {
-      setEnviando(false)
-    }
-  }
 
   function abrirDetalle(d) {
     setSeleccion(d)
@@ -376,49 +312,6 @@ export default function Doctores() {
           </p>
         )}
       </div>
-
-      <button type="button" className="btn btn-primary btn-auto fab-registrar" onClick={abrirNuevo}>+ Registrar doctor</button>
-
-      {modal === 'nuevo' && (
-        <div className="modal-fondo" onClick={() => setModal(null)}>
-          <form className="modal-tarjeta" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()} onSubmit={crearDoctor}>
-            <div className="modal-titulo">Registrar doctor</div>
-            <div className="modal-sub">La cuenta queda activa de inmediato, sin pasar por revisión.</div>
-            <div className="campos-2col">
-              <div><label className="campo-label">Nombre completo</label><input type="text" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} required /></div>
-              <div><label className="campo-label">Celular (8 dígitos)</label><input type="text" inputMode="numeric" value={nuevo.telefono} onChange={(e) => setNuevo({ ...nuevo, telefono: e.target.value.replace(/\D/g, '').slice(0, 8) })} required /></div>
-              <div><label className="campo-label">Correo</label><input type="email" value={nuevo.email} onChange={(e) => setNuevo({ ...nuevo, email: e.target.value })} required /></div>
-              <div>
-                <label className="campo-label">Contraseña inicial</label>
-                <CampoContrasena value={nuevo.contrasena} onChange={(e) => setNuevo({ ...nuevo, contrasena: e.target.value })} required />
-                <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>{AYUDA_CONTRASENA}</div>
-              </div>
-              <div>
-                <label className="campo-label">Profesión</label>
-                <select value={nuevo.profesion} onChange={(e) => setNuevo({ ...nuevo, profesion: e.target.value })}>
-                  {PROFESIONES.map((p) => <option key={p}>{p}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="campo-label">Especialidad</label>
-                <select value={nuevo.especialidad} onChange={(e) => setNuevo({ ...nuevo, especialidad: e.target.value })}>
-                  {tiposProfesion.map((t) => <option key={t.id} value={t.nombre}>{t.nombre}</option>)}
-                </select>
-              </div>
-              <div><label className="campo-label">Carnet profesional</label><input type="text" value={nuevo.carnet} onChange={(e) => setNuevo({ ...nuevo, carnet: e.target.value })} required /></div>
-              <div><label className="campo-label">Experiencia</label><input type="text" value={nuevo.experiencia} onChange={(e) => setNuevo({ ...nuevo, experiencia: e.target.value })} /></div>
-              <div><label className="campo-label">Costo de consulta (Bs)</label><input type="number" value={nuevo.costoConsulta} onChange={(e) => setNuevo({ ...nuevo, costoConsulta: e.target.value })} required /></div>
-            </div>
-            <label className="campo-label">Descripción</label>
-            <textarea rows="2" value={nuevo.descripcion} onChange={(e) => setNuevo({ ...nuevo, descripcion: e.target.value })} />
-            {error && <div className="registro-error">{error}</div>}
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancelar</button>
-              <button type="submit" className="btn btn-primary" disabled={enviando}>{enviando ? 'Creando…' : 'Crear doctor'}</button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {modal === 'bloquear' && seleccion && (
         <ModalBloqueo

@@ -99,7 +99,7 @@ export default function MisConsultas() {
       {consultas.length > 0 && filtradas.length === 0 && <p className="web-sub">No hay consultas en esta categoría.</p>}
 
       {filtradas.length > 0 && (
-        <div className="card-plain admin-list-card" style={{ maxWidth: 820 }}>
+        <div className="card-plain admin-list-card">
           {filtradas.map((c) => {
             const estado = ESTADOS_CONSULTA[c.estado] ?? ESTADOS_CONSULTA.pendiente_pago
             return (

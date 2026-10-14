@@ -84,7 +84,7 @@ export default function Agenda() {
       {!cargando && grupos.length === 0 && <p className="web-sub">No tienes consultas agendadas por ahora.</p>}
 
       {grupos.map(([fecha, lista]) => (
-        <div key={fecha} className="card-plain admin-list-card" style={{ maxWidth: 820 }}>
+        <div key={fecha} className="card-plain admin-list-card">
           <h2 className="section-title" style={{ marginTop: 0 }}>{formatearFechaLarga(fecha)}</h2>
           {lista.map((c) => (
             <div className="admin-row" key={c.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/doctor/consultas/${c.id}`)}>

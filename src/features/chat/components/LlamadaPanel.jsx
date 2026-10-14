@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff } from 'lucide-react'
 
 function VideoStream({ stream, muted, espejado, oculto }) {
   const ref = useRef(null)
@@ -17,7 +18,7 @@ function VideoStream({ stream, muted, espejado, oculto }) {
 }
 
 // Pantalla de llamada (sonando, entrante o en curso) que se superpone sobre el chat abierto.
-export default function LlamadaPanel({ llamada, soyLlamante, localStream, remoteStream, error, onAceptar, onRechazar, onColgar, otro }) {
+export default function LlamadaPanel({ llamada, soyLlamante, localStream, remoteStream, error, onAceptar, onRechazar, onColgar, onDescartarError, otro }) {
   const [micActivo, setMicActivo] = useState(true)
   const [camActiva, setCamActiva] = useState(true)
 
@@ -29,7 +30,21 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
     localStream?.getVideoTracks().forEach((t) => { t.enabled = camActiva })
   }, [camActiva, localStream])
 
-  if (!llamada) return null
+  // Si falló el micrófono/cámara ANTES de crear la llamada en Firestore, "llamada" nunca llega a
+  // existir — pero igual hay que mostrar el error, si no la persona no ve absolutamente nada al
+  // tocar el botón de llamar (justo el bug reportado: "no me muestra que estoy llamando").
+  if (!llamada) {
+    if (!error) return null
+    return (
+      <div className="llamada-overlay">
+        <div className="llamada-tarjeta">
+          <div className="llamada-nombre">No se pudo iniciar la llamada</div>
+          <p style={{ fontSize: 13, color: '#CFE8DE', marginTop: 8 }}>{error}</p>
+          <button type="button" className="btn btn-outline btn-auto" style={{ marginTop: 14 }} onClick={onDescartarError}>Cerrar</button>
+        </div>
+      </div>
+    )
+  }
 
   const sonando = llamada.estado === 'llamando'
   const esVideo = llamada.tipo === 'video'
@@ -40,7 +55,9 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
         <div className="llamada-tarjeta">
           <div className="llamada-nombre">Llamando a {otro.nombre}…</div>
           <div className="llamada-tipo">{esVideo ? '🎥 Videollamada' : '📞 Llamada de voz'}</div>
-          <button type="button" className="btn btn-danger btn-auto" style={{ marginTop: 14 }} onClick={onColgar}>Cancelar</button>
+          <button type="button" className="llamada-redondo colgar" style={{ margin: '16px auto 0' }} onClick={onColgar} title="Cancelar">
+            <PhoneOff size={24} />
+          </button>
         </div>
       )}
 
@@ -48,9 +65,19 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
         <div className="llamada-tarjeta">
           <div className="llamada-nombre">{otro.nombre} te está llamando</div>
           <div className="llamada-tipo">{esVideo ? '🎥 Videollamada' : '📞 Llamada de voz'}</div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-            <button type="button" className="btn btn-danger btn-auto" onClick={onRechazar}>Rechazar</button>
-            <button type="button" className="btn btn-ok btn-auto" onClick={onAceptar}>Aceptar</button>
+          <div style={{ display: 'flex', gap: 24, marginTop: 18, justifyContent: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <button type="button" className="llamada-redondo colgar" onClick={onRechazar} title="Rechazar">
+                <PhoneOff size={24} />
+              </button>
+              <div style={{ fontSize: 11, color: '#CFE8DE', marginTop: 6 }}>Rechazar</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <button type="button" className="llamada-redondo aceptar" onClick={onAceptar} title="Aceptar">
+                <Phone size={24} />
+              </button>
+              <div style={{ fontSize: 11, color: '#CFE8DE', marginTop: 6 }}>Aceptar</div>
+            </div>
           </div>
         </div>
       )}
@@ -78,14 +105,14 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
 
           <div className="llamada-controles">
             <button type="button" className={`llamada-btn${micActivo ? '' : ' off'}`} onClick={() => setMicActivo((v) => !v)} title={micActivo ? 'Silenciar' : 'Activar micrófono'}>
-              {micActivo ? '🎤' : '🔇'}
+              {micActivo ? <Mic size={20} /> : <MicOff size={20} />}
             </button>
             {esVideo && (
               <button type="button" className={`llamada-btn${camActiva ? '' : ' off'}`} onClick={() => setCamActiva((v) => !v)} title={camActiva ? 'Apagar cámara' : 'Encender cámara'}>
-                {camActiva ? '🎥' : '📷'}
+                {camActiva ? <Video size={20} /> : <VideoOff size={20} />}
               </button>
             )}
-            <button type="button" className="llamada-btn colgar" onClick={onColgar} title="Colgar">📵</button>
+            <button type="button" className="llamada-btn colgar" onClick={onColgar} title="Colgar"><PhoneOff size={20} /></button>
           </div>
         </div>
       )}

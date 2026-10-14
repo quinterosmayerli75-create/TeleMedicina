@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { doc, getDoc } from 'firebase/firestore'
+import { QrCode } from 'lucide-react'
 import { db } from '@/services/firebase/config'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useSuscripcionesDoctor } from '../../hooks/useSuscripciones'
@@ -74,7 +75,7 @@ export default function Suscripcion() {
       <h1 className="web-h1">Suscripción a DocTop</h1>
       <p className="web-sub">Para aparecer en las búsquedas y recibir consultas, tu suscripción debe estar activa.</p>
 
-      <div className={`admin-feature-card${activa ? '' : ' c-ambar'}`} style={{ maxWidth: 520 }}>
+      <div className={`admin-feature-card${activa ? '' : ' c-ambar'}`} style={{ maxWidth: 720 }}>
         <div className="icono">{activa ? '✅' : '⚠️'}</div>
         <div className="overline">Estado de la cuenta</div>
         {activa ? (
@@ -95,7 +96,7 @@ export default function Suscripcion() {
       </div>
 
       {!enCurso && (
-        <div className="card-plain admin-list-card" style={{ maxWidth: 520 }}>
+        <div className="card-plain admin-list-card" style={{ maxWidth: 720 }}>
           <h2 className="section-title" style={{ marginTop: 0 }}>💳 {activa ? 'Renovar' : 'Pagar suscripción'}</h2>
           <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
             {Object.entries(PLANES).map(([clave, info]) => (
@@ -115,7 +116,7 @@ export default function Suscripcion() {
       )}
 
       {enCurso && (
-        <div className="card-plain admin-list-card" style={{ maxWidth: 520 }}>
+        <div className="card-plain admin-list-card" style={{ maxWidth: 720 }}>
           <h2 className="section-title" style={{ marginTop: 0 }}>
             {PLANES[enCurso.plan]?.etiqueta} · Bs {enCurso.precio} <span className={`status-pill ${ESTADOS_SUSCRIPCION[enCurso.estado]?.clase}`} style={{ marginLeft: 8 }}>{ESTADOS_SUSCRIPCION[enCurso.estado]?.etiqueta}</span>
           </h2>
@@ -131,7 +132,12 @@ export default function Suscripcion() {
                   <img src={configPago.qrUrl} alt="QR de suscripción" style={{ width: 200, height: 200, objectFit: 'contain', border: '1px solid var(--marfil-osc)', borderRadius: 6 }} />
                 </div>
               ) : (
-                <p style={{ fontSize: 12.5, color: 'var(--gris)' }}>El administrador todavía no configuró el QR de suscripción.</p>
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                  <div style={{ width: 72, height: 72, borderRadius: 16, background: 'var(--admin-accent-soft)', color: 'var(--admin-accent-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
+                    <QrCode size={32} strokeWidth={1.6} />
+                  </div>
+                  <p style={{ fontSize: 12.5, color: 'var(--gris)', margin: 0 }}>El administrador todavía no configuró el QR de suscripción.</p>
+                </div>
               )}
               {configPago.datosPago && <p style={{ fontSize: 12.5, whiteSpace: 'pre-wrap', textAlign: 'center' }}>{configPago.datosPago}</p>}
 
@@ -153,7 +159,7 @@ export default function Suscripcion() {
       )}
 
       {suscripciones.length > 0 && (
-        <div className="card-plain admin-list-card" style={{ maxWidth: 520 }}>
+        <div className="card-plain admin-list-card" style={{ maxWidth: 720 }}>
           <h2 className="section-title" style={{ marginTop: 0 }}>🧾 Historial de pagos</h2>
           {suscripciones.map((s) => (
             <div className="admin-row" key={s.id}>

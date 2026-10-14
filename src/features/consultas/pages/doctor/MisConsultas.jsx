@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useConsultasDoctor } from '../../hooks/useConsultas'
 import { ESTADOS_CONSULTA, MODALIDADES } from '../../services/consultas'
@@ -18,8 +18,9 @@ export default function MisConsultas() {
   const navigate = useNavigate()
   const { usuario } = useAuth()
   const { consultas, cargando } = useConsultasDoctor(usuario?.uid)
+  const [searchParams] = useSearchParams()
   const [pestana, setPestana] = useState('')
-  const [busqueda, setBusqueda] = useState('')
+  const [busqueda, setBusqueda] = useState(searchParams.get('q') ?? '')
   const [fechaFiltro, setFechaFiltro] = useState('')
 
   const conteos = useMemo(() => {
@@ -105,7 +106,7 @@ export default function MisConsultas() {
       {consultas.length > 0 && filtradas.length === 0 && <p className="web-sub">No hay consultas en esta categoría.</p>}
 
       {filtradas.length > 0 && (
-        <div className="card-plain admin-list-card" style={{ maxWidth: 820 }}>
+        <div className="card-plain admin-list-card">
           {filtradas.map((c) => {
             const estado = ESTADOS_CONSULTA[c.estado] ?? ESTADOS_CONSULTA.pendiente_pago
             return (

@@ -106,6 +106,10 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
     limpiar()
   }
 
+  function descartarError() {
+    setError('')
+  }
+
   // El llamante fija la respuesta cuando llega.
   useEffect(() => {
     const pc = pcRef.current
@@ -139,5 +143,5 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
 
   const llamadaActiva = llamada && !['finalizada', 'rechazada'].includes(llamada.estado) ? llamada : null
 
-  return { llamada: llamadaActiva, soyLlamante, localStream, remoteStream, error, iniciar, aceptar, rechazar, colgar }
+  return { llamada: llamadaActiva, soyLlamante, localStream, remoteStream, error, iniciar, aceptar, rechazar, colgar, descartarError }
 }

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useProfesionalesActivos } from '../hooks/useProfesionalesActivos'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import TarjetaDoctor from '../components/TarjetaDoctor'
@@ -27,8 +28,9 @@ const ORDENES = [
 export default function Buscar() {
   const { profesionales, cargando } = useProfesionalesActivos()
   const tipos = useTiposProfesion()
+  const [searchParams] = useSearchParams()
 
-  const [texto, setTexto] = useState('')
+  const [texto, setTexto] = useState(searchParams.get('q') ?? '')
   const [especialidad, setEspecialidad] = useState('Todas')
   const [precioMax, setPrecioMax] = useState(500)
   const [soloEnLinea, setSoloEnLinea] = useState(false)
@@ -70,7 +72,7 @@ export default function Buscar() {
       <div className="web-2col">
         <div>
           <h2 className="section-title">{cargando ? 'Cargando…' : `${resultados.length} resultado${resultados.length === 1 ? '' : 's'}`}</h2>
-          <div className="web-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <div className="web-grid" style={{ gridTemplateColumns: '1fr' }}>
             {resultados.map((doctor) => (
               <TarjetaDoctor key={doctor.id} doctor={doctor} />
             ))}

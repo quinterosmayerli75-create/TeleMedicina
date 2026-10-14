@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/services/firebase/config'
 import { useAuth } from '../context/AuthContext'
 import CampoContrasena from '@/shared/components/CampoContrasena'
+import fotoDoctora from '@/assets/landing/doctora-consulta.jpg'
 import './Acceso.css'
 
 const RUTA_POR_ROL = {
@@ -71,55 +72,79 @@ export default function Acceso() {
 
   return (
     <div className="acceso-fondo">
-      <div className="acceso-panel">
-        <div className="acceso-panel-tag">🔒 Portal clínico seguro</div>
-        <h1>Tu salud y la de tu familia, en manos de profesionales verificados.</h1>
-        <p>Accede a consultas virtuales por chat, llamada o videollamada con profesionales de la salud validados por DocTop.</p>
-      </div>
-
-      <div className="acceso-formulario">
-        <div className="acceso-card">
-          <div className="acceso-marca">
-            <svg width="46" height="46" viewBox="0 0 100 100" aria-hidden="true">
-              <circle cx="50" cy="50" r="46" fill="none" stroke="var(--onyx)" strokeWidth="4" />
-              <text x="50" y="61" textAnchor="middle" fontFamily="Playfair Display" fontSize="32" fill="var(--onyx)" fontWeight="600">DT</text>
-            </svg>
-            <div className="acceso-nombre">DOCTOP</div>
-            <div className="acceso-slogan">Bienvenido de nuevo — ingresa a tu cuenta</div>
+      <div className="acceso-tarjeta">
+        <div className="acceso-panel" style={{ backgroundImage: `linear-gradient(160deg, rgba(11,17,32,.92), rgba(14,122,87,.88)), url(${fotoDoctora})` }}>
+          <div className="acceso-panel-top">
+            <div className="acceso-panel-logo">
+              <div className="mark">➕</div>
+              <div>
+                <div className="word">DOCTOP</div>
+                <div className="sub">Salud digital</div>
+              </div>
+            </div>
+            <div className="acceso-panel-pill">🟢 Acceso seguro</div>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <label className="campo-label" htmlFor="correo">Correo electrónico</label>
-            <input
-              id="correo"
-              type="text"
-              placeholder="tu@correo.com"
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              autoComplete="email"
-            />
+          <div className="acceso-panel-tag">🩺 Red de telemedicina</div>
+          <h1>Tu salud y la de tu familia, en manos de profesionales verificados.</h1>
+          <p>Accede a consultas virtuales por chat, llamada o videollamada con profesionales de la salud validados por DocTop.</p>
 
-            <label className="campo-label" htmlFor="contrasena">Contraseña</label>
-            <CampoContrasena
-              id="contrasena"
-              placeholder="••••••••"
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-              autoComplete="current-password"
-            />
+          <div className="acceso-panel-spacer" />
 
-            {error && <div className="acceso-error">{error}</div>}
+          <div className="acceso-panel-badges">
+            <div className="acceso-panel-badge">✓ Profesionales verificados</div>
+            <div className="acceso-panel-badge">💬 Chat, llamada o video</div>
+            <div className="acceso-panel-badge">📱 Pago directo por QR</div>
+          </div>
+        </div>
 
-            <button type="submit" className="btn btn-primary" disabled={enviando}>
-              {enviando ? 'Ingresando…' : 'Iniciar sesión'}
-            </button>
-          </form>
+        <div className="acceso-formulario">
+          <div className="acceso-card">
+            <div className="acceso-marca">
+              <svg width="46" height="46" viewBox="0 0 100 100" aria-hidden="true">
+                <circle cx="50" cy="50" r="46" fill="none" stroke="var(--onyx)" strokeWidth="4" />
+                <text x="50" y="61" textAnchor="middle" fontFamily="Playfair Display" fontSize="32" fill="var(--onyx)" fontWeight="600">DT</text>
+              </svg>
+              <div className="acceso-nombre">DOCTOP</div>
+              <div className="acceso-slogan">Bienvenido de nuevo — ingresa a tu cuenta</div>
+            </div>
 
-          <div className="acceso-divisor">¿Aún no tiene cuenta?</div>
-          <Link to="/registro/paciente" className="btn btn-outline">Registrarme como paciente</Link>
-          <Link to="/registro/profesional" className="btn btn-outline" style={{ marginTop: 10 }}>
-            Registrarme como profesional de la salud
-          </Link>
+            <form onSubmit={handleSubmit}>
+              <label className="campo-label" htmlFor="correo">Correo electrónico</label>
+              <input
+                id="correo"
+                type="text"
+                placeholder="tu@correo.com"
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
+                autoComplete="email"
+              />
+
+              <label className="campo-label" htmlFor="contrasena">Contraseña</label>
+              <CampoContrasena
+                id="contrasena"
+                placeholder="••••••••"
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
+                autoComplete="current-password"
+              />
+
+              {error && <div className="acceso-error">{error}</div>}
+
+              <button type="submit" className="btn btn-primary" disabled={enviando}>
+                {enviando ? 'Ingresando…' : 'Iniciar sesión →'}
+              </button>
+            </form>
+
+            <div className="acceso-divisor">¿Aún no tiene cuenta?</div>
+            <div className="acceso-crear-cuenta">
+              <p>Regístrate gratis como paciente o como profesional de la salud.</p>
+            </div>
+            <Link to="/registro/paciente" className="btn btn-outline" style={{ marginTop: 10 }}>Registrarme como paciente</Link>
+            <Link to="/registro/profesional" className="btn btn-outline" style={{ marginTop: 10 }}>
+              Registrarme como profesional de la salud
+            </Link>
+          </div>
         </div>
       </div>
     </div>

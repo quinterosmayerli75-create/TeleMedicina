@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Paperclip, Image, Mic, MessageSquareText, Phone, Video, Flag } from 'lucide-react'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { enviarMensaje, idConversacion, mensajeErrorEnvio } from '../services/chat'
 import { useMensajes } from '../hooks/useChat'
@@ -130,11 +131,11 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
         <button type="button" className="btn btn-outline btn-auto" style={{ borderColor: 'var(--admin-accent)', color: '#5FE3B3' }} onClick={() => navigate(rutaPerfil)}>
           Ver perfil
         </button>
-        <div className="icn" title="Llamada de voz" onClick={() => !llamada.llamada && llamada.iniciar('audio')}>📞</div>
-        <button type="button" className="btn btn-primary btn-auto" style={{ background: 'var(--admin-accent)' }} onClick={() => !llamada.llamada && llamada.iniciar('video')}>
-          🎥 Iniciar videollamada
+        <div className="icn" title="Llamada de voz" onClick={() => !llamada.llamada && llamada.iniciar('audio')}><Phone size={17} /></div>
+        <button type="button" className="btn btn-primary btn-auto" style={{ background: 'var(--admin-accent)', display: 'flex', alignItems: 'center', gap: 7 }} onClick={() => !llamada.llamada && llamada.iniciar('video')}>
+          <Video size={15} /> Iniciar videollamada
         </button>
-        <div className="icn" style={{ color: 'var(--alerta)' }} title="Denunciar" onClick={() => navigate(rutaDenuncia)}>⚑</div>
+        <div className="icn" style={{ color: 'var(--alerta)' }} title="Denunciar" onClick={() => navigate(rutaDenuncia)}><Flag size={16} /></div>
       </div>
 
       <div className="chat-body" style={{ flex: 1, overflowY: 'auto' }}>
@@ -143,7 +144,12 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
           <div className="registro-error">Firestore no permite leer los mensajes: hay que publicar las reglas de firestore.rules (ver README).</div>
         )}
         {!cargando && !errorLectura && mensajes.length === 0 && (
-          <div className="chat-system" style={{ background: 'transparent', color: 'var(--gris)' }}>Aún no hay mensajes. Escriba el primero.</div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: 'var(--gris)' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: '#fff', color: 'var(--admin-accent-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MessageSquareText size={26} strokeWidth={1.6} />
+            </div>
+            <div style={{ fontSize: 13 }}>Aún no hay mensajes. Escriba el primero.</div>
+          </div>
         )}
         {mensajes.map((m) => (
           <Burbuja
@@ -190,9 +196,9 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
           </>
         ) : (
           <>
-            <button type="button" className="attach-btn" title="Enviar documentos o archivos" aria-label="Adjuntar archivo" onClick={() => archivosRef.current?.click()}>📎</button>
-            <button type="button" className="attach-btn" title="Enviar fotos o videos" aria-label="Adjuntar foto o video" onClick={() => galeriaRef.current?.click()}>📷</button>
-            <button type="button" className="attach-btn" title="Grabar audio" aria-label="Grabar audio" onClick={empezarGrabacion}>🎤</button>
+            <button type="button" className="attach-btn" title="Enviar documentos o archivos" aria-label="Adjuntar archivo" onClick={() => archivosRef.current?.click()}><Paperclip size={16} /></button>
+            <button type="button" className="attach-btn" title="Enviar fotos o videos" aria-label="Adjuntar foto o video" onClick={() => galeriaRef.current?.click()}><Image size={16} /></button>
+            <button type="button" className="attach-btn" title="Grabar audio" aria-label="Grabar audio" onClick={empezarGrabacion}><Mic size={16} /></button>
             <input type="text" placeholder="Escriba un mensaje…" style={{ flex: 1 }} value={texto} onChange={(e) => setTexto(e.target.value)} />
             <button type="submit" className="btn btn-primary btn-auto" disabled={!texto.trim()}>Enviar</button>
           </>
@@ -210,6 +216,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
         onAceptar={llamada.aceptar}
         onRechazar={llamada.rechazar}
         onColgar={llamada.colgar}
+        onDescartarError={llamada.descartarError}
         otro={otro}
       />
     </div>
