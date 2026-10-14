@@ -4,7 +4,13 @@ import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff } from 'lucide-react'
 function VideoStream({ stream, muted, espejado, oculto }) {
   const ref = useRef(null)
   useEffect(() => {
-    if (ref.current) ref.current.srcObject = stream ?? null
+    if (!ref.current) return
+    ref.current.srcObject = stream ?? null
+    // En varios navegadores (sobre todo en celular) el autoplay de un video con audio y sin
+    // "muted" se bloquea en silencio: el stream llega bien, pero el video se queda pausado con
+    // el ícono nativo de "play" y no se escucha nada. Forzar play() explícito arregla la mayoría
+    // de los casos; si igual lo bloquea, queda el reintento al tocar la pantalla (ver más abajo).
+    if (stream) ref.current.play().catch(() => {})
   }, [stream])
   return (
     <video
@@ -15,6 +21,12 @@ function VideoStream({ stream, muted, espejado, oculto }) {
       style={{ width: '100%', height: '100%', objectFit: 'cover', transform: espejado ? 'scaleX(-1)' : undefined, display: oculto ? 'none' : undefined }}
     />
   )
+}
+
+// Reintenta reproducir todo video/audio de la llamada: para cuando el navegador bloqueó el
+// autoplay y hace falta un toque de la persona (un gesto real del usuario) para desbloquearlo.
+function reintentarReproduccion(contenedor) {
+  contenedor?.querySelectorAll('video').forEach((v) => v.play().catch(() => {}))
 }
 
 // Pantalla de llamada (sonando, entrante o en curso) que se superpone sobre el chat abierto.
@@ -83,7 +95,7 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
       )}
 
       {llamada.estado === 'conectada' && (
-        <div className="llamada-activa">
+        <div className="llamada-activa" onClick={(e) => reintentarReproduccion(e.currentTarget)}>
           {esVideo && (
             <div className="llamada-header">
               <div className="llamada-header-chip">🟢 {otro.nombre}</div>
