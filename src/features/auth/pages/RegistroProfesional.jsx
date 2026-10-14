@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore'
@@ -10,8 +10,8 @@ import { AYUDA_CONTRASENA, validarContrasena } from '@/shared/utils/validacion'
 import { calcularEdad } from '@/shared/utils/fechas'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import { notificarAdmins } from '@/features/notificaciones/services/notificaciones'
+import { PROFESIONES } from '@/shared/utils/profesiones'
 
-const PROFESIONES = ['Médico', 'Odontólogo', 'Psicólogo', 'Nutricionista']
 const MODALIDADES = [
   { clave: 'chat', etiqueta: 'Chat de texto' },
   { clave: 'llamada', etiqueta: 'Llamada de voz' },
@@ -57,11 +57,21 @@ export default function RegistroProfesional() {
 
   const navigate = useNavigate()
 
+  // Solo las especialidades que el admin asignó a la profesión elegida (ver Categorías, admin).
+  const especialidadesDeLaProfesion = useMemo(
+    () => tiposProfesion.filter((t) => t.profesion === datos.profesion),
+    [tiposProfesion, datos.profesion]
+  )
+
+  // Si cambia la profesión (o recién cargan las especialidades), la especialidad elegida se
+  // reinicia a la primera que sí pertenece a esa profesión.
   useEffect(() => {
-    if (tiposProfesion.length > 0 && !datos.especialidad) {
-      setDatos((prev) => ({ ...prev, especialidad: tiposProfesion[0].nombre }))
+    if (especialidadesDeLaProfesion.length === 0) return
+    const siguePerteneciendo = especialidadesDeLaProfesion.some((t) => t.nombre === datos.especialidad)
+    if (!siguePerteneciendo) {
+      setDatos((prev) => ({ ...prev, especialidad: especialidadesDeLaProfesion[0].nombre }))
     }
-  }, [tiposProfesion, datos.especialidad])
+  }, [datos.profesion, datos.especialidad, especialidadesDeLaProfesion])
 
   function actualizarCampo(campo) {
     return (e) => setDatos((prev) => ({ ...prev, [campo]: e.target.value }))
@@ -275,8 +285,10 @@ export default function RegistroProfesional() {
                   </div>
                   <div>
                     <label className="campo-label" htmlFor="especialidad">Especialidad</label>
-                    <select id="especialidad" value={datos.especialidad} onChange={actualizarCampo('especialidad')}>
-                      {tiposProfesion.map((t) => <option key={t.id} value={t.nombre}>{t.nombre}</option>)}
+                    <select id="especialidad" value={datos.especialidad} onChange={actualizarCampo('especialidad')} disabled={especialidadesDeLaProfesion.length === 0}>
+                      {especialidadesDeLaProfesion.length === 0
+                        ? <option>Sin especialidades para esta profesión</option>
+                        : especialidadesDeLaProfesion.map((t) => <option key={t.id} value={t.nombre}>{t.nombre}</option>)}
                     </select>
                   </div>
                   <div>

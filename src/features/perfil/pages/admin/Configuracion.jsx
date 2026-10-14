@@ -116,7 +116,7 @@ export default function Configuracion() {
         <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
       </div>
       <h1 className="web-h1">Mi cuenta</h1>
-      <div className="web-2col" style={{ maxWidth: 820 }}>
+      <div className="web-2col">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <div className="admin-cat-icon">🔒</div>

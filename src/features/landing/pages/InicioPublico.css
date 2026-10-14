@@ -49,8 +49,16 @@
 .landing-hero {
   background: linear-gradient(180deg, var(--admin-accent-soft), var(--marfil));
   color: var(--onyx);
-  text-align: center;
-  padding: 80px 24px 96px;
+  padding: 72px 48px 90px;
+}
+
+.landing-hero-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 48px;
+  align-items: center;
 }
 
 .landing-hero-tag {
@@ -69,31 +77,76 @@
 
 .landing-hero h1 {
   font-family: var(--display);
-  font-size: 42px;
+  font-size: 34px;
   font-weight: 600;
-  max-width: 780px;
-  margin: 0 auto 20px;
-  line-height: 1.25;
+  margin: 0 0 18px;
+  line-height: 1.28;
 }
 
+.landing-hero h1 .acento { color: var(--admin-accent-dark); }
+
 .landing-hero p {
-  max-width: 560px;
-  margin: 0 auto 32px;
   color: var(--gris);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.65;
+  margin-bottom: 28px;
+  max-width: 480px;
 }
 
 .landing-hero-botones {
   display: flex;
   gap: 14px;
-  justify-content: center;
   flex-wrap: wrap;
 }
 
 .landing-btn-outline {
   border-color: var(--admin-accent-dark);
   color: var(--admin-accent-dark);
+}
+
+.landing-hero-badges {
+  display: flex;
+  gap: 20px;
+  margin-top: 36px;
+  flex-wrap: wrap;
+}
+
+.landing-hero-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--gris);
+  font-weight: 500;
+}
+
+.landing-hero-visual {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(14, 122, 87, .18);
+}
+
+.landing-hero-visual img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  display: block;
+}
+
+.landing-hero-visual-badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  background: #fff;
+  color: var(--onyx);
+  border-radius: 12px;
+  padding: 10px 16px;
+  box-shadow: 0 14px 30px rgba(15, 20, 23, .15);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .landing-section {
@@ -108,43 +161,163 @@
   margin: 0;
 }
 
+.landing-section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent-dark);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.landing-section-sub {
+  text-align: center;
+  color: var(--gris);
+  font-size: 14px;
+  max-width: 560px;
+  margin: 8px auto 0;
+}
+
 .landing-pasos {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  margin-top: 32px;
+  margin-top: 36px;
 }
 
 .landing-paso {
-  text-align: center;
-  border-radius: 12px;
+  border-radius: 14px;
+  position: relative;
+  padding-top: 20px;
 }
 
-.landing-paso-numero {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+.landing-paso-icono {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
   background: var(--admin-accent-soft);
   color: var(--admin-accent-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--display);
-  font-weight: 600;
-  margin: 0 auto 14px;
+  font-size: 19px;
 }
 
-.landing-footer {
-  text-align: center;
-  padding: 28px;
-  font-size: 12.5px;
+.landing-paso-numero {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--marfil);
   color: var(--gris);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
 }
+
+.landing-especialidades {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-top: 36px;
+}
+
+.landing-especialidad {
+  background: var(--admin-accent-soft);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 20px;
+  text-decoration: none;
+  display: block;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.landing-especialidad:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(15, 20, 23, .08); }
+
+.landing-especialidad-icono {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: var(--admin-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 19px;
+}
+
+.landing-especialidad-nombre { color: var(--onyx); font-size: 14.5px; font-weight: 700; margin-top: 14px; }
+.landing-especialidad-desc { color: var(--gris); font-size: 12px; margin-top: 4px; line-height: 1.5; }
+.landing-especialidad-link { color: var(--admin-accent-dark); font-size: 12px; font-weight: 600; margin-top: 12px; }
+
+.landing-beneficios {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 36px;
+}
+
+.landing-beneficio { text-align: center; }
+
+.landing-beneficio-icono {
+  width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 12px;
+  background: var(--admin-accent-soft); color: var(--admin-accent-dark);
+  display: flex; align-items: center; justify-content: center; font-size: 21px;
+}
+
+.landing-cta {
+  background: linear-gradient(135deg, var(--admin-navy), var(--admin-accent-dark));
+  border-radius: 24px;
+  padding: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  max-width: 1100px;
+  margin: 0 auto 72px;
+  color: #fff;
+}
+
+.landing-cta h2 { font-family: var(--display); font-size: 28px; margin: 0 0 10px; max-width: 480px; }
+.landing-cta p { color: #CFE8DE; font-size: 14px; max-width: 460px; margin: 0 0 20px; }
+
+.landing-footer {
+  background: var(--marfil);
+  border-top: 1px solid var(--marfil-osc);
+  padding: 48px 48px 24px;
+}
+
+.landing-footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 32px;
+}
+
+.landing-footer-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--onyx);
+}
+
+.landing-footer-desc { font-size: 12.5px; color: var(--gris); margin-top: 10px; max-width: 320px; line-height: 1.6; }
+.landing-footer-titulo { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--gris); margin-bottom: 12px; }
+.landing-footer-links { display: flex; flex-direction: column; gap: 8px; }
+.landing-footer-links a { color: var(--onyx); font-size: 13px; text-decoration: none; }
+.landing-footer-bottom { text-align: center; padding: 20px 0 0; font-size: 12px; color: var(--gris); border-top: 1px solid var(--marfil-osc); margin-top: 28px; }
 
 @media (max-width: 900px) {
   .landing-nav { padding: 16px 24px; }
   .landing-nav-links { gap: 16px; }
+  .landing-hero-inner { grid-template-columns: 1fr; }
   .landing-hero h1 { font-size: 30px; }
-  .landing-pasos { grid-template-columns: 1fr 1fr; }
+  .landing-pasos, .landing-especialidades, .landing-beneficios { grid-template-columns: 1fr 1fr; }
   .landing-section { padding: 48px 24px; }
+  .landing-footer-inner { grid-template-columns: 1fr; }
 }

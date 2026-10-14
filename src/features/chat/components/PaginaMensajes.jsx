@@ -45,6 +45,10 @@ export default function PaginaMensajes({ rol, encabezadoLista = null }) {
   return (
     <div className="web-two-pane chat-shell" style={{ margin: '-30px -36px' }}>
       <div className="web-pane-list">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 16px 4px' }}>
+          <span style={{ fontFamily: 'var(--display)', fontWeight: 700, fontSize: 16 }}>Mensajes</span>
+          <span className="admin-subtab-count">{conversaciones.length} total</span>
+        </div>
         {encabezadoLista}
         {error && (
           <div className="registro-error" style={{ padding: 16 }}>

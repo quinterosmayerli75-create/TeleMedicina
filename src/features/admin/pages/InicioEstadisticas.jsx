@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
+import {
+  Stethoscope, Users, ClipboardList, ShieldAlert, Ban, CreditCard, Hourglass,
+  BarChart3, TrendingUp, Monitor, Star, Tags, Wallet,
+} from 'lucide-react'
 import { db } from '@/services/firebase/config'
 import { useBloqueados } from '@/features/bloqueos/hooks/useBloqueados'
 import ListaBloqueos from '@/features/bloqueos/components/ListaBloqueos'
@@ -110,15 +114,33 @@ function useGraficasConsultas() {
   return { porDoctor, porModalidad, porEspecialidad, ingresoTotal, ingresosPorEspecialidad, pagosPendientes, porDoctorCalificacion, cargando }
 }
 
-// Cuántas calificaciones de cada cantidad de estrellas (1 a 5) se dieron en total.
+// Cuántas calificaciones de cada cantidad de estrellas (1 a 5) se dieron en total, y de qué
+// doctor es cada una (para no dejar el gráfico sin saber a quién corresponde).
 function useGraficaCalificaciones() {
   const { filas: calificaciones, cargando } = useColeccion('calificaciones')
+  const { filas: usuarios } = useColeccion('usuarios')
+
+  const nombrePorId = useMemo(() => {
+    const mapa = new Map()
+    usuarios.forEach((u) => mapa.set(u.id, u.nombre || 'Doctor'))
+    return mapa
+  }, [usuarios])
 
   const porEstrellas = useMemo(() => {
     const conteo = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
-    calificaciones.forEach((c) => { if (c.estrellas in conteo) conteo[c.estrellas] += 1 })
-    return [5, 4, 3, 2, 1].map((n) => ({ etiqueta: `${'★'.repeat(n)}${'☆'.repeat(5 - n)}`, valor: conteo[n] }))
-  }, [calificaciones])
+    const doctoresPorNivel = { 1: [], 2: [], 3: [], 4: [], 5: [] }
+    calificaciones.forEach((c) => {
+      if (!(c.estrellas in conteo)) return
+      conteo[c.estrellas] += 1
+      const nombre = nombrePorId.get(c.doctorId)
+      if (nombre) doctoresPorNivel[c.estrellas].push(nombre)
+    })
+    return [5, 4, 3, 2, 1].map((n) => {
+      const nombres = [...new Set(doctoresPorNivel[n])]
+      const sufijoNombre = nombres.length === 0 ? '' : nombres.length <= 2 ? ` · ${nombres.join(', ')}` : ` · ${nombres[0]} y ${nombres.length - 1} más`
+      return { etiqueta: `${'★'.repeat(n)}${'☆'.repeat(5 - n)}${sufijoNombre}`, valor: conteo[n] }
+    })
+  }, [calificaciones, nombrePorId])
 
   return { porEstrellas, cargando }
 }
@@ -296,31 +318,31 @@ export default function InicioEstadisticas() {
         <>
           <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)', marginBottom: 16 }}>
             <div className="admin-metric-card">
-              <div className="icono">🩺</div>
+              <div className="icono"><Stethoscope size={16} strokeWidth={2} /></div>
               <div className="overline">Doctores activos</div>
               <div className="numero">{doctoresActivos}</div>
               <div className="caption">Disponibles para teleconsulta</div>
             </div>
             <div className="admin-metric-card c-azul">
-              <div className="icono">👥</div>
+              <div className="icono"><Users size={16} strokeWidth={2} /></div>
               <div className="overline">Pacientes registrados</div>
               <div className="numero">{pacientes}</div>
               <div className="caption">Cuentas activas</div>
             </div>
             <div className="admin-metric-card c-rojo">
-              <div className="icono">📝</div>
+              <div className="icono"><ClipboardList size={16} strokeWidth={2} /></div>
               <div className="overline">Solicitudes pendientes</div>
               <div className="numero">{solicitudesPendientes}</div>
               <div className="caption">Validación de título y matrícula</div>
             </div>
             <div className="admin-metric-card c-ambar">
-              <div className="icono">🛡️</div>
+              <div className="icono"><ShieldAlert size={16} strokeWidth={2} /></div>
               <div className="overline">Denuncias pendientes</div>
               <div className="numero">{denunciasPendientes}</div>
               <div className="caption">Por revisar</div>
             </div>
             <div className="admin-metric-card c-onyx">
-              <div className="icono">🚫</div>
+              <div className="icono"><Ban size={16} strokeWidth={2} /></div>
               <div className="overline">Doctores bloqueados</div>
               <div className="numero">{temporales.bloqueados.length + permanentes.bloqueados.length}</div>
               <div className="caption">Temporal + permanente</div>
@@ -328,14 +350,14 @@ export default function InicioEstadisticas() {
           </div>
           <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', marginBottom: 16 }}>
             <div className="admin-feature-card">
-              <div className="icono">💳</div>
+              <div className="icono"><CreditCard size={18} strokeWidth={2} /></div>
               <div className="overline">Pagos de consultas</div>
               <div className="titulo">Ingresos registrados en plataforma</div>
               <div className="sub">Consultas completadas y liquidadas entre doctor y paciente.</div>
               <div className="numero">Bs {ingresoTotal}</div>
             </div>
             <div className="admin-feature-card c-ambar">
-              <div className="icono">⏳</div>
+              <div className="icono"><Hourglass size={18} strokeWidth={2} /></div>
               <div className="overline">Validación de pagos</div>
               <div className="titulo">Pagos pendientes de validar</div>
               <div className="sub">Comprobantes subidos por pacientes, a la espera del doctor.</div>
@@ -344,7 +366,7 @@ export default function InicioEstadisticas() {
           </div>
           <GraficaBarras
             titulo="Resumen en gráfica"
-            icono="📊"
+            Icono={BarChart3}
             datos={[
               { etiqueta: 'Doctores activos', valor: doctoresActivos },
               { etiqueta: 'Pacientes registrados', valor: pacientes },
@@ -362,28 +384,32 @@ export default function InicioEstadisticas() {
           <GraficaBarras
             titulo="Doctores con más consultas"
             subtitulo="Cantidad total de consultas solicitadas, por doctor."
-            icono="📈"
+            Icono={TrendingUp}
             datos={porDoctor}
             cargando={cargandoConsultas}
           />
           <GraficaBarras
             titulo="Modalidad más usada"
             subtitulo="Cómo prefieren atenderse los pacientes."
-            icono="💻"
+            Icono={Monitor}
             datos={porModalidad}
             cargando={cargandoConsultas}
           />
           <GraficaBarras
             titulo="Calificaciones de los pacientes"
-            subtitulo="Cuántas veces se dio cada cantidad de estrellas."
-            icono="⭐"
+            subtitulo={
+              porDoctorCalificacion.length > 0
+                ? `Mejor calificado: ${porDoctorCalificacion[0].etiqueta} (${porDoctorCalificacion[0].valor} ★). Cuántas veces se dio cada cantidad de estrellas.`
+                : 'Cuántas veces se dio cada cantidad de estrellas.'
+            }
+            Icono={Star}
             datos={porEstrellas}
             cargando={cargandoCalificaciones}
           />
           <GraficaBarras
             titulo="Calificación promedio por doctor"
             subtitulo="A quién corresponde cada nota — promedio de estrellas, por doctor."
-            icono="⭐"
+            Icono={Star}
             datos={porDoctorCalificacion}
             sufijo=" ★"
             cargando={cargandoConsultas}
@@ -391,14 +417,14 @@ export default function InicioEstadisticas() {
           <GraficaBarras
             titulo="Especialidades más solicitadas"
             subtitulo="Consultas pedidas, agrupadas por especialidad del doctor."
-            icono="🏷️"
+            Icono={Tags}
             datos={porEspecialidad}
             cargando={cargandoConsultas}
           />
           <GraficaBarras
             titulo="Ingresos por especialidad"
             subtitulo="Solo consultas ya pagadas y aprobadas (habilitadas o finalizadas)."
-            icono="💰"
+            Icono={Wallet}
             datos={ingresosPorEspecialidad}
             sufijo=" Bs"
             cargando={cargandoConsultas}

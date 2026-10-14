@@ -1,18 +1,67 @@
 .acceso-fondo {
   min-height: 100vh;
   display: flex;
-  background: var(--marfil);
+  align-items: center;
+  justify-content: center;
+  background: #EEF2F0;
+  padding: 32px;
+}
+
+.acceso-tarjeta {
+  width: 100%;
+  max-width: 1040px;
+  min-height: 600px;
+  display: flex;
+  background: #fff;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 30px 70px rgba(15, 20, 23, .12);
 }
 
 .acceso-panel {
   flex: 1 1 46%;
-  background: linear-gradient(160deg, var(--admin-navy), var(--admin-accent-dark));
+  background-size: cover;
+  background-position: center;
   color: #fff;
-  padding: 48px;
+  padding: 44px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 18px;
+  position: relative;
+}
+
+.acceso-panel-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.acceso-panel-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.acceso-panel-logo .mark {
+  width: 36px; height: 36px; border-radius: 10px; background: var(--admin-accent);
+  display: flex; align-items: center; justify-content: center; font-size: 17px;
+}
+
+.acceso-panel-logo .word { font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.1; }
+.acceso-panel-logo .sub { font-size: 9px; letter-spacing: 1.4px; color: #BFE3D3; text-transform: uppercase; }
+
+.acceso-panel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, .12);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .acceso-panel-tag {
@@ -25,20 +74,41 @@
   border-radius: 20px;
   font-size: 11.5px;
   font-weight: 600;
+  margin-top: 18px;
 }
 
 .acceso-panel h1 {
   font-family: var(--display);
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.3;
   margin: 10px 0;
 }
 
 .acceso-panel p {
-  font-size: 14px;
+  font-size: 13.5px;
   color: #CFE8DE;
   max-width: 420px;
+  line-height: 1.6;
+}
+
+.acceso-panel-spacer { flex: 1; }
+
+.acceso-panel-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.acceso-panel-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 11.5px;
 }
 
 .acceso-formulario {
@@ -46,16 +116,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 48px 44px;
 }
 
 .acceso-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 380px;
 }
 
 .acceso-marca {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .acceso-nombre {
@@ -67,7 +137,7 @@
 }
 
 .acceso-slogan {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--gris);
   margin-top: 6px;
 }
@@ -78,19 +148,51 @@
   margin-top: 12px;
 }
 
+.acceso-card input {
+  border-radius: 9px;
+}
+
 .acceso-card .btn-primary {
   margin-top: 20px;
   background: var(--admin-accent);
+  border-radius: 9px;
+  padding: 13px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .acceso-divisor {
   text-align: center;
   font-size: 11px;
   color: var(--gris);
-  margin: 18px 0 10px;
+  margin: 20px 0 14px;
+}
+
+.acceso-crear-cuenta {
+  background: var(--admin-accent-soft);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.acceso-crear-cuenta p {
+  font-size: 12px;
+  color: #1d4d3b;
+  margin: 0;
+  line-height: 1.5;
 }
 
 @media (max-width: 860px) {
-  .acceso-fondo { flex-direction: column; }
+  .acceso-fondo { padding: 0; }
+  .acceso-tarjeta { flex-direction: column; border-radius: 0; min-height: 100vh; }
   .acceso-panel { padding: 32px; }
+  .acceso-formulario { padding: 32px 24px; }
 }

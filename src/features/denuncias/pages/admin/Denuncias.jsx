@@ -29,23 +29,33 @@ const PESTANAS = [
   { clave: 'apelaciones', etiqueta: 'Apelaciones' },
 ]
 
-// Cuántos reportes tiene cada denunciado en total (cualquier estado), para detectar reincidentes.
+// Historial completo de reportes por denunciado (cualquier estado), para detectar reincidentes y
+// que el admin pueda ver motivo y fecha de denuncias anteriores antes de decidir.
 function useHistorialDenuncias() {
-  const [conteo, setConteo] = useState(new Map())
+  const [porDenunciado, setPorDenunciado] = useState(new Map())
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'reportes'), (snap) => {
       const mapa = new Map()
-      snap.docs.forEach((d) => {
-        const id = d.data().denunciadoId
-        if (id) mapa.set(id, (mapa.get(id) ?? 0) + 1)
+      snap.docs.forEach((docSnap) => {
+        const r = { id: docSnap.id, ...docSnap.data() }
+        if (!r.denunciadoId) return
+        if (!mapa.has(r.denunciadoId)) mapa.set(r.denunciadoId, [])
+        mapa.get(r.denunciadoId).push(r)
       })
-      setConteo(mapa)
+      mapa.forEach((lista) => lista.sort((a, b) => (aFecha(b.fecha)?.getTime() ?? 0) - (aFecha(a.fecha)?.getTime() ?? 0)))
+      setPorDenunciado(mapa)
     })
     return unsubscribe
   }, [])
 
-  return conteo
+  return porDenunciado
+}
+
+const ESTILO_REPORTE = {
+  pendiente: { texto: 'Pendiente', clase: 'status-pending' },
+  descartada: { texto: 'Descartada', clase: 'status-active' },
+  resuelta: { texto: 'Resuelta (bloqueo)', clase: 'status-blocked' },
 }
 
 // Apelaciones de usuarios bloqueados: colección "apelaciones"
@@ -110,6 +120,12 @@ export default function Denuncias() {
       const snap = await getDoc(doc(db, 'profesionales', id)).catch(() => null)
       setPerfilViendo((prev) => (prev?.id === id ? { ...prev, profesional: snap?.exists() ? snap.data() : null, cargandoExtra: false } : prev))
     }
+  }
+
+  function diasDesde(fecha) {
+    const f = aFecha(fecha)
+    if (!f) return null
+    return Math.max(0, Math.round((Date.now() - f.getTime()) / 86400000))
   }
 
   useEffect(() => {
@@ -278,11 +294,11 @@ export default function Denuncias() {
                 {d.denunciado && ` (${ETIQUETA_ROL[d.denunciado.rol] ?? d.denunciado.rol})`}
                 {d.denunciado && estadoEfectivo(d.denunciado) !== 'activo' && ` · cuenta ${ETIQUETA_ESTADO[estadoEfectivo(d.denunciado)] ?? d.denunciado.estado}`}
                 {d.denunciado && <span className="terminos-link" style={{ marginLeft: 6 }} onClick={() => verPerfil(d.denunciado, d.denunciadoId)}>Ver perfil</span>}
-                {(historialDenuncias.get(d.denunciadoId) ?? 0) > 1 && (
+                {(historialDenuncias.get(d.denunciadoId)?.length ?? 0) > 1 && (
                   <>
                     {' · '}
                     <span style={{ color: 'var(--alerta)', fontWeight: 600 }}>
-                      ⚠ {historialDenuncias.get(d.denunciadoId) - 1} denuncia{historialDenuncias.get(d.denunciadoId) - 1 === 1 ? '' : 's'} anterior{historialDenuncias.get(d.denunciadoId) - 1 === 1 ? '' : 'es'}
+                      ⚠ {historialDenuncias.get(d.denunciadoId).length - 1} denuncia{historialDenuncias.get(d.denunciadoId).length - 1 === 1 ? '' : 's'} anterior{historialDenuncias.get(d.denunciadoId).length - 1 === 1 ? '' : 'es'}
                     </span>
                   </>
                 )}
@@ -312,8 +328,20 @@ export default function Denuncias() {
             <div className="modal-titulo">Información de la denuncia</div>
             <div className="modal-sub">{seleccion.motivo}</div>
             <div className="card-plain" style={{ marginTop: 12 }}>
-              <div className="admin-row"><div>Denunciante</div><div style={{ fontWeight: 600 }}>{seleccion.denunciante?.nombre ?? '—'}</div></div>
-              <div className="admin-row" style={{ borderBottom: 'none' }}><div>Denunciado</div><div style={{ fontWeight: 600 }}>{seleccion.denunciado?.nombre ?? '—'}</div></div>
+              <div className="admin-row">
+                <div>Denunciante</div>
+                <div style={{ fontWeight: 600 }}>
+                  {seleccion.denunciante?.nombre ?? '—'}
+                  {seleccion.denunciante && <span className="terminos-link" style={{ marginLeft: 8, fontWeight: 500 }} onClick={() => verPerfil(seleccion.denunciante, seleccion.denuncianteId)}>Ver perfil</span>}
+                </div>
+              </div>
+              <div className="admin-row" style={{ borderBottom: 'none' }}>
+                <div>Denunciado</div>
+                <div style={{ fontWeight: 600 }}>
+                  {seleccion.denunciado?.nombre ?? '—'}
+                  {seleccion.denunciado && <span className="terminos-link" style={{ marginLeft: 8, fontWeight: 500 }} onClick={() => verPerfil(seleccion.denunciado, seleccion.denunciadoId)}>Ver perfil</span>}
+                </div>
+              </div>
             </div>
             <div className="section-title">Descripción del denunciante</div>
             <p style={{ fontSize: 12, lineHeight: 1.7, color: '#3a4750', background: 'var(--marfil)', padding: 12 }}>{seleccion.descripcion}</p>
@@ -357,7 +385,31 @@ export default function Denuncias() {
                 )
               )}
             </div>
-            <button type="button" className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => setPerfilViendo(null)}>Cerrar</button>
+
+            <div className="section-title">Historial de denuncias recibidas</div>
+            {(historialDenuncias.get(perfilViendo.id)?.length ?? 0) === 0 ? (
+              <p style={{ fontSize: 12, color: 'var(--gris)', marginTop: 0 }}>Sin denuncias anteriores.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                {historialDenuncias.get(perfilViendo.id).map((r) => {
+                  const estilo = ESTILO_REPORTE[r.estado] ?? ESTILO_REPORTE.pendiente
+                  const dias = diasDesde(r.fecha)
+                  return (
+                    <div key={r.id} style={{ background: 'var(--marfil)', borderRadius: 8, padding: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                        <div style={{ fontSize: 12.5, fontWeight: 600 }}>{r.motivo}</div>
+                        <span className={`status-pill ${estilo.clase}`}>{estilo.texto}</span>
+                      </div>
+                      <div className="rank-meta" style={{ marginTop: 2 }}>
+                        {formatearFecha(r.fecha)}{dias !== null && ` · hace ${dias} día${dias === 1 ? '' : 's'}`}
+                      </div>
+                      {r.notaAdmin && <div style={{ fontSize: 11.5, color: 'var(--gris)', marginTop: 4 }}>Resolución: {r.notaAdmin}</div>}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            <button type="button" className="btn btn-primary" onClick={() => setPerfilViendo(null)}>Cerrar</button>
           </div>
         </div>
       )}

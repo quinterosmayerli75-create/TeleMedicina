@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 
 // Input de contraseña con botón de "ojito" para mostrar/ocultar el texto. Acepta las mismas props
 // que un <input> normal (id, value, onChange, placeholder, autoComplete, required, etc.).
@@ -20,12 +21,13 @@ export default function CampoContrasena({ style, ...props }) {
           background: 'none',
           border: 'none',
           cursor: 'pointer',
-          fontSize: 15,
           padding: 4,
           lineHeight: 1,
+          color: 'var(--gris)',
+          display: 'flex',
         }}
       >
-        {visible ? '🙈' : '👁️'}
+        {visible ? <EyeOff size={17} strokeWidth={2} /> : <Eye size={17} strokeWidth={2} />}
       </button>
     </div>
   )
