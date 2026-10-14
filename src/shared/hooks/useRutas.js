@@ -13,7 +13,7 @@ export function useRutas() {
     base,
     buscar: `${base}/buscar`,
     perfilDoctor: (id) => (esDoctor ? `/doctor/especialista/${id}` : `/paciente/doctor/${id}`),
-    mensajesDoctor: (id) => (esDoctor ? `/doctor/mensajes/doctores/${id}` : `/paciente/mensajes/${id}`),
+    mensajesDoctor: (id) => (esDoctor ? `/doctor/mensajes/${id}` : `/paciente/mensajes/${id}`),
     denuncia: (id) => `${base}/denuncia/${id}`,
     // Un doctor también puede solicitar y hacer seguimiento a sus propias consultas (como
     // paciente de otro doctor). Usa una ruta aparte de "Mis consultas" (esa es su cola de

@@ -35,8 +35,11 @@ export default function PaginaMensajes({ rol, encabezadoLista = null }) {
   const idOtro = (c) => (esPaciente ? c.doctorId : c.pacienteId)
   const otrosIds = conversaciones.map(idOtro)
   const idActivo = id ?? otrosIds[0] ?? null
-  const contactos = useContactos([...otrosIds, idActivo], esPaciente ? 'profesional' : 'paciente')
+  const contactos = useContactos([...otrosIds, idActivo])
   const activo = idActivo ? contactos[idActivo] : null
+  // Un doctor puede chatear con un paciente o, si pidió una consulta con otro doctor (ver "Mis
+  // citas"), con otro profesional: la identidad real se toma del contacto, no de quién mira.
+  const otroEsProfesional = activo?.rol === 'profesional'
 
   // Un paciente que entra desde el perfil de un doctor con el que aún no habló ve la conversación vacía.
   const filas = idActivo && !otrosIds.includes(idActivo) ? [{ id: `nueva-${idActivo}`, nueva: true, otroId: idActivo }] : []
@@ -93,12 +96,16 @@ export default function PaginaMensajes({ rol, encabezadoLista = null }) {
           miUid={usuario.uid}
           miRol={rol}
           otro={activo}
-          rutaPerfil={esPaciente ? `/paciente/doctor/${idActivo}` : `/doctor/paciente/${idActivo}`}
+          rutaPerfil={
+            esPaciente || otroEsProfesional ? `${base}/${esPaciente ? 'doctor' : 'especialista'}/${idActivo}` : `/doctor/paciente/${idActivo}`
+          }
           rutaDenuncia={`${base}/denuncia/${idActivo}`}
           subtitulo={
             esPaciente
               ? `${activo.enLinea ? 'En línea' : 'Desconectado'} · toque para ver su perfil`
-              : 'Paciente · toque para ver su perfil'
+              : otroEsProfesional
+                ? `Doctor · ${activo.enLinea ? 'en línea' : 'desconectado'} · toque para ver su perfil`
+                : 'Paciente · toque para ver su perfil'
           }
         />
       ) : (

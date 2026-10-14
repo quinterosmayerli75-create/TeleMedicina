@@ -21,7 +21,6 @@ import MisConsultasPaciente from '@/features/consultas/pages/paciente/MisConsult
 import DoctorLayout from './layouts/DoctorLayout'
 import Panel from '@/features/profesionales/pages/Panel'
 import MensajesDoctor from '@/features/chat/pages/doctor/Mensajes'
-import MensajesInterconsulta from '@/features/chat/pages/doctor/MensajesInterconsulta'
 import PerfilPaciente from '@/features/pacientes/pages/PerfilPaciente'
 import Informes from '@/features/informes/pages/Informes'
 import InformeForm from '@/features/informes/pages/InformeForm'
@@ -104,8 +103,6 @@ export default function AppRouter() {
           <Route path="favoritos" element={<Favoritos />} />
           <Route path="especialista/:id" element={<PerfilDoctor />} />
           <Route path="mensajes" element={<MensajesDoctor />} />
-          <Route path="mensajes/doctores" element={<MensajesInterconsulta />} />
-          <Route path="mensajes/doctores/:id" element={<MensajesInterconsulta />} />
           <Route path="mensajes/:id" element={<MensajesDoctor />} />
           <Route path="paciente/:id" element={<PerfilPaciente />} />
           <Route path="informes" element={<Informes />} />
