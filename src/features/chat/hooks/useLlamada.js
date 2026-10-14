@@ -3,7 +3,22 @@ import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 import { agregarCandidato, crearLlamada, enviarOferta, enviarRespuesta, finalizarLlamada, rechazarLlamada } from '../services/llamadas'
 
-const CONFIG_ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
+// STUN solo no basta siempre: aunque los dos estén en la misma red, el router puede no soportar
+// "hairpin NAT" (rebotar una conexión hacia la misma red de la que salió) y la llamada se queda sin
+// audio/video pese a que la señalización funcione. Open Relay (metered.ca) es un TURN gratuito y
+// público pensado justo para pruebas/proyectos como este: si la conexión directa falla, pasa
+// retransmitida por ahí. No es privado (cualquiera con estas credenciales públicas lo usa) ni
+// tiene SLA, pero para un proyecto de curso es exactamente lo que hace falta.
+const CONFIG_ICE = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:openrelay.metered.ca:80' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+  ],
+}
 
 function mensajeErrorMedios(err) {
   if (err?.name === 'NotAllowedError') return 'Debes dar permiso para usar la cámara y/o el micrófono.'
@@ -65,6 +80,11 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
     pc.onicecandidate = (e) => {
       if (e.candidate) agregarCandidato(convId, campoCandidatos, e.candidate.toJSON()).catch(() => {})
     }
+    // Diagnóstico (solo en la consola del navegador, F12 → Console; no se le muestra a la
+    // persona): si el audio/video sigue sin llegar, esto dice en qué paso se traba exactamente.
+    pc.oniceconnectionstatechange = () => console.log('[llamada] iceConnectionState:', pc.iceConnectionState)
+    pc.onconnectionstatechange = () => console.log('[llamada] connectionState:', pc.connectionState)
+    pc.onicecandidateerror = (e) => console.log('[llamada] icecandidateerror:', e.errorCode, e.errorText, e.url)
     pc.ontrack = (e) => setRemoteStream(e.streams[0])
     pcRef.current = pc
     return pc
