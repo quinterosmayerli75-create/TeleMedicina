@@ -32,7 +32,11 @@ export default function PaginaMensajes({ rol, encabezadoLista = null }) {
   const base = esPaciente ? '/paciente' : '/doctor'
   const { conversaciones, cargando, error } = useConversaciones(usuario.uid)
 
-  const idOtro = (c) => (esPaciente ? c.doctorId : c.pacienteId)
+  // "La otra persona" de cada conversación: se toma de participantes (siempre los dos uid
+  // reales), no de los campos pacienteId/doctorId — esos solo dicen quién ocupa cada rol en
+  // ESA conversación puntual, y un doctor puede aparecer como pacienteId de otro doctor (ver
+  // "Mis citas"), así que asumir "yo siempre soy doctorId" lo hacía verse a sí mismo como contacto.
+  const idOtro = (c) => (c.participantes ?? [c.pacienteId, c.doctorId]).find((p) => p !== usuario.uid) ?? (esPaciente ? c.doctorId : c.pacienteId)
   const otrosIds = conversaciones.map(idOtro)
   const idActivo = id ?? otrosIds[0] ?? null
   const contactos = useContactos([...otrosIds, idActivo])
