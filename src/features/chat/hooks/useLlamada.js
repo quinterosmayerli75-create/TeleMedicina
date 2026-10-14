@@ -27,7 +27,11 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
 
   useEffect(() => {
     if (!convId) return undefined
-    return onSnapshot(doc(db, 'llamadas', convId), (snap) => setLlamada(snap.exists() ? snap.data() : null))
+    return onSnapshot(
+      doc(db, 'llamadas', convId),
+      (snap) => setLlamada(snap.exists() ? snap.data() : null),
+      () => setError('No se pudo conectar con la llamada. Recarga la página e intenta de nuevo.')
+    )
   }, [convId])
 
   const limpiar = useCallback(() => {
