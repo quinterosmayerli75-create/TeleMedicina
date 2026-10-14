@@ -16,9 +16,31 @@ import LlamadaPanel from './LlamadaPanel'
 export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenuncia, subtitulo }) {
   const navigate = useNavigate()
   const { perfil } = useAuth()
-  const pacienteId = miRol === 'paciente' ? miUid : otro.id
-  const doctorId = miRol === 'paciente' ? otro.id : miUid
+  // Quién es "pacienteId" vs "doctorId" en esta conversación: si alguno de los dos es
+  // realmente paciente, ese va en pacienteId (como siempre). Si los dos son profesionales (un
+  // doctor consultando a otro, ver "Mis citas"), no hay forma de saber quién iba primero, así
+  // que se ordena por uid — así ambos lados calculan siempre la misma conversación, sin
+  // importar quién la abre primero. Antes esto asumía "yo (doctor) siempre soy doctorId", lo
+  // que hacía que dos doctores chateando calcularan conversaciones distintas entre sí.
+  const yoSoyPaciente = miRol === 'paciente'
+  const otroEsPaciente = otro.rol === 'paciente'
+  let pacienteId
+  let doctorId
+  if (yoSoyPaciente) {
+    pacienteId = miUid
+    doctorId = otro.id
+  } else if (otroEsPaciente) {
+    pacienteId = otro.id
+    doctorId = miUid
+  } else if (miUid < otro.id) {
+    pacienteId = miUid
+    doctorId = otro.id
+  } else {
+    pacienteId = otro.id
+    doctorId = miUid
+  }
   const convId = idConversacion(pacienteId, doctorId)
+  const pacienteRol = pacienteId === miUid ? miRol : otro.rol
 
   const { mensajes, cargando, error: errorLectura } = useMensajes(convId)
   const grabadora = useGrabadora()
@@ -46,7 +68,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
     setTexto('')
     setAviso('')
     try {
-      await enviarMensaje({ pacienteId, doctorId, de: miUid, deNombre: perfil?.nombre, tipo: 'texto', texto: limpio })
+      await enviarMensaje({ pacienteId, doctorId, pacienteRol, de: miUid, deNombre: perfil?.nombre, tipo: 'texto', texto: limpio })
     } catch (err) {
       setTexto(limpio)
       setAviso(mensajeErrorEnvio(err))
@@ -82,6 +104,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
           await enviarMensaje({
             pacienteId,
             doctorId,
+            pacienteRol,
             de: miUid,
             deNombre: perfil?.nombre,
             tipo: tipoDeArchivo(archivo),

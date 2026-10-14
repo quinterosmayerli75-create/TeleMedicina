@@ -20,8 +20,11 @@ export function resumenDeMensaje({ tipo, texto, archivo }) {
 
 // Guarda un mensaje (texto o adjunto ya subido a Storage) y actualiza el resumen de la conversación.
 // `archivo`: { url, nombre, tamano, mime, duracion? } cuando `tipo` no es 'texto'. `deNombre` es el
-// nombre de quien envía, para el texto de la notificación que recibe la otra persona.
-export async function enviarMensaje({ pacienteId, doctorId, de, deNombre, tipo, texto = '', archivo = null }) {
+// nombre de quien envía, para el texto de la notificación que recibe la otra persona. `pacienteRol`
+// es el rol real de quien ocupa el "lugar" de pacienteId en esta conversación puntual: normalmente
+// 'paciente', pero puede ser 'profesional' si un doctor le escribe/consulta a otro doctor (ver "Mis
+// citas") — sin esto, la notificación lo mandaría al panel de paciente, al que no tiene acceso.
+export async function enviarMensaje({ pacienteId, doctorId, de, deNombre, tipo, texto = '', archivo = null, pacienteRol = 'paciente' }) {
   const convId = idConversacion(pacienteId, doctorId)
   await setDoc(
     doc(db, 'conversaciones', convId),
@@ -44,7 +47,15 @@ export async function enviarMensaje({ pacienteId, doctorId, de, deNombre, tipo, 
   })
 
   const paraUid = de === pacienteId ? doctorId : pacienteId
-  const enlace = paraUid === pacienteId ? `/paciente/mensajes/${doctorId}` : `/doctor/mensajes/${pacienteId}`
+  let enlace
+  if (paraUid === doctorId) {
+    // El que ocupa doctorId siempre es un profesional de verdad.
+    enlace = `/doctor/mensajes/${pacienteId}`
+  } else if (pacienteRol === 'paciente') {
+    enlace = `/paciente/mensajes/${doctorId}`
+  } else {
+    enlace = `/doctor/mensajes/${doctorId}`
+  }
   crearNotificacion({
     paraUid,
     tipo: 'mensaje_chat',
