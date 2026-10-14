@@ -6,6 +6,7 @@ import { auth, db } from '@/services/firebase/config'
 import { useAuth } from '../context/AuthContext'
 import SelectorFotos from '@/shared/components/SelectorFotos'
 import CampoContrasena from '@/shared/components/CampoContrasena'
+import CampoFecha from '@/shared/components/CampoFecha'
 import { mensajeErrorSubida, nombreSeguro, subirArchivo } from '@/services/archivos'
 import { AYUDA_CONTRASENA, validarContrasena } from '@/shared/utils/validacion'
 import { calcularEdad } from '@/shared/utils/fechas'
@@ -223,7 +224,7 @@ export default function RegistroPaciente() {
                   </div>
                   <div>
                     <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>
-                    <input id="fechaNacimiento" type="date" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
+                    <CampoFecha id="fechaNacimiento" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
                     <CampoError campo="fechaNacimiento" faltantes={faltantes} />
                   </div>
                   <div>
