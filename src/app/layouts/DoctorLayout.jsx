@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import {
   Stethoscope, CreditCard, CalendarDays, Home, Search, Heart,
-  FolderKanban, CircleCheckBig, MessageSquare, ClipboardList, Settings, LogOut,
+  FolderKanban, CircleCheckBig, MessageSquare, ClipboardList, Settings, LogOut, ShieldAlert,
 } from 'lucide-react'
 import { db, auth } from '@/services/firebase/config'
 import CuentaRestringida from '@/features/auth/components/CuentaRestringida'
@@ -36,7 +36,9 @@ function iniciales(nombre = '') {
 export default function DoctorLayout() {
   const { usuario, perfil, estado } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [busqueda, setBusqueda] = useState('')
+  const [datosProfesional, setDatosProfesional] = useState(null)
 
   // Revisión "perezosa" (sin backend/cron): cada vez que el doctor entra a cualquier pantalla,
   // se fija si su membresía está por vencer (avisa) o ya venció sin renovar (suspende).
@@ -47,9 +49,21 @@ export default function DoctorLayout() {
       .catch(() => {})
   }, [usuario, estado])
 
+  // Escucha en vivo el estado de la suscripción para mostrar el bloqueo de pantalla completa en
+  // cuanto se suspenda, sin esperar a recargar.
+  useEffect(() => {
+    if (!usuario || estado !== 'activo') return undefined
+    return onSnapshot(doc(db, 'profesionales', usuario.uid), (snap) => {
+      setDatosProfesional(snap.exists() ? snap.data() : null)
+    })
+  }, [usuario, estado])
+
   if (estado !== 'activo') {
     return <CuentaRestringida />
   }
+
+  const suspendidoPorMembresia = datosProfesional?.suscripcionActiva === false
+  const enPaginaDeSuscripcion = location.pathname === '/doctor/suscripcion'
 
   async function cerrarSesion() {
     await signOut(auth)
@@ -105,6 +119,43 @@ export default function DoctorLayout() {
         </main>
       </div>
       <TutorialInicio />
+
+      {suspendidoPorMembresia && !enPaginaDeSuscripcion && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(11, 17, 32, 0.92)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+          }}
+        >
+          <div className="modal-tarjeta" style={{ maxWidth: 460, textAlign: 'center' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: 18, margin: '0 auto 14px', color: '#fff',
+              background: 'var(--alerta)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <ShieldAlert size={30} strokeWidth={2} />
+            </div>
+            <div className="modal-titulo" style={{ color: 'var(--alerta)' }}>Tu cuenta está suspendida</div>
+            <p className="web-sub" style={{ marginTop: 8 }}>
+              Tu membresía venció y no fue renovada a tiempo. Mientras no regularices el pago, no apareces en
+              las búsquedas de pacientes y no puedes recibir ni atender nuevas consultas.
+            </p>
+            <p className="web-sub">
+              Realiza el pago de tu suscripción para reactivar tu cuenta y seguir usando DocTop con normalidad.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ marginTop: 12, background: 'var(--admin-accent)' }}
+              onClick={() => navigate('/doctor/suscripcion')}
+            >
+              Pagar mi suscripción ahora
+            </button>
+            <button type="button" className="btn btn-outline" style={{ marginTop: 10 }} onClick={cerrarSesion}>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
