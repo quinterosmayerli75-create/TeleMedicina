@@ -50,6 +50,39 @@ textarea, select {
   color: var(--texto);
   box-sizing: border-box;
 }
+/* Selector de fecha con calendario (CampoFecha.jsx, reemplaza el input type=date nativo) */
+.campo-fecha-wrapper { display: block; width: 100%; }
+input.campo-fecha-input {
+  width: 100%; background: var(--blanco); border: 1px solid var(--marfil-osc); border-radius: 9px;
+  padding: 12px 14px; font-family: var(--sans); font-size: 15px; color: var(--texto); box-sizing: border-box;
+}
+input.campo-fecha-input:focus { outline: none; border-color: var(--admin-accent); box-shadow: 0 0 0 3px var(--admin-accent-soft); }
+.campo-fecha-calendario.react-datepicker {
+  font-family: var(--sans); border: 1px solid var(--marfil-osc); border-radius: 16px; overflow: hidden;
+  box-shadow: 0 12px 28px rgba(11, 17, 32, .14);
+}
+.campo-fecha-calendario .react-datepicker__header {
+  background: var(--blanco); border-bottom: 1px solid var(--marfil-osc); padding-top: 14px;
+}
+.campo-fecha-calendario .react-datepicker__current-month,
+.campo-fecha-calendario .react-datepicker-year-header { font-weight: 700; font-size: 14px; color: var(--onyx); }
+.campo-fecha-calendario .react-datepicker__day-name { color: var(--gris); font-size: 12px; font-weight: 600; }
+.campo-fecha-calendario .react-datepicker__day {
+  border-radius: 50%; width: 2rem; line-height: 2rem; margin: 2px; color: var(--texto);
+}
+.campo-fecha-calendario .react-datepicker__day:hover { background: var(--admin-accent-soft); border-radius: 50%; }
+.campo-fecha-calendario .react-datepicker__day--selected,
+.campo-fecha-calendario .react-datepicker__day--keyboard-selected {
+  background: var(--admin-accent); color: #fff;
+}
+.campo-fecha-calendario .react-datepicker__day--outside-month { color: var(--marfil-osc); }
+.campo-fecha-calendario .react-datepicker__navigation-icon::before { border-color: var(--onyx); }
+.campo-fecha-calendario .react-datepicker__month-select,
+.campo-fecha-calendario .react-datepicker__year-select {
+  border-radius: 8px; border: 1px solid var(--marfil-osc); padding: 4px 8px; font-size: 13px; font-family: var(--sans);
+}
+.campo-fecha-calendario .react-datepicker__close-icon::after { background: var(--admin-accent); }
+
 input[type=range] { width: 100%; accent-color: var(--oro); }
 input[type=file] { border: 1px dashed var(--marfil-osc); background: var(--marfil); font-size: 13px; color: var(--gris); padding: 10px 12px; }
 input[type=file]::file-selector-button {
