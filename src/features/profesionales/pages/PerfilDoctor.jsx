@@ -134,11 +134,9 @@ export default function PerfilDoctor() {
         </div>
 
         <div>
-          {!rutas.esDoctor && (
-            <button type="button" className="btn btn-primary" style={{ width: '100%', marginBottom: 14 }} onClick={() => navigate(`/paciente/solicitar/${doctor.id}`)}>
-              📅 Solicitar consulta
-            </button>
-          )}
+          <button type="button" className="btn btn-primary" style={{ width: '100%', marginBottom: 14 }} onClick={() => navigate(rutas.solicitarConsulta(doctor.id))}>
+            📅 Solicitar consulta
+          </button>
 
           <div className="icon-btn-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
             {modalidadesActivas.includes('Llamada de voz') && <div className="icon-btn">📞 Llamar</div>}

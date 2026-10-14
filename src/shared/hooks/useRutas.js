@@ -15,5 +15,11 @@ export function useRutas() {
     perfilDoctor: (id) => (esDoctor ? `/doctor/especialista/${id}` : `/paciente/doctor/${id}`),
     mensajesDoctor: (id) => (esDoctor ? `/doctor/mensajes/doctores/${id}` : `/paciente/mensajes/${id}`),
     denuncia: (id) => `${base}/denuncia/${id}`,
+    // Un doctor también puede solicitar y hacer seguimiento a sus propias consultas (como
+    // paciente de otro doctor). Usa una ruta aparte de "Mis consultas" (esa es su cola de
+    // pacientes como profesional) para no mezclarlas.
+    solicitarConsulta: (id) => `${base}/solicitar/${id}`,
+    misCitas: esDoctor ? '/doctor/mis-citas' : '/paciente/consultas',
+    cita: (id) => (esDoctor ? `/doctor/mis-citas/${id}` : `/paciente/consultas/${id}`),
   }
 }

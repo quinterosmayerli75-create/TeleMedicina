@@ -119,6 +119,11 @@ export default function AppRouter() {
           <Route path="consultas/:id" element={<ConsultaDetalleDoctor />} />
           <Route path="suscripcion" element={<SuscripcionDoctor />} />
           <Route path="validacion-pagos" element={<ValidacionPagosDoctor />} />
+          {/* El doctor también puede ser paciente de otro doctor (ver useRutas.js): mismas
+              pantallas que usa el paciente, en una ruta aparte de su propia "Mis consultas". */}
+          <Route path="solicitar/:id" element={<SolicitarConsulta />} />
+          <Route path="mis-citas" element={<MisConsultasPaciente />} />
+          <Route path="mis-citas/:id" element={<Consulta />} />
         </Route>
 
         <Route

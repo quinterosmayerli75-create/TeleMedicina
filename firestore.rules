@@ -219,9 +219,10 @@ service cloud.firestore {
     match /consultas/{id} {
       allow read: if estaAutenticado()
         && (request.auth.uid == resource.data.pacienteId || request.auth.uid == resource.data.doctorId || esAdmin());
-      allow create: if esPaciente()
+      allow create: if (esPaciente() || esProfesional())
         && request.resource.data.pacienteId == request.auth.uid
         && request.resource.data.doctorId is string
+        && request.resource.data.doctorId != request.auth.uid
         && request.resource.data.estado == 'pendiente_pago'
         && request.resource.data.modalidad in ['chat', 'llamada', 'video']
         && request.resource.data.costoConsulta is number
