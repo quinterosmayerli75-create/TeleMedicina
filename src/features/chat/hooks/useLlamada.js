@@ -21,6 +21,17 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
   const pcRef = useRef(null)
   const localStreamRef = useRef(null)
   const candidatosVistos = useRef(new Set())
+  // Candidatos ICE que llegaron antes de que este lado tuviera lista la "remote description": no se
+  // pueden agregar todavía (el navegador los rechaza), así que se guardan aquí y se aplican en cuanto
+  // setRemoteDescription termina. Sin esto, un candidato que llega un poco antes (muy probable en una
+  // red local rápida) se perdía para siempre: se marcaba como "visto" aunque addIceCandidate fallara.
+  const candidatosPendientes = useRef([])
+
+  function aplicarCandidatosPendientes(pc) {
+    const pendientes = candidatosPendientes.current
+    candidatosPendientes.current = []
+    pendientes.forEach((c) => pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {}))
+  }
 
   const soyLlamante = llamada?.llamanteId === miUid
   const campoCandidatosOtro = soyLlamante ? 'candidatosReceptor' : 'candidatosLlamante'
@@ -42,6 +53,7 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
     setLocalStream(null)
     setRemoteStream(null)
     candidatosVistos.current = new Set()
+    candidatosPendientes.current = []
   }, [])
 
   // "comoLlamante" se pasa explícito (no se puede confiar en el estado "llamada" reactivo aquí: justo
@@ -91,6 +103,7 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
       const pc = crearConexion(false)
       stream.getTracks().forEach((track) => pc.addTrack(track, stream))
       await pc.setRemoteDescription(new RTCSessionDescription(llamada.oferta))
+      aplicarCandidatosPendientes(pc)
       const respuesta = await pc.createAnswer()
       await pc.setLocalDescription(respuesta)
       await enviarRespuesta(convId, { sdp: respuesta.sdp, type: respuesta.type })
@@ -119,11 +132,14 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
     const pc = pcRef.current
     if (!pc || !llamada || !soyLlamante) return
     if (llamada.respuesta && pc.signalingState === 'have-local-offer') {
-      pc.setRemoteDescription(new RTCSessionDescription(llamada.respuesta)).catch(() => {})
+      pc.setRemoteDescription(new RTCSessionDescription(llamada.respuesta))
+        .then(() => aplicarCandidatosPendientes(pc))
+        .catch(() => {})
     }
   }, [llamada, soyLlamante])
 
-  // Agrega los candidatos ICE nuevos que publicó la otra persona.
+  // Agrega los candidatos ICE nuevos que publicó la otra persona — o los deja en espera si este
+  // lado todavía no tiene remoteDescription lista (ver candidatosPendientes más arriba).
   useEffect(() => {
     const pc = pcRef.current
     if (!pc || !llamada) return
@@ -132,7 +148,11 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
       const clave = `${campoCandidatosOtro}-${i}`
       if (candidatosVistos.current.has(clave)) return
       candidatosVistos.current.add(clave)
-      pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {})
+      if (pc.remoteDescription) {
+        pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {})
+      } else {
+        candidatosPendientes.current.push(c)
+      }
     })
   }, [llamada, campoCandidatosOtro])
 
