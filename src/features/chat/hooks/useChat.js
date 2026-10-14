@@ -49,9 +49,11 @@ export function useMensajes(convId) {
   return { mensajes: vigente ? estado.mensajes : [], cargando: !vigente, error: vigente ? estado.error : '' }
 }
 
-// Nombre, foto y (si es doctor) disponibilidad de las personas con las que se conversa.
-// `rolContacto`: 'profesional' si el que mira es un paciente; 'paciente' si el que mira es un doctor.
-export function useContactos(ids, rolContacto) {
+// Nombre, foto, rol real y (si es doctor) disponibilidad de las personas con las que se conversa.
+// El rol se lee del propio documento de "usuarios" (no se asume por quién mira la conversación):
+// un doctor puede ser paciente de otro doctor, así que el "pacienteId" de una conversación a veces
+// es en realidad una cuenta de profesional.
+export function useContactos(ids) {
   const clave = useMemo(() => [...new Set(ids.filter(Boolean))].sort().join(','), [ids])
   const [contactos, setContactos] = useState({})
 
@@ -61,17 +63,17 @@ export function useContactos(ids, rolContacto) {
     Promise.all(
       lista.map(async (id) => {
         try {
-          const [usuarioSnap, profSnap] = await Promise.all([
-            getDoc(doc(db, 'usuarios', id)),
-            rolContacto === 'profesional' ? getDoc(doc(db, 'profesionales', id)) : null,
-          ])
+          const usuarioSnap = await getDoc(doc(db, 'usuarios', id))
           if (!usuarioSnap.exists()) return [id, { existe: false }]
           const u = usuarioSnap.data()
+          const esProfesional = u.rol === 'profesional'
+          const profSnap = esProfesional ? await getDoc(doc(db, 'profesionales', id)) : null
           return [
             id,
             {
               existe: true,
               id,
+              rol: u.rol,
               nombre: [u.nombre, u.apellido].filter(Boolean).join(' ') || 'Usuario',
               fotoUrl: u.fotoUrl ?? '',
               enLinea: profSnap?.exists() ? profSnap.data().disponibleAhora ?? false : null,
@@ -85,7 +87,7 @@ export function useContactos(ids, rolContacto) {
     return () => {
       vigente = false
     }
-  }, [clave, rolContacto])
+  }, [clave])
 
   return contactos
 }
