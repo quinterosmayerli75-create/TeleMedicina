@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
+import { useRutas } from '@/shared/hooks/useRutas'
 import { useConsultasPaciente } from '../../hooks/useConsultas'
 import { ESTADOS_CONSULTA, MODALIDADES } from '../../services/consultas'
 
@@ -16,6 +17,7 @@ const PESTANAS = [
 
 export default function MisConsultas() {
   const navigate = useNavigate()
+  const rutas = useRutas()
   const { usuario } = useAuth()
   const { consultas, cargando } = useConsultasPaciente(usuario?.uid)
   const [pestana, setPestana] = useState('')
@@ -103,7 +105,7 @@ export default function MisConsultas() {
           {filtradas.map((c) => {
             const estado = ESTADOS_CONSULTA[c.estado] ?? ESTADOS_CONSULTA.pendiente_pago
             return (
-              <div className="admin-row" key={c.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/paciente/consultas/${c.id}`)}>
+              <div className="admin-row" key={c.id} style={{ cursor: 'pointer' }} onClick={() => navigate(rutas.cita(c.id))}>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <div className="admin-avatar-row">{(c.doctor?.nombre ?? c.doctorNombre ?? '?')[0].toUpperCase()}</div>
                   <div>

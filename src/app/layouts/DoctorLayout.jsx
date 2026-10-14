@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth'
 import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import {
   Stethoscope, CreditCard, CalendarDays, Home, Search, Heart,
-  FolderKanban, CircleCheckBig, MessageSquare, ClipboardList, Settings, LogOut, ShieldAlert,
+  FolderKanban, CircleCheckBig, MessageSquare, ClipboardList, Settings, LogOut, ShieldAlert, CalendarHeart,
 } from 'lucide-react'
 import { db, auth } from '@/services/firebase/config'
 import CuentaRestringida from '@/features/auth/components/CuentaRestringida'
@@ -21,6 +21,7 @@ const ITEMS = [
   { to: '/doctor/inicio', label: 'Inicio', Icono: Home },
   { to: '/doctor/buscar', label: 'Buscar doctores', Icono: Search },
   { to: '/doctor/favoritos', label: 'Favoritos', Icono: Heart },
+  { to: '/doctor/mis-citas', label: 'Mis citas', Icono: CalendarHeart },
   { to: '/doctor/consultas', label: 'Mis consultas', Icono: FolderKanban },
   { to: '/doctor/validacion-pagos', label: 'Validar pagos', Icono: CircleCheckBig },
   { to: '/doctor/mensajes', label: 'Mensajes', Icono: MessageSquare },

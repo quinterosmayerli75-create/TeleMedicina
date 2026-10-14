@@ -2,14 +2,19 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useProfesional } from '@/features/profesionales/hooks/useProfesionalesActivos'
+import { useRutas } from '@/shared/hooks/useRutas'
 import { crearConsulta, MODALIDADES } from '../../services/consultas'
 import { hayHorarios, horasDisponibles } from '@/features/profesionales/utils/horarios'
 
 const HOY = new Date().toISOString().slice(0, 10)
 
+// Se usa tanto en /paciente/solicitar/:id como en /doctor/solicitar/:id: un doctor también puede
+// solicitar una consulta con otro doctor (por ejemplo, si él mismo necesita atención), igual que
+// cualquier paciente — ver useRutas.js.
 export default function SolicitarConsulta() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const rutas = useRutas()
   const { usuario, perfil } = useAuth()
   const { profesional: doctor, cargando } = useProfesional(id)
   const [modalidad, setModalidad] = useState('')
@@ -67,7 +72,7 @@ export default function SolicitarConsulta() {
         fecha,
         hora,
       })
-      navigate(`/paciente/consultas/${idConsulta}`, { replace: true })
+      navigate(rutas.cita(idConsulta), { replace: true })
     } catch {
       setError('No se pudo crear la solicitud. Intenta de nuevo.')
       setEnviando(false)

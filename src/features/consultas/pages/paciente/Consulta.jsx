@@ -32,7 +32,7 @@ export default function Consulta() {
   if (!consulta || consulta.pacienteId !== usuario?.uid) {
     return (
       <div>
-        <span className="back-link" onClick={() => navigate(rutas.base + '/consultas')}>← Volver</span>
+        <span className="back-link" onClick={() => navigate(rutas.misCitas)}>← Volver</span>
         <p>No se encontró esa consulta.</p>
       </div>
     )
@@ -75,7 +75,7 @@ export default function Consulta() {
 
   return (
     <div>
-      <span className="back-link" onClick={() => navigate(rutas.base + '/consultas')}>← Volver a mis consultas</span>
+      <span className="back-link" onClick={() => navigate(rutas.misCitas)}>← Volver a mis consultas</span>
       <h1 className="web-h1">Consulta con {consulta.doctor?.nombre ?? consulta.doctorNombre}</h1>
       <span className={`status-pill ${estado.clase}`}>{estado.etiqueta}</span>
 
