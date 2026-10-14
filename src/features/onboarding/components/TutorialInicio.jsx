@@ -21,16 +21,21 @@ function claveVisto(uid) {
 }
 
 // Mini-tutorial que se ve una sola vez, la primera vez que la persona entra (solo paciente y
-// doctor; el admin no lo necesita). Muestra todos los pasos juntos en una lista. Se puede omitir;
-// una vez cerrado (por "Omitir" o "Comenzar") no vuelve a aparecer en ese navegador.
+// doctor; el admin no lo necesita). Avanza paso a paso con "Siguiente"; se puede omitir en
+// cualquier momento. Una vez cerrado (por "Omitir" o "Comenzar" en el último paso) no vuelve a
+// aparecer en ese navegador.
 export default function TutorialInicio() {
   const { usuario, rol } = useAuth()
   const [visible, setVisible] = useState(false)
+  const [paso, setPaso] = useState(0)
 
   useEffect(() => {
     if (!usuario || !rol || rol === 'administrador') return
     const yaVisto = localStorage.getItem(claveVisto(usuario.uid))
-    if (!yaVisto) setVisible(true)
+    if (!yaVisto) {
+      setPaso(0)
+      setVisible(true)
+    }
   }, [usuario, rol])
 
   function cerrar() {
@@ -41,42 +46,44 @@ export default function TutorialInicio() {
   if (!visible || rol === 'administrador') return null
 
   const pasos = PASOS_POR_ROL[rol] ?? PASOS_POR_ROL.paciente
+  const actual = pasos[paso]
+  const esUltimo = paso === pasos.length - 1
 
   return (
     <div className="modal-fondo" onClick={cerrar}>
-      <div className="modal-tarjeta" style={{ maxWidth: 440, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-tarjeta" style={{ maxWidth: 420, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
         <div style={{
           width: 60, height: 60, borderRadius: 16, margin: '0 auto 10px', fontSize: 28,
           background: 'var(--admin-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          {pasos[0].icono}
+          {actual.icono}
         </div>
         <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--admin-accent-dark)' }}>
-          Guía de inicio rápido
+          Guía de inicio rápido · Paso {paso + 1} de {pasos.length}
         </div>
-        <div className="modal-titulo" style={{ marginTop: 2 }}>¡Bienvenido a DocTop!</div>
+        <div className="modal-titulo" style={{ marginTop: 2 }}>{actual.titulo}</div>
+        <div className="modal-sub" style={{ marginTop: 6 }}>{actual.texto}</div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'left', marginTop: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16 }}>
           {pasos.map((p, i) => (
-            <div key={p.titulo} style={{ display: 'flex', gap: 12, background: 'var(--marfil)', borderRadius: 12, padding: '12px 14px', alignItems: 'flex-start' }}>
-              <div style={{
-                width: 26, height: 26, borderRadius: '50%', flex: '0 0 auto', fontSize: 12, fontWeight: 700,
-                background: 'var(--admin-accent-soft)', color: 'var(--admin-accent-dark)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {i + 1}
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 13 }}>{p.icono} {p.titulo}</div>
-                <div style={{ fontSize: 12, color: 'var(--gris)', marginTop: 2, lineHeight: 1.5 }}>{p.texto}</div>
-              </div>
-            </div>
+            <span
+              key={p.titulo}
+              style={{
+                width: i === paso ? 18 : 7, height: 7, borderRadius: 4,
+                background: i === paso ? 'var(--admin-accent)' : 'var(--admin-accent-soft)',
+                transition: 'width .2s',
+              }}
+            />
           ))}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 18 }}>
           <button type="button" className="btn btn-outline" onClick={cerrar}>Omitir</button>
-          <button type="button" className="btn btn-primary" style={{ background: 'var(--admin-accent)' }} onClick={cerrar}>Comenzar</button>
+          {esUltimo ? (
+            <button type="button" className="btn btn-primary" style={{ background: 'var(--admin-accent)' }} onClick={cerrar}>Comenzar</button>
+          ) : (
+            <button type="button" className="btn btn-primary" style={{ background: 'var(--admin-accent)' }} onClick={() => setPaso((p) => p + 1)}>Siguiente</button>
+          )}
         </div>
       </div>
     </div>
