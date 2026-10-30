@@ -240,8 +240,12 @@ service cloud.firestore {
             )
           )
           || (
+            // El doctor (o el admin) valida el pago (pago_en_revision -> habilitada/rechazada), y
+            // también puede corregirse si se equivocó, alternando directo entre habilitada y
+            // rechazada (botón "¿Te equivocaste?" en ValidacionPagos.jsx) — por eso el estado de
+            // origen acepta los tres, no solo pago_en_revision.
             (esAdmin() || request.auth.uid == resource.data.doctorId)
-            && resource.data.estado == 'pago_en_revision'
+            && resource.data.estado in ['pago_en_revision', 'habilitada', 'rechazada']
             && request.resource.data.estado in ['habilitada', 'rechazada']
           )
           || (

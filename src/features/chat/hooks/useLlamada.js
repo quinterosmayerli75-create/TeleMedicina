@@ -36,6 +36,11 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
   const pcRef = useRef(null)
   const localStreamRef = useRef(null)
   const candidatosVistos = useRef(new Set())
+  // Espejo de "llamada" en una ref: dentro de aceptar() hay una pausa real (pedir cámara/mic) y el
+  // valor de "llamada" capturado por el closure en ese momento queda congelado — no se entera si
+  // mientras tanto el otro lado colgó. Leer llamadaRef.current después del await sí ve el dato
+  // fresco, porque una ref no se "cierra" sobre un valor, se lee en el momento.
+  const llamadaRef = useRef(null)
   // Candidatos ICE que llegaron antes de que este lado tuviera lista la "remote description": no se
   // pueden agregar todavía (el navegador los rechaza), así que se guardan aquí y se aplican en cuanto
   // setRemoteDescription termina. Sin esto, un candidato que llega un poco antes (muy probable en una
@@ -55,7 +60,11 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
     if (!convId) return undefined
     return onSnapshot(
       doc(db, 'llamadas', convId),
-      (snap) => setLlamada(snap.exists() ? snap.data() : null),
+      (snap) => {
+        const datos = snap.exists() ? snap.data() : null
+        llamadaRef.current = datos
+        setLlamada(datos)
+      },
       () => setError('No se pudo conectar con la llamada. Recarga la página e intenta de nuevo.')
     )
   }, [convId])
@@ -116,10 +125,19 @@ export function useLlamada({ convId, pacienteId, doctorId, miUid }) {
 
   // Quien recibe: pide cámara/mic, crea la respuesta a partir de la oferta.
   async function aceptar() {
-    if (!llamada?.oferta) return
+    if (!llamada?.oferta || llamada.estado !== 'llamando') return
     setError('')
     try {
       const stream = await obtenerMedios(llamada.tipo)
+      // Pedir cámara/mic toma un momento: si justo en ese lapso quien llamaba colgó o se cayó la
+      // llamada, no hay que seguir conectando a algo que ya no existe del otro lado (si no, se
+      // queda "conectada" de este lado aunque el otro ya cerró — la llamada "zombi" reportada).
+      // Se lee llamadaRef (no la "llamada" del closure, que quedó congelada antes del await).
+      if (!llamadaRef.current || llamadaRef.current.estado !== 'llamando') {
+        stream.getTracks().forEach((t) => t.stop())
+        limpiar()
+        return
+      }
       const pc = crearConexion(false)
       stream.getTracks().forEach((track) => pc.addTrack(track, stream))
       await pc.setRemoteDescription(new RTCSessionDescription(llamada.oferta))
