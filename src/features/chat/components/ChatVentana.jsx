@@ -4,6 +4,7 @@ import { Paperclip, Image, Mic, MessageSquareText, Phone, Video, Flag } from 'lu
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { enviarMensaje, idConversacion, mensajeErrorEnvio } from '../services/chat'
 import { useMensajes } from '../hooks/useChat'
+import { marcarNotificacionesDeChatLeidas } from '@/features/notificaciones/services/notificaciones'
 import { useGrabadora } from '../hooks/useGrabadora'
 import { useLlamada } from '../hooks/useLlamada'
 import { LIMITE_ADJUNTO_MB, MB, formatearTamano, mensajeErrorSubida, nombreSeguro, subirArchivo, tipoDeArchivo } from '@/services/archivos'
@@ -57,6 +58,16 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
   useEffect(() => {
     finRef.current?.scrollIntoView({ block: 'end' })
   }, [mensajes.length, subidas.length])
+
+  // Antes esto solo se revisaba al ENTRAR a la conversación (en PaginaMensajes.jsx): si un
+  // mensaje nuevo llegaba mientras el chat ya estaba abierto en pantalla, su notificación se
+  // creaba igual pero nunca se marcaba como leída — se quedaba sin leer para siempre a menos que
+  // la persona la tocara a mano en la campanita. Al depender de "mensajes" en vez de solo del
+  // montaje del componente, esto se vuelve a revisar cada vez que llega un mensaje nuevo mientras
+  // la conversación sigue abierta.
+  useEffect(() => {
+    marcarNotificacionesDeChatLeidas(miUid, otro.id).catch(() => {})
+  }, [mensajes.length, miUid, otro.id])
 
   const actualizarSubida = (id, cambios) => setSubidas((prev) => prev.map((s) => (s.id === id ? { ...s, ...cambios } : s)))
   const quitarSubida = (id) => setSubidas((prev) => prev.filter((s) => s.id !== id))

@@ -1,8 +1,6 @@
-import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useContactos, useConversaciones } from '../hooks/useChat'
-import { marcarNotificacionesDeChatLeidas } from '@/features/notificaciones/services/notificaciones'
 import { aFecha } from '@/shared/utils/fechas'
 import MascotaVacio from '@/shared/components/MascotaVacio'
 import ChatVentana from './ChatVentana'
@@ -47,12 +45,9 @@ export default function PaginaMensajes({ rol, encabezadoLista = null }) {
   // Un doctor puede chatear con un paciente o, si pidió una consulta con otro doctor (ver "Mis
   // citas"), con otro profesional: la identidad real se toma del contacto, no de quién mira.
   const otroEsProfesional = activo?.rol === 'profesional'
-
-  // Al abrir esta conversación, las notificaciones de "nuevo mensaje" de esa misma persona dejan
-  // de tener sentido sin leer — ya se está viendo el mensaje aquí mismo.
-  useEffect(() => {
-    if (idActivo) marcarNotificacionesDeChatLeidas(usuario.uid, idActivo).catch(() => {})
-  }, [idActivo, usuario.uid])
+  // (Las notificaciones de "nuevo mensaje" se marcan como leídas desde ChatVentana.jsx, no aquí —
+  // así también se revisa si llega un mensaje nuevo mientras el chat ya está abierto, no solo al
+  // entrar.)
 
   // Un paciente que entra desde el perfil de un doctor con el que aún no habló ve la conversación vacía.
   const filas = idActivo && !otrosIds.includes(idActivo) ? [{ id: `nueva-${idActivo}`, nueva: true, otroId: idActivo }] : []
