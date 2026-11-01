@@ -7,9 +7,14 @@ import { useAuth } from '../context/AuthContext'
 import SelectorFotos from '@/shared/components/SelectorFotos'
 import CampoContrasena from '@/shared/components/CampoContrasena'
 import CampoFecha from '@/shared/components/CampoFecha'
+import CampoTelefono from '@/shared/components/CampoTelefono'
+import EtiquetaCampo from '@/shared/components/EtiquetaCampo'
 import { mensajeErrorSubida, nombreSeguro, subirArchivo } from '@/services/archivos'
-import { AYUDA_CONTRASENA, validarContrasena } from '@/shared/utils/validacion'
+import { AYUDA_CONTRASENA, validarContrasena, validarCorreo, validarNombre } from '@/shared/utils/validacion'
+import { validarTelefono } from '@/shared/utils/telefonos'
 import { calcularEdad } from '@/shared/utils/fechas'
+
+const EDAD_MINIMA = 18
 
 function mensajeError(codigo) {
   switch (codigo) {
@@ -30,6 +35,7 @@ const HOY = new Date().toISOString().slice(0, 10)
 const ESTADO_INICIAL = {
   email: '',
   celular: '',
+  celularPais: 'BO',
   contrasena: '',
   confirmarContrasena: '',
   nombre: '',
@@ -69,9 +75,8 @@ export default function RegistroPaciente() {
     return (e) => setDatos((prev) => ({ ...prev, [campo]: e.target.value }))
   }
 
-  function actualizarCelular(e) {
-    const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, 8)
-    setDatos((prev) => ({ ...prev, celular: soloNumeros }))
+  function actualizarTelefono(valor) {
+    setDatos((prev) => ({ ...prev, celularPais: valor.pais, celular: valor.numero }))
   }
 
   async function handleSubmit(e) {
@@ -90,14 +95,35 @@ export default function RegistroPaciente() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
-    if (datos.celular.length !== 8) {
-      setError('El celular debe tener 8 dígitos.')
+    const errorNombre = validarNombre(datos.nombre) || validarNombre(datos.apellido)
+    if (errorNombre) {
+      setError(errorNombre)
+      setFaltantes(['nombre', 'apellido'])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    const errorCorreo = validarCorreo(datos.email)
+    if (errorCorreo) {
+      setError(errorCorreo)
+      setFaltantes(['email'])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    const errorTelefono = validarTelefono(datos.celularPais, datos.celular)
+    if (errorTelefono) {
+      setError(errorTelefono)
       setFaltantes(['celular'])
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
     if (datos.fechaNacimiento > HOY) {
       setError('La fecha de nacimiento no puede ser futura.')
+      setFaltantes(['fechaNacimiento'])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (calcularEdad(datos.fechaNacimiento) < EDAD_MINIMA) {
+      setError(`Debe ser mayor de edad (${EDAD_MINIMA} años) para registrarse.`)
       setFaltantes(['fechaNacimiento'])
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
@@ -186,23 +212,23 @@ export default function RegistroPaciente() {
                 <h2 className="seccion-titulo">🔑 Datos de acceso</h2>
                 <div className="campos-2col">
                   <div>
-                    <label className="campo-label" htmlFor="email">Correo electrónico</label>
+                    <EtiquetaCampo htmlFor="email">Correo electrónico</EtiquetaCampo>
                     <input id="email" type="email" placeholder="tu@correo.com" value={datos.email} onChange={actualizarCampo('email')} />
                     <CampoError campo="email" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="celular">Celular (8 dígitos)</label>
-                    <input id="celular" type="text" inputMode="numeric" placeholder="7XXXXXXX" value={datos.celular} onChange={actualizarCelular} />
+                    <EtiquetaCampo htmlFor="celular">Celular</EtiquetaCampo>
+                    <CampoTelefono id="celular" value={{ pais: datos.celularPais, numero: datos.celular }} onChange={actualizarTelefono} />
                     <CampoError campo="celular" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="contrasena">Contraseña</label>
+                    <EtiquetaCampo htmlFor="contrasena">Contraseña</EtiquetaCampo>
                     <CampoContrasena id="contrasena" placeholder="••••••••" value={datos.contrasena} onChange={actualizarCampo('contrasena')} />
                     <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>{AYUDA_CONTRASENA}</div>
                     <CampoError campo="contrasena" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="confirmarContrasena">Confirmar contraseña</label>
+                    <EtiquetaCampo htmlFor="confirmarContrasena">Confirmar contraseña</EtiquetaCampo>
                     <CampoContrasena id="confirmarContrasena" placeholder="Repita la contraseña" value={datos.confirmarContrasena} onChange={actualizarCampo('confirmarContrasena')} />
                     <CampoError campo="confirmarContrasena" faltantes={faltantes} />
                   </div>
@@ -213,39 +239,39 @@ export default function RegistroPaciente() {
                 <h2 className="seccion-titulo">🧾 Datos personales</h2>
                 <div className="campos-2col">
                   <div>
-                    <label className="campo-label" htmlFor="nombre">Nombre</label>
+                    <EtiquetaCampo htmlFor="nombre">Nombre</EtiquetaCampo>
                     <input id="nombre" type="text" placeholder="Camila" value={datos.nombre} onChange={actualizarCampo('nombre')} />
                     <CampoError campo="nombre" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="apellido">Apellido</label>
+                    <EtiquetaCampo htmlFor="apellido">Apellido</EtiquetaCampo>
                     <input id="apellido" type="text" placeholder="Rojas Peña" value={datos.apellido} onChange={actualizarCampo('apellido')} />
                     <CampoError campo="apellido" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>
+                    <EtiquetaCampo htmlFor="fechaNacimiento">Fecha de nacimiento</EtiquetaCampo>
                     <CampoFecha id="fechaNacimiento" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
                     <CampoError campo="fechaNacimiento" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="sexo">Sexo</label>
+                    <EtiquetaCampo htmlFor="sexo" opcional>Sexo</EtiquetaCampo>
                     <select id="sexo" value={datos.sexo} onChange={actualizarCampo('sexo')}>
                       <option>Femenino</option>
                       <option>Masculino</option>
                     </select>
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="estatura">Estatura aprox.</label>
+                    <EtiquetaCampo htmlFor="estatura">Estatura aprox.</EtiquetaCampo>
                     <input id="estatura" type="text" placeholder="1.63 m" value={datos.estatura} onChange={actualizarCampo('estatura')} />
                     <CampoError campo="estatura" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="peso">Peso aprox.</label>
+                    <EtiquetaCampo htmlFor="peso">Peso aprox.</EtiquetaCampo>
                     <input id="peso" type="text" placeholder="58 kg" value={datos.peso} onChange={actualizarCampo('peso')} />
                     <CampoError campo="peso" faltantes={faltantes} />
                   </div>
                 </div>
-                <label className="campo-label" htmlFor="lugar">Lugar donde vive</label>
+                <EtiquetaCampo htmlFor="lugar">Lugar donde vive</EtiquetaCampo>
                 <input id="lugar" type="text" placeholder="Quillacollo, Cochabamba" value={datos.lugar} onChange={actualizarCampo('lugar')} />
                 <CampoError campo="lugar" faltantes={faltantes} />
               </div>
@@ -265,6 +291,10 @@ export default function RegistroPaciente() {
                   ayuda="JPG o PNG, máximo 5 MB. Podrás cambiarla después en Configuración."
                   deshabilitado={enviando}
                 />
+              </div>
+
+              <div style={{ fontSize: 11.5, color: 'var(--gris)', marginBottom: 12 }}>
+                <span style={{ color: 'var(--alerta)' }}>*</span> Campo obligatorio
               </div>
 
               <div className="terminos-row">

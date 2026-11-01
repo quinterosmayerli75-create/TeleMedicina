@@ -8,3 +8,24 @@ export function validarContrasena(contrasena) {
   }
   return null
 }
+
+// Solo letras (con tildes y ñ) y espacios — nada de números ni símbolos en nombres/apellidos.
+const PATRON_SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚÑÜáéíóúñü\s]+$/
+
+export function validarNombre(texto) {
+  if (!PATRON_SOLO_LETRAS.test(texto.trim())) {
+    return 'Solo se permiten letras y espacios, sin números ni símbolos.'
+  }
+  return null
+}
+
+// Formato general de correo: usuario@dominio.extensión. No limita a dominios específicos
+// (gmail.com, outlook.com, etc.) porque cualquier dominio válido debe poder registrarse.
+const PATRON_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export function validarCorreo(correo) {
+  if (!PATRON_CORREO.test(correo.trim())) {
+    return 'Ingrese un correo válido (ej. nombre@gmail.com).'
+  }
+  return null
+}

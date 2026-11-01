@@ -6,12 +6,17 @@ import { auth, db } from '@/services/firebase/config'
 import SelectorFotos from '@/shared/components/SelectorFotos'
 import CampoContrasena from '@/shared/components/CampoContrasena'
 import CampoFecha from '@/shared/components/CampoFecha'
+import CampoTelefono from '@/shared/components/CampoTelefono'
+import EtiquetaCampo from '@/shared/components/EtiquetaCampo'
 import { mensajeErrorSubida, nombreSeguro, subirArchivo } from '@/services/archivos'
-import { AYUDA_CONTRASENA, validarContrasena } from '@/shared/utils/validacion'
+import { AYUDA_CONTRASENA, validarContrasena, validarCorreo, validarNombre } from '@/shared/utils/validacion'
+import { validarTelefono } from '@/shared/utils/telefonos'
 import { calcularEdad } from '@/shared/utils/fechas'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import { notificarAdmins } from '@/features/notificaciones/services/notificaciones'
 import { PROFESIONES } from '@/shared/utils/profesiones'
+
+const EDAD_MINIMA = 18
 
 const MODALIDADES = [
   { clave: 'chat', etiqueta: 'Chat de texto' },
@@ -33,7 +38,7 @@ function mensajeError(codigo) {
 }
 
 const ESTADO_INICIAL = {
-  email: '', celular: '', contrasena: '', confirmarContrasena: '',
+  email: '', celular: '', celularPais: 'BO', contrasena: '', confirmarContrasena: '',
   nombre: '', fechaNacimiento: '', estatura: '', peso: '', profesion: PROFESIONES[0], especialidad: '',
   experiencia: '', carnet: '', descripcion: '', costoConsulta: '',
 }
@@ -78,9 +83,8 @@ export default function RegistroProfesional() {
     return (e) => setDatos((prev) => ({ ...prev, [campo]: e.target.value }))
   }
 
-  function actualizarCelular(e) {
-    const soloNumeros = e.target.value.replace(/\D/g, '').slice(0, 8)
-    setDatos((prev) => ({ ...prev, celular: soloNumeros }))
+  function actualizarTelefono(valor) {
+    setDatos((prev) => ({ ...prev, celularPais: valor.pais, celular: valor.numero }))
   }
 
   async function subirSiExiste(archivo, uid, etiqueta) {
@@ -103,8 +107,23 @@ export default function RegistroProfesional() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
-    if (datos.celular.length !== 8) {
-      setError('El celular debe tener 8 dígitos.')
+    const errorNombre = validarNombre(datos.nombre)
+    if (errorNombre) {
+      setError(errorNombre)
+      setFaltantes(['nombre'])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    const errorCorreo = validarCorreo(datos.email)
+    if (errorCorreo) {
+      setError(errorCorreo)
+      setFaltantes(['email'])
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    const errorTelefono = validarTelefono(datos.celularPais, datos.celular)
+    if (errorTelefono) {
+      setError(errorTelefono)
       setFaltantes(['celular'])
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
@@ -115,8 +134,8 @@ export default function RegistroProfesional() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
-    if (calcularEdad(datos.fechaNacimiento) < 18) {
-      setError('Debe ser mayor de edad (18 años) para registrarse como profesional.')
+    if (calcularEdad(datos.fechaNacimiento) < EDAD_MINIMA) {
+      setError(`Debe ser mayor de edad (${EDAD_MINIMA} años) para registrarse como profesional.`)
       setFaltantes(['fechaNacimiento'])
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
@@ -228,23 +247,23 @@ export default function RegistroProfesional() {
                 <h2 className="seccion-titulo">🔑 Datos de acceso</h2>
                 <div className="campos-2col">
                   <div>
-                    <label className="campo-label" htmlFor="email">Correo electrónico</label>
+                    <EtiquetaCampo htmlFor="email">Correo electrónico</EtiquetaCampo>
                     <input id="email" type="email" value={datos.email} onChange={actualizarCampo('email')} />
                     <CampoError campo="email" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="celular">Celular (8 dígitos)</label>
-                    <input id="celular" type="text" inputMode="numeric" placeholder="7XXXXXXX" value={datos.celular} onChange={actualizarCelular} />
+                    <EtiquetaCampo htmlFor="celular">Celular</EtiquetaCampo>
+                    <CampoTelefono id="celular" value={{ pais: datos.celularPais, numero: datos.celular }} onChange={actualizarTelefono} />
                     <CampoError campo="celular" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="contrasena">Contraseña</label>
+                    <EtiquetaCampo htmlFor="contrasena">Contraseña</EtiquetaCampo>
                     <CampoContrasena id="contrasena" value={datos.contrasena} onChange={actualizarCampo('contrasena')} />
                     <div style={{ fontSize: 10.5, color: 'var(--gris)', marginTop: 4 }}>{AYUDA_CONTRASENA}</div>
                     <CampoError campo="contrasena" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="confirmarContrasena">Confirmar contraseña</label>
+                    <EtiquetaCampo htmlFor="confirmarContrasena">Confirmar contraseña</EtiquetaCampo>
                     <CampoContrasena id="confirmarContrasena" value={datos.confirmarContrasena} onChange={actualizarCampo('confirmarContrasena')} />
                     <CampoError campo="confirmarContrasena" faltantes={faltantes} />
                   </div>
@@ -255,17 +274,17 @@ export default function RegistroProfesional() {
                 <h2 className="seccion-titulo">🧾 Datos personales</h2>
                 <div className="campos-2col">
                   <div>
-                    <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>
+                    <EtiquetaCampo htmlFor="fechaNacimiento">Fecha de nacimiento</EtiquetaCampo>
                     <CampoFecha id="fechaNacimiento" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
                     <CampoError campo="fechaNacimiento" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="estatura">Estatura aprox.</label>
+                    <EtiquetaCampo htmlFor="estatura">Estatura aprox.</EtiquetaCampo>
                     <input id="estatura" type="text" placeholder="1.70 m" value={datos.estatura} onChange={actualizarCampo('estatura')} />
                     <CampoError campo="estatura" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="peso">Peso aprox.</label>
+                    <EtiquetaCampo htmlFor="peso">Peso aprox.</EtiquetaCampo>
                     <input id="peso" type="text" placeholder="72 kg" value={datos.peso} onChange={actualizarCampo('peso')} />
                     <CampoError campo="peso" faltantes={faltantes} />
                   </div>
@@ -274,18 +293,18 @@ export default function RegistroProfesional() {
 
               <div className="registro-seccion">
                 <h2 className="seccion-titulo">🩺 Datos profesionales y acreditación</h2>
-                <label className="campo-label" htmlFor="nombre">Nombre completo</label>
+                <EtiquetaCampo htmlFor="nombre">Nombre completo</EtiquetaCampo>
                 <input id="nombre" type="text" placeholder="Dr./Dra. Nombre Apellido" value={datos.nombre} onChange={actualizarCampo('nombre')} />
                 <CampoError campo="nombre" faltantes={faltantes} />
                 <div className="campos-2col">
                   <div>
-                    <label className="campo-label" htmlFor="profesion">Profesión</label>
+                    <EtiquetaCampo htmlFor="profesion">Profesión</EtiquetaCampo>
                     <select id="profesion" value={datos.profesion} onChange={actualizarCampo('profesion')}>
                       {PROFESIONES.map((p) => <option key={p}>{p}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="especialidad">Especialidad</label>
+                    <EtiquetaCampo htmlFor="especialidad">Especialidad</EtiquetaCampo>
                     <select id="especialidad" value={datos.especialidad} onChange={actualizarCampo('especialidad')} disabled={especialidadesDeLaProfesion.length === 0}>
                       {especialidadesDeLaProfesion.length === 0
                         ? <option>Sin especialidades para esta profesión</option>
@@ -293,20 +312,20 @@ export default function RegistroProfesional() {
                     </select>
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="carnet">Carnet profesional</label>
+                    <EtiquetaCampo htmlFor="carnet">Carnet profesional</EtiquetaCampo>
                     <input id="carnet" type="text" placeholder="CP-4821-CB" value={datos.carnet} onChange={actualizarCampo('carnet')} />
                     <CampoError campo="carnet" faltantes={faltantes} />
                   </div>
                   <div>
-                    <label className="campo-label" htmlFor="experiencia">Experiencia</label>
+                    <EtiquetaCampo htmlFor="experiencia">Experiencia</EtiquetaCampo>
                     <input id="experiencia" type="text" placeholder="5 años de experiencia clínica" value={datos.experiencia} onChange={actualizarCampo('experiencia')} />
                     <CampoError campo="experiencia" faltantes={faltantes} />
                   </div>
                 </div>
-                <label className="campo-label" htmlFor="descripcion">Descripción profesional</label>
+                <EtiquetaCampo htmlFor="descripcion">Descripción profesional</EtiquetaCampo>
                 <textarea id="descripcion" rows="3" placeholder="Cuénteles a sus pacientes en qué se especializa…" value={datos.descripcion} onChange={actualizarCampo('descripcion')} />
                 <CampoError campo="descripcion" faltantes={faltantes} />
-                <label className="campo-label" htmlFor="costoConsulta">Costo de la consulta (Bs)</label>
+                <EtiquetaCampo htmlFor="costoConsulta">Costo de la consulta (Bs)</EtiquetaCampo>
                 <input id="costoConsulta" type="number" placeholder="150" value={datos.costoConsulta} onChange={actualizarCampo('costoConsulta')} />
                 <CampoError campo="costoConsulta" faltantes={faltantes} />
 
@@ -372,6 +391,10 @@ export default function RegistroProfesional() {
               <div style={{ background: 'var(--admin-accent-soft)', borderLeft: `2px solid var(--admin-accent)`, padding: 12, fontSize: 11.5, lineHeight: 1.6, color: '#1d4d3b' }}>
                 Sin membresía ni costo de registro. Un administrador de DocTop revisará su carnet
                 profesional y sus documentos antes de activar su cuenta.
+              </div>
+
+              <div style={{ fontSize: 11.5, color: 'var(--gris)', margin: '12px 0' }}>
+                <span style={{ color: 'var(--alerta)' }}>*</span> Campo obligatorio
               </div>
 
               <div className="terms-row">

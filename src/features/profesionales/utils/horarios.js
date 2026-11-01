@@ -42,18 +42,25 @@ const DIA_JS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 
 
 // Horas en punto disponibles para agendar una consulta en una fecha "aaaa-mm-dd", según el día de la
 // semana que le toque y las franjas que el doctor activó ese día. [] si no atiende ese día.
+// Si la fecha elegida es HOY, además descarta las horas que ya pasaron (antes se mostraban igual,
+// dejando pedir una consulta a las 09:00 aunque ya fueran las 15:00).
 export function horasDisponibles(disponibilidad, fechaStr) {
   if (!fechaStr) return []
   const fecha = new Date(`${fechaStr}T00:00:00`)
   if (Number.isNaN(fecha.getTime())) return []
   const dia = normalizarDisponibilidad(disponibilidad)[DIA_JS[fecha.getDay()]]
   if (!dia.activo) return []
+
+  const ahora = new Date()
+  const esHoy = fecha.toDateString() === ahora.toDateString()
+  const horaMinima = esHoy ? ahora.getHours() + 1 : 0 // +1: no dejar agendar la hora que ya está corriendo
+
   const horas = []
   for (const { desde, hasta } of dia.franjas) {
     let hora = Number(desde.split(':')[0])
     const horaFin = Number(hasta.split(':')[0])
     while (hora < horaFin) {
-      horas.push(`${String(hora).padStart(2, '0')}:00`)
+      if (hora >= horaMinima) horas.push(`${String(hora).padStart(2, '0')}:00`)
       hora += 1
     }
   }

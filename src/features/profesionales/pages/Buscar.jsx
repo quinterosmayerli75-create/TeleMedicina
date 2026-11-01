@@ -85,7 +85,7 @@ export default function Buscar() {
         <div className="card-plain admin-list-card">
           <h2 className="section-title">🧮 Filtros</h2>
           <label className="campo-label" htmlFor="texto">Nombre, profesión o especialidad</label>
-          <input id="texto" type="text" placeholder="Cardiólogo, Médico…" value={texto} onChange={(e) => setTexto(e.target.value)} />
+          <input id="texto" type="text" placeholder="Ej. nombre, especialidad…" value={texto} onChange={(e) => setTexto(e.target.value)} />
 
           <label className="campo-label" htmlFor="especialidad">Especialidad</label>
           <select id="especialidad" value={especialidad} onChange={(e) => setEspecialidad(e.target.value)}>
