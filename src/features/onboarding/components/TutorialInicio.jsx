@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/features/auth/context/AuthContext'
+import panda from '@/assets/mascota/panda-doctor.png'
 
 const PASOS_POR_ROL = {
   paciente: [
@@ -52,12 +53,16 @@ export default function TutorialInicio() {
   return (
     <div className="modal-fondo" onClick={cerrar}>
       <div className="modal-tarjeta" style={{ maxWidth: 420, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-        <div style={{
-          width: 60, height: 60, borderRadius: 16, margin: '0 auto 10px', fontSize: 28,
-          background: 'var(--admin-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {actual.icono}
-        </div>
+        {paso === 0 ? (
+          <img src={panda} alt="Mascota de DocTop" style={{ width: 92, height: 92, objectFit: 'contain', margin: '0 auto 6px' }} />
+        ) : (
+          <div style={{
+            width: 60, height: 60, borderRadius: 16, margin: '0 auto 10px', fontSize: 28,
+            background: 'var(--admin-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            {actual.icono}
+          </div>
+        )}
         <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--admin-accent-dark)' }}>
           Guía de inicio rápido · Paso {paso + 1} de {pasos.length}
         </div>

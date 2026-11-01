@@ -140,10 +140,7 @@ export default function Acceso() {
             <div className="acceso-crear-cuenta">
               <p>Regístrate gratis como paciente o como profesional de la salud.</p>
             </div>
-            <Link to="/registro/paciente" className="btn btn-outline" style={{ marginTop: 10 }}>Registrarme como paciente</Link>
-            <Link to="/registro/profesional" className="btn btn-outline" style={{ marginTop: 10 }}>
-              Registrarme como profesional de la salud
-            </Link>
+            <Link to="/registro" className="btn btn-outline" style={{ marginTop: 10 }}>Crear mi cuenta</Link>
           </div>
         </div>
       </div>

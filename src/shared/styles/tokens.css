@@ -1,8 +1,13 @@
 :root {
   --onyx: #0F1417;
-  --oro: #2C8FD6;
-  --oro-rgb: 44, 143, 214;
-  --oro-claro: #8AD0F5;
+  /* "--oro" se llama así por el nombre que tenía al principio del proyecto, pero ya no es dorado:
+     es el color principal de toda la app (botones, encabezados, enlaces), ahora el mismo verde
+     azulado (teal) del uniforme de la mascota — igual que --admin-accent, que es el mismo tono
+     usado en los paneles. Se mantiene el nombre --oro para no tener que tocar los ~30 lugares
+     que ya lo usan; cambiar el valor aquí los actualiza a todos a la vez. */
+  --oro: #16A974;
+  --oro-rgb: 22, 169, 116;
+  --oro-claro: #5FE3B3;
   --marfil: #F7FAFC;
   --marfil-osc: #DCE8F0;
   --gris: #6E7880;
@@ -12,7 +17,8 @@
   --ambar: #B07A2A;
   --blanco: #FFFFFF;
 
-  /* Panel de administrador (2026-10-13): paleta propia, no reemplaza la de doctor/paciente. */
+  /* Panel de administrador (2026-10-13): mismo verde azulado que --oro de arriba, declarado
+     aparte porque el panel admin/doctor/paciente ya lo usaba con este nombre. */
   --admin-navy: #0B1120;
   --admin-accent: #16A974;
   --admin-accent-dark: #0E7A57;

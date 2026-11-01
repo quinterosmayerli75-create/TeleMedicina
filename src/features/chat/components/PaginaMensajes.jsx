@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/context/AuthContext'
 import { useContactos, useConversaciones } from '../hooks/useChat'
 import { marcarNotificacionesDeChatLeidas } from '@/features/notificaciones/services/notificaciones'
 import { aFecha } from '@/shared/utils/fechas'
+import MascotaVacio from '@/shared/components/MascotaVacio'
 import ChatVentana from './ChatVentana'
 
 function Avatar({ contacto }) {
@@ -71,11 +72,14 @@ export default function PaginaMensajes({ rol, encabezadoLista = null }) {
           </div>
         )}
         {!cargando && !error && filas.length === 0 && (
-          <p className="web-sub" style={{ padding: 20 }}>
-            {esPaciente
-              ? 'Aún no tiene conversaciones. Busque un especialista y toque “Mensaje” en su perfil.'
-              : 'Aún no tiene conversaciones. Aquí aparecerán los pacientes que le escriban.'}
-          </p>
+          <MascotaVacio
+            tamano={72}
+            texto={
+              esPaciente
+                ? 'Aún no tiene conversaciones. Busque un especialista y toque “Mensaje” en su perfil.'
+                : 'Aún no tiene conversaciones. Aquí aparecerán los pacientes que le escriban.'
+            }
+          />
         )}
         {filas.map((fila) => {
           const contacto = contactos[fila.otroId]

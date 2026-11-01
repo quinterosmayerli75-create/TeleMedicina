@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
+import { addDoc, collection, doc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 
 // Una calificación por paciente y doctor: el id del documento es "{doctorId}_{pacienteId}", así si el
@@ -33,4 +33,38 @@ export async function guardarCalificacion({ doctorId, pacienteId, estrellas, com
   } catch {
     return { promedioActualizado: false }
   }
+}
+
+// El doctor no puede borrar un comentario, solo denunciarlo — el admin decide qué hacer (ver
+// admin/ComentariosDenunciados.jsx). Reutiliza la colección "reportes" (igual que las denuncias
+// entre personas), marcado con tipoDenuncia: 'comentario' para poder filtrarlo aparte.
+export function denunciarComentario({ doctorId, pacienteId, calificacionId, comentario, motivo }) {
+  return addDoc(collection(db, 'reportes'), {
+    denuncianteId: doctorId,
+    denunciadoId: pacienteId,
+    tipoDenuncia: 'comentario',
+    calificacionId,
+    comentarioTexto: comentario,
+    motivo,
+    estado: 'pendiente',
+    fecha: serverTimestamp(),
+  })
+}
+
+// El admin oculta un comentario denunciado: no se borra de la base de datos, solo deja de
+// mostrarse en el perfil público del doctor.
+export function ocultarComentario(calificacionId) {
+  return updateDoc(doc(db, 'calificaciones', calificacionId), { oculto: true })
+}
+
+// Cierra una denuncia de comentario sin bloquear al paciente (ocultar el comentario o solo
+// mandarle un aviso). Para suspender temporal o definitivamente se usa bloquearUsuario() con
+// reporteId — esa función ya marca la denuncia como resuelta sola.
+export function resolverDenunciaComentario(reporteId, { accion, notaAdmin = '' }) {
+  return updateDoc(doc(db, 'reportes', reporteId), {
+    estado: 'resuelta',
+    accion,
+    notaAdmin,
+    resueltaEn: serverTimestamp(),
+  })
 }

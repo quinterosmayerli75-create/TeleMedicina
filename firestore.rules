@@ -140,15 +140,23 @@ service cloud.firestore {
         && request.resource.data.estrellas <= 5
         && request.resource.data.consultaId is string
         && consultaFinalizadaValida(request.auth.uid, request.resource.data.doctorId, request.resource.data.consultaId);
-      allow update: if esPaciente()
-        && resource.data.pacienteId == request.auth.uid
-        && request.resource.data.pacienteId == request.auth.uid
-        && request.resource.data.doctorId == resource.data.doctorId
-        && request.resource.data.estrellas is int
-        && request.resource.data.estrellas >= 1
-        && request.resource.data.estrellas <= 5
-        && request.resource.data.consultaId is string
-        && consultaFinalizadaValida(request.auth.uid, resource.data.doctorId, request.resource.data.consultaId);
+      allow update: if (
+          esPaciente()
+          && resource.data.pacienteId == request.auth.uid
+          && request.resource.data.pacienteId == request.auth.uid
+          && request.resource.data.doctorId == resource.data.doctorId
+          && request.resource.data.estrellas is int
+          && request.resource.data.estrellas >= 1
+          && request.resource.data.estrellas <= 5
+          && request.resource.data.consultaId is string
+          && consultaFinalizadaValida(request.auth.uid, resource.data.doctorId, request.resource.data.consultaId)
+        )
+        || (
+          // El admin puede ocultar un comentario denunciado (no se borra de la base de datos,
+          // solo deja de mostrarse) — nunca puede tocar el texto, las estrellas ni nada más.
+          esAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['oculto'])
+        );
       allow delete: if esAdmin();
     }
 

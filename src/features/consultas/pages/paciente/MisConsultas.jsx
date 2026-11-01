@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/context/AuthContext'
 import { useRutas } from '@/shared/hooks/useRutas'
 import { useConsultasPaciente } from '../../hooks/useConsultas'
 import { ESTADOS_CONSULTA, MODALIDADES } from '../../services/consultas'
+import MascotaVacio from '@/shared/components/MascotaVacio'
 
 const PESTANAS = [
   { clave: '', etiqueta: 'Todas' },
@@ -51,7 +52,7 @@ export default function MisConsultas() {
 
       {cargando && <p className="web-sub">Cargando…</p>}
       {!cargando && consultas.length === 0 && (
-        <p className="web-sub">Todavía no solicitaste ninguna consulta. Busca un profesional y toca "Solicitar consulta" en su perfil.</p>
+        <MascotaVacio texto='Todavía no solicitaste ninguna consulta. Busca un profesional y toca "Solicitar consulta" en su perfil.' />
       )}
 
       {consultas.length > 0 && (

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import InicioPublico from '@/features/landing/pages/InicioPublico'
 import Acceso from '@/features/auth/pages/Acceso'
+import Registro from '@/features/auth/pages/Registro'
 import RegistroPaciente from '@/features/auth/pages/RegistroPaciente'
 import RegistroProfesional from '@/features/auth/pages/RegistroProfesional'
 
@@ -41,6 +42,7 @@ import NuevaCategoria from '@/features/admin/pages/NuevaCategoria'
 import Doctores from '@/features/admin/pages/Doctores'
 import Usuarios from '@/features/admin/pages/Usuarios'
 import Denuncias from '@/features/denuncias/pages/admin/Denuncias'
+import ComentariosDenunciados from '@/features/denuncias/pages/admin/ComentariosDenunciados'
 import Roles from '@/features/admin/pages/Roles'
 import ConfiguracionAdmin from '@/features/perfil/pages/admin/Configuracion'
 import ValidacionPagos from '@/features/consultas/pages/admin/ValidacionPagos'
@@ -62,6 +64,7 @@ export default function AppRouter() {
       <Routes>
         <Route path="/" element={<InicioPublico />} />
         <Route path="/acceso" element={<Acceso />} />
+        <Route path="/registro" element={<Registro />} />
         <Route path="/registro/paciente" element={<RegistroPaciente />} />
         <Route path="/registro/profesional" element={<RegistroProfesional />} />
 
@@ -140,6 +143,7 @@ export default function AppRouter() {
           <Route path="doctores" element={<Doctores />} />
           <Route path="usuarios" element={<Usuarios />} />
           <Route path="denuncias" element={<Denuncias />} />
+          <Route path="comentarios-denunciados" element={<ComentariosDenunciados />} />
           <Route path="roles" element={<Roles />} />
           <Route path="pagos" element={<ValidacionPagos />} />
           <Route path="suscripciones" element={<ValidacionSuscripciones />} />

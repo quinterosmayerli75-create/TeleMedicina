@@ -4,7 +4,7 @@ import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import {
   LayoutGrid, ClipboardCheck, Tags, Stethoscope, Users, CreditCard,
-  Wallet, ShieldAlert, KeyRound, Settings, LogOut, Search,
+  Wallet, ShieldAlert, KeyRound, Settings, LogOut, Search, MessageSquareWarning,
 } from 'lucide-react'
 import { db, auth } from '@/services/firebase/config'
 import CuentaRestringida from '@/features/auth/components/CuentaRestringida'
@@ -20,6 +20,7 @@ const ITEMS = [
   { to: '/admin/suscripciones', label: 'Suscripciones de doctores', Icono: CreditCard },
   { to: '/admin/pagos', label: 'Pagos de consultas', Icono: Wallet },
   { to: '/admin/denuncias', label: 'Denuncias y moderación', Icono: ShieldAlert, contador: 'denuncias' },
+  { to: '/admin/comentarios-denunciados', label: 'Comentarios denunciados', Icono: MessageSquareWarning, contador: 'comentarios' },
   { to: '/admin/roles', label: 'Roles y permisos', Icono: KeyRound },
   { to: '/admin/configuracion', label: 'Configuración', Icono: Settings },
 ]
@@ -33,19 +34,23 @@ function iniciales(nombre = '') {
 function useContadoresAdmin() {
   const [solicitudes, setSolicitudes] = useState(0)
   const [denuncias, setDenuncias] = useState(0)
+  const [comentarios, setComentarios] = useState(0)
 
   useEffect(() => {
     const qSolicitudes = query(collection(db, 'usuarios'), where('rol', '==', 'profesional'), where('estado', '==', 'pendiente'))
     const unsubSolicitudes = onSnapshot(qSolicitudes, (snap) => setSolicitudes(snap.size))
     const qDenuncias = query(collection(db, 'reportes'), where('estado', '==', 'pendiente'))
     const unsubDenuncias = onSnapshot(qDenuncias, (snap) => setDenuncias(snap.size))
+    const qComentarios = query(collection(db, 'reportes'), where('tipoDenuncia', '==', 'comentario'), where('estado', '==', 'pendiente'))
+    const unsubComentarios = onSnapshot(qComentarios, (snap) => setComentarios(snap.size))
     return () => {
       unsubSolicitudes()
       unsubDenuncias()
+      unsubComentarios()
     }
   }, [])
 
-  return { solicitudes, denuncias }
+  return { solicitudes, denuncias, comentarios }
 }
 
 export default function AdminLayout() {
@@ -84,7 +89,10 @@ export default function AdminLayout() {
         </div>
 
         {ITEMS.map((item) => {
-          const conteo = item.contador === 'solicitudes' ? contadores.solicitudes : item.contador === 'denuncias' ? contadores.denuncias : 0
+          const conteo = item.contador === 'solicitudes' ? contadores.solicitudes
+            : item.contador === 'denuncias' ? contadores.denuncias
+            : item.contador === 'comentarios' ? contadores.comentarios
+            : 0
           return (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => `admin-nav-item${isActive ? ' on' : ''}`}>
               <span className="admin-nav-icon"><item.Icono size={17} strokeWidth={2} /></span>

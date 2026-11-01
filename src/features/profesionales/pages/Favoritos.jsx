@@ -1,6 +1,7 @@
 import { useProfesionalesActivos } from '../hooks/useProfesionalesActivos'
 import { useFavoritos } from '../context/FavoritosContext'
 import TarjetaDoctor from '../components/TarjetaDoctor'
+import MascotaVacio from '@/shared/components/MascotaVacio'
 
 export default function Favoritos() {
   const { favoritos } = useFavoritos()
@@ -16,7 +17,7 @@ export default function Favoritos() {
       <h1 className="web-h1">Mis doctores de confianza</h1>
       {cargando && <p className="web-sub">Cargando…</p>}
       {!cargando && doctores.length === 0 ? (
-        <p className="web-sub">Aún no marcaste ningún profesional como favorito — toca el ♥ en su tarjeta para guardarlo aquí.</p>
+        <MascotaVacio texto="Aún no marcaste ningún profesional como favorito — toca el ♥ en su tarjeta para guardarlo aquí." />
       ) : (
         <div className="web-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginTop: 20 }}>
           {doctores.map((doctor) => (

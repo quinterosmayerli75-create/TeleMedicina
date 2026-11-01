@@ -171,8 +171,7 @@ export default function InicioPublico() {
             <div className="landing-footer-titulo">Cuenta</div>
             <div className="landing-footer-links">
               <Link to="/acceso">Iniciar sesión</Link>
-              <Link to="/registro/paciente">Registrarme como paciente</Link>
-              <Link to="/registro/profesional">Registrarme como profesional</Link>
+              <Link to="/registro">Crear una cuenta</Link>
             </div>
           </div>
         </div>
