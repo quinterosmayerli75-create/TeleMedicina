@@ -3,6 +3,7 @@ import { useAuth } from '@/features/auth/context/AuthContext'
 import { guardarCalificacion } from '../services/calificaciones'
 import { crearNotificacion } from '@/features/notificaciones/services/notificaciones'
 import { formatearFecha } from '@/shared/utils/fechas'
+import { contieneVulgaridad } from '@/shared/utils/filtroPalabras'
 import SelectorEstrellas from './SelectorEstrellas'
 
 const RESENAS_VISIBLES = 5
@@ -46,6 +47,10 @@ export default function ResenasDoctor({ doctorId, calificaciones, cargando, erro
     e.preventDefault()
     if (estrellas < 1) {
       setMensaje({ tipo: 'error', texto: 'Elige de 1 a 5 estrellas antes de publicar.' })
+      return
+    }
+    if (contieneVulgaridad(comentario)) {
+      setMensaje({ tipo: 'error', texto: 'Tu comentario tiene palabras no permitidas. Vuelve a escribirlo sin groserías para poder publicarlo.' })
       return
     }
     setEnviando(true)

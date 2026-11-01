@@ -1,12 +1,17 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useProfesional } from '@/features/profesionales/hooks/useProfesionalesActivos'
+import { useConsultasDoctor } from '../../hooks/useConsultas'
 import { useRutas } from '@/shared/hooks/useRutas'
 import { crearConsulta, MODALIDADES } from '../../services/consultas'
 import { hayHorarios, horasDisponibles } from '@/features/profesionales/utils/horarios'
 
 const HOY = new Date().toISOString().slice(0, 10)
+
+// Una consulta "ocupa" el horario mientras no esté rechazada ni cancelada: hasta que el doctor
+// rechace o alguien cancele, ese cupo sigue siendo suyo (aunque todavía esté pendiente de pago).
+const ESTADOS_QUE_OCUPAN_HORARIO = ['pendiente_pago', 'pago_en_revision', 'habilitada', 'finalizada']
 
 // Se usa tanto en /paciente/solicitar/:id como en /doctor/solicitar/:id: un doctor también puede
 // solicitar una consulta con otro doctor (por ejemplo, si él mismo necesita atención), igual que
@@ -17,11 +22,25 @@ export default function SolicitarConsulta() {
   const rutas = useRutas()
   const { usuario, perfil } = useAuth()
   const { profesional: doctor, cargando } = useProfesional(id)
+  const { consultas: consultasDelDoctor } = useConsultasDoctor(id)
   const [modalidad, setModalidad] = useState('')
   const [fecha, setFecha] = useState('')
   const [hora, setHora] = useState('')
   const [error, setError] = useState('')
   const [enviando, setEnviando] = useState(false)
+
+  // Horas que ese doctor ya tiene comprometidas ese día con otra consulta (de cualquier
+  // paciente) — no deberían volver a ofrecerse, aunque caigan dentro de su horario normal. Va
+  // antes de los "return" de abajo porque los Hooks de React siempre deben llamarse en el mismo
+  // orden en cada render, nunca después de un return condicional.
+  const horasOcupadas = useMemo(
+    () => new Set(
+      consultasDelDoctor
+        .filter((c) => c.fecha === fecha && ESTADOS_QUE_OCUPAN_HORARIO.includes(c.estado))
+        .map((c) => c.hora)
+    ),
+    [consultasDelDoctor, fecha]
+  )
 
   if (cargando) return <p className="web-sub">Cargando…</p>
   if (!doctor) {
@@ -43,7 +62,7 @@ export default function SolicitarConsulta() {
 
   const modalidadesActivas = Object.keys(MODALIDADES).filter((_, i) => doctor.modalidades?.[i])
   const tieneHorarios = hayHorarios(doctor.disponibilidad)
-  const horas = horasDisponibles(doctor.disponibilidad, fecha)
+  const horas = horasDisponibles(doctor.disponibilidad, fecha).filter((h) => !horasOcupadas.has(h))
 
   function elegirFecha(valor) {
     setFecha(valor)
@@ -57,6 +76,14 @@ export default function SolicitarConsulta() {
     }
     if (!fecha || !hora) {
       setError('Elige la fecha y la hora de la consulta.')
+      return
+    }
+    // Revisión de último momento: por si otro paciente tomó ese mismo horario justo mientras
+    // esta persona tenía la pantalla abierta (la lista de horas se actualiza sola, pero por las
+    // dudas se vuelve a chequear antes de enviar).
+    if (horasOcupadas.has(hora)) {
+      setError('Ese horario ya fue tomado por otra consulta. Elige otro.')
+      setHora('')
       return
     }
     setError('')

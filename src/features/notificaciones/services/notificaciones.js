@@ -18,3 +18,16 @@ export async function notificarAdmins({ tipo, texto, enlace = '' }) {
 export function marcarNotificacionLeida(id) {
   return updateDoc(doc(db, 'notificaciones', id), { leida: true })
 }
+
+// Al abrir un chat, las notificaciones de "nuevo mensaje" de esa misma conversación ya no tienen
+// sentido sin leer (la persona está viendo el mensaje ahí mismo). `enlace` guarda la ruta al chat
+// (ej. "/doctor/mensajes/abc123"), así que se identifica la conversación por el id al final de esa
+// ruta en vez de guardar un campo aparte solo para esto.
+export async function marcarNotificacionesDeChatLeidas(miUid, otroId) {
+  if (!miUid || !otroId) return
+  const snap = await getDocs(
+    query(collection(db, 'notificaciones'), where('paraUid', '==', miUid), where('tipo', '==', 'mensaje_chat'), where('leida', '==', false))
+  )
+  const deEsaConversacion = snap.docs.filter((d) => d.data().enlace?.endsWith(`/${otroId}`))
+  await Promise.all(deEsaConversacion.map((d) => updateDoc(d.ref, { leida: true }).catch(() => {})))
+}
