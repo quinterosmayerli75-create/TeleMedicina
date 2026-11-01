@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { collection, deleteDoc, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
+import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
-import { bloquearUsuario, levantarBloqueo, mensajeErrorBloqueo } from '@/features/bloqueos/services/bloqueos'
+import { bloquearUsuario, congelarUsuario, levantarBloqueo, mensajeErrorBloqueo } from '@/features/bloqueos/services/bloqueos'
 import ModalBloqueo from '@/features/bloqueos/components/ModalBloqueo'
 import { esBloqueo } from '@/features/bloqueos/utils/bloqueos'
 import { diasRestantes, formatearFecha } from '@/shared/utils/fechas'
@@ -31,15 +31,17 @@ const ETIQUETA_ESTADO = {
   bloqueado_temporal: { texto: 'Bloqueado temporal', clase: 'status-blocked' },
   rechazado_temporal: { texto: 'Rechazo temporal', clase: 'status-warn' },
   rechazado_definitivo: { texto: 'Rechazado', clase: 'status-blocked' },
+  congelada: { texto: 'Congelada', clase: 'status-blocked' },
 }
 
 // Estados de cuenta que se listan aquí (los pendientes y rechazados viven en Solicitudes).
-const ESTADOS_VISIBLES = ['activo', 'bloqueado_temporal', 'bloqueado']
+const ESTADOS_VISIBLES = ['activo', 'bloqueado_temporal', 'bloqueado', 'congelada']
 const FILTROS_ESTADO = [
   { clave: '', etiqueta: 'Todos' },
   { clave: 'activo', etiqueta: 'Activos' },
   { clave: 'bloqueado_temporal', etiqueta: 'Bloqueados temporalmente' },
   { clave: 'bloqueado', etiqueta: 'Bloqueados permanentemente' },
+  { clave: 'congelada', etiqueta: 'Congeladas' },
 ]
 
 export default function Doctores() {
@@ -55,6 +57,7 @@ export default function Doctores() {
 
   const [modal, setModal] = useState(null)
   const [seleccion, setSeleccion] = useState(null)
+  const [motivoCongelar, setMotivoCongelar] = useState('')
 
   useEffect(() => {
     // Todos los doctores, incluidos los bloqueados: así el bloqueo (temporal o permanente) se ve aquí.
@@ -141,17 +144,19 @@ export default function Doctores() {
     setModal('detalle')
   }
 
-  async function eliminarDoctor() {
+  // Las cuentas nunca se borran de la base de datos: se congelan. Así se conserva su historial
+  // (consultas, pagos, calificaciones) y la cuenta simplemente deja de poder entrar.
+  async function congelarDoctor() {
     setAviso('')
     setErrorAccion('')
     try {
-      await deleteDoc(doc(db, 'usuarios', seleccion.id))
-      await deleteDoc(doc(db, 'profesionales', seleccion.id))
-      setAviso(`Se eliminó a ${seleccion.nombre}.`)
+      await congelarUsuario({ usuarioId: seleccion.id, motivo: motivoCongelar })
+      setAviso(`Se congeló la cuenta de ${seleccion.nombre}.`)
+      setModal(null)
+      setMotivoCongelar('')
     } catch (err) {
       setErrorAccion(mensajeErrorBloqueo(err))
     }
-    setModal(null)
   }
 
   async function aplicarBloqueo(d, { tipo, dias, motivo }) {
@@ -285,7 +290,7 @@ export default function Doctores() {
                           ? `Plan ${PLANES[d.profesional.suscripcionPlan]?.etiqueta ?? d.profesional.suscripcionPlan}${d.profesional.suscripcionVenceEl ? ` · vence ${d.profesional.suscripcionVenceEl}` : ''}`
                           : 'Sin suscripción activa'}
                       </div>
-                      {bloqueado && (d.motivoBloqueo) && <div className="rank-meta">Motivo: {d.motivoBloqueo}</div>}
+                      {(bloqueado || d.estado === 'congelada') && d.motivoBloqueo && <div className="rank-meta">Motivo: {d.motivoBloqueo}</div>}
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -299,7 +304,7 @@ export default function Doctores() {
                     ) : (
                       <button type="button" className="mini-btn danger" onClick={() => { setSeleccion(d); setAviso(''); setErrorAccion(''); setModal('bloquear') }}>Bloquear</button>
                     )}
-                    <button type="button" className="mini-btn danger" onClick={() => { setSeleccion(d); setModal('eliminar') }}>Eliminar</button>
+                    <button type="button" className="mini-btn danger" onClick={() => { setSeleccion(d); setMotivoCongelar(''); setModal('congelar') }}>Congelar</button>
                   </div>
                 </div>
               )
@@ -360,17 +365,19 @@ export default function Doctores() {
         </div>
       )}
 
-      {modal === 'eliminar' && seleccion && (
+      {modal === 'congelar' && seleccion && (
         <div className="modal-fondo" onClick={() => setModal(null)}>
           <div className="modal-tarjeta" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-titulo" style={{ color: 'var(--alerta)' }}>¿Eliminar a {seleccion.nombre}?</div>
+            <div className="modal-titulo" style={{ color: 'var(--alerta)' }}>¿Congelar la cuenta de {seleccion.nombre}?</div>
             <div className="modal-sub">
-              Se borra su perfil de la plataforma. Su cuenta de acceso queda inutilizable porque ya no tendrá
-              datos asociados, aunque el registro de autenticación deba limpiarse aparte.
+              Ya no podrá entrar a DocTop, pero su historial (consultas, pagos, calificaciones) se conserva.
+              Las cuentas nunca se borran de la plataforma.
             </div>
+            <label className="campo-label">Motivo (lo verá si intenta entrar)</label>
+            <textarea rows="3" value={motivoCongelar} onChange={(e) => setMotivoCongelar(e.target.value)} placeholder="Ej. Cuenta duplicada, a pedido del profesional…" />
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancelar</button>
-              <button type="button" className="btn btn-danger" onClick={eliminarDoctor}>Sí, eliminar</button>
+              <button type="button" className="btn btn-danger" disabled={!motivoCongelar.trim()} onClick={congelarDoctor}>Sí, congelar</button>
             </div>
           </div>
         </div>

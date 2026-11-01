@@ -12,7 +12,8 @@ import LlamadaEntranteBanner from '@/features/chat/components/LlamadaEntranteBan
 import NotificacionesBell from '@/features/notificaciones/components/NotificacionesBell'
 import TutorialInicio from '@/features/onboarding/components/TutorialInicio'
 import { useAuth } from '@/features/auth/context/AuthContext'
-import { revisarVencimientoSuscripcion } from '@/features/consultas/services/suscripciones'
+import { DIAS_AVISO_VENCIMIENTO, revisarVencimientoSuscripcion } from '@/features/consultas/services/suscripciones'
+import { revisarRecordatorioConsulta } from '@/features/consultas/services/consultas'
 
 const ITEMS = [
   { to: '/doctor/panel', label: 'Panel principal', Icono: Stethoscope },
@@ -40,6 +41,7 @@ export default function DoctorLayout() {
   const location = useLocation()
   const [busqueda, setBusqueda] = useState('')
   const [datosProfesional, setDatosProfesional] = useState(null)
+  const [avisoVencimientoCerrado, setAvisoVencimientoCerrado] = useState(false)
 
   // Revisión "perezosa" (sin backend/cron): cada vez que el doctor entra a cualquier pantalla,
   // se fija si su membresía está por vencer (avisa) o ya venció sin renovar (suspende).
@@ -48,6 +50,12 @@ export default function DoctorLayout() {
     getDoc(doc(db, 'profesionales', usuario.uid))
       .then((snap) => { if (snap.exists()) revisarVencimientoSuscripcion(usuario.uid, snap.data()) })
       .catch(() => {})
+  }, [usuario, estado])
+
+  // Misma idea, perezosa: avisa una sola vez por consulta si tiene una habilitada para hoy o mañana.
+  useEffect(() => {
+    if (!usuario || estado !== 'activo') return
+    revisarRecordatorioConsulta(usuario.uid).catch(() => {})
   }, [usuario, estado])
 
   // Escucha en vivo el estado de la suscripción para mostrar el bloqueo de pantalla completa en
@@ -65,6 +73,16 @@ export default function DoctorLayout() {
 
   const suspendidoPorMembresia = datosProfesional?.suscripcionActiva === false
   const enPaginaDeSuscripcion = location.pathname === '/doctor/suscripcion'
+
+  // Ventana emergente (estilo "tu suscripción de streaming está por vencer"): a diferencia del
+  // bloqueo de arriba (cuenta YA suspendida, no se puede cerrar), esta solo avisa que falta poco
+  // y se puede cerrar — reaparece la próxima vez que entre mientras siga sin pagar.
+  const hoy = new Date().toISOString().slice(0, 10)
+  const diasParaVencer = datosProfesional?.suscripcionVenceEl
+    ? Math.ceil((new Date(`${datosProfesional.suscripcionVenceEl}T00:00:00`) - new Date(`${hoy}T00:00:00`)) / 86400000)
+    : null
+  const porVencerPronto = datosProfesional?.suscripcionActiva === true
+    && diasParaVencer !== null && diasParaVencer >= 0 && diasParaVencer <= DIAS_AVISO_VENCIMIENTO
 
   async function cerrarSesion() {
     await signOut(auth)
@@ -153,6 +171,41 @@ export default function DoctorLayout() {
             </button>
             <button type="button" className="btn btn-outline" style={{ marginTop: 10 }} onClick={cerrarSesion}>
               Cerrar sesión
+            </button>
+          </div>
+        </div>
+      )}
+
+      {porVencerPronto && !avisoVencimientoCerrado && !enPaginaDeSuscripcion && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(11, 17, 32, 0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+          }}
+          onClick={() => setAvisoVencimientoCerrado(true)}
+        >
+          <div className="modal-tarjeta" style={{ maxWidth: 440, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 16, margin: '0 auto 14px', color: '#fff',
+              background: 'var(--ambar)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <CreditCard size={26} strokeWidth={2} />
+            </div>
+            <div className="modal-titulo">Tu suscripción está por vencer</div>
+            <p className="web-sub" style={{ marginTop: 8 }}>
+              Vence el <b>{datosProfesional.suscripcionVenceEl}</b>{diasParaVencer === 0 ? ' (hoy)' : ` (en ${diasParaVencer} día${diasParaVencer === 1 ? '' : 's'})`}.
+              Si no la renuevas a tiempo, tu cuenta se suspenderá automáticamente.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ marginTop: 12, background: 'var(--admin-accent)' }}
+              onClick={() => navigate('/doctor/suscripcion')}
+            >
+              Pagar ahora
+            </button>
+            <button type="button" className="btn btn-outline" style={{ marginTop: 10 }} onClick={() => setAvisoVencimientoCerrado(true)}>
+              Recordarme más tarde
             </button>
           </div>
         </div>

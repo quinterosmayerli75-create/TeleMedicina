@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 import { nombreSeguro, subirArchivo } from '@/services/archivos'
 import { crearNotificacion } from '@/features/notificaciones/services/notificaciones'
@@ -9,18 +9,22 @@ export const MODALIDADES = {
   video: { etiqueta: 'Videollamada', icono: '🎥' },
 }
 
+// Etiqueta y color de cada estado, para que se vean claros y distintos entre sí en toda la app
+// (tarjetas de "Mis consultas", validación de pagos, detalle de la consulta, etc.).
 export const ESTADOS_CONSULTA = {
-  pendiente_pago: { etiqueta: 'Pendiente de pago', clase: 'status-pending' },
-  pago_en_revision: { etiqueta: 'Pago en revisión', clase: 'status-pending' },
-  habilitada: { etiqueta: 'Habilitada', clase: 'status-active' },
+  pendiente_pago: { etiqueta: 'Pago pendiente', clase: 'status-pending' },
+  pago_en_revision: { etiqueta: 'En espera de confirmación', clase: 'status-warn' },
+  habilitada: { etiqueta: 'Habilitada para consulta', clase: 'status-active' },
   rechazada: { etiqueta: 'Pago rechazado', clase: 'status-blocked' },
   finalizada: { etiqueta: 'Finalizada', clase: 'status-active' },
   cancelada: { etiqueta: 'Cancelada', clase: 'status-blocked' },
 }
 
 // Crea la solicitud de consulta para una fecha y hora concretas; queda "pendiente_pago" hasta que el
-// paciente suba su comprobante.
-export async function crearConsulta({ pacienteId, pacienteNombre, doctorId, doctorNombre, modalidad, costoConsulta, fecha, hora }) {
+// paciente suba su comprobante. `pacienteEsDoctor`: true cuando quien pide la consulta es en
+// realidad otro doctor (ver "Mis citas" en useRutas.js) — así el recordatorio de pago lo manda a
+// su panel de doctor, no al de paciente (al que no tiene acceso).
+export async function crearConsulta({ pacienteId, pacienteNombre, doctorId, doctorNombre, modalidad, costoConsulta, fecha, hora, pacienteEsDoctor = false }) {
   const ref = await addDoc(collection(db, 'consultas'), {
     pacienteId,
     pacienteNombre,
@@ -40,6 +44,14 @@ export async function crearConsulta({ pacienteId, pacienteNombre, doctorId, doct
     tipo: 'consulta_solicitada',
     texto: `${pacienteNombre || 'Un paciente'} te solicitó una consulta para el ${fecha} a las ${hora}.`,
     enlace: `/doctor/consultas/${ref.id}`,
+  }).catch(() => {})
+  // Recordatorio para el propio paciente: sin esto paga en el momento o se olvida y la solicitud
+  // queda "pago pendiente" sin que nada se lo recuerde después.
+  crearNotificacion({
+    paraUid: pacienteId,
+    tipo: 'recordatorio_pago_consulta',
+    texto: `Recuerda pagar tu consulta con ${doctorNombre} (Bs ${costoConsulta}) para que se habilite.`,
+    enlace: `${pacienteEsDoctor ? '/doctor/mis-citas' : '/paciente/consultas'}/${ref.id}`,
   }).catch(() => {})
   return ref.id
 }
@@ -83,4 +95,38 @@ export function validarPago(id, { aprobado, motivoRechazo = '' }) {
 // Paciente o doctor marcan la consulta como finalizada una vez atendida.
 export function finalizarConsulta(id) {
   return updateDoc(doc(db, 'consultas', id), { estado: 'finalizada', fechaFinalizacion: serverTimestamp() })
+}
+
+async function recordarConsultasDe(uid, campoUid, campoRecordado, enlaceBase) {
+  const hoy = new Date().toISOString().slice(0, 10)
+  const manana = new Date(Date.now() + 86400000).toISOString().slice(0, 10)
+  // Solo un "where" (filtra por uid) y el resto (estado, fecha) se revisa en el código: así no
+  // hace falta crear un índice compuesto en Firestore, igual que el resto de consultas en el proyecto.
+  const snap = await getDocs(query(collection(db, 'consultas'), where(campoUid, '==', uid)))
+  for (const d of snap.docs) {
+    const c = d.data()
+    if (c.estado !== 'habilitada' || (c.fecha !== hoy && c.fecha !== manana)) continue
+    if (c[campoRecordado]) continue
+    await updateDoc(d.ref, { [campoRecordado]: true })
+    const otro = campoUid === 'pacienteId' ? c.doctorNombre : c.pacienteNombre
+    crearNotificacion({
+      paraUid: uid,
+      tipo: 'recordatorio_consulta',
+      texto: `Tienes una consulta ${c.fecha === hoy ? 'hoy' : 'mañana'} a las ${c.hora} con ${otro || 'tu contacto'}.`,
+      enlace: `${enlaceBase}/${d.id}`,
+    }).catch(() => {})
+  }
+}
+
+// Revisión "perezosa" (sin backend/cron): cada vez que la persona entra a su panel, se fija si
+// tiene una consulta habilitada para hoy o mañana (como paciente o como doctor) y, si todavía no
+// le avisó, le manda un recordatorio una sola vez por consulta (campoRecordado lo marca).
+export async function revisarRecordatorioConsulta(uid) {
+  if (!uid) return
+  const usuarioSnap = await getDoc(doc(db, 'usuarios', uid))
+  const esDoctorReal = usuarioSnap.exists() && usuarioSnap.data().rol === 'profesional'
+  await recordarConsultasDe(uid, 'pacienteId', 'recordatorioPacienteEnviado', esDoctorReal ? '/doctor/mis-citas' : '/paciente/consultas')
+  if (esDoctorReal) {
+    await recordarConsultasDe(uid, 'doctorId', 'recordatorioDoctorEnviado', '/doctor/consultas')
+  }
 }

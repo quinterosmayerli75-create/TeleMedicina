@@ -148,12 +148,20 @@ export default function CuentaRestringida() {
         {usuario && perfil && <Apelacion usuario={usuario} perfil={perfil} />}
       </>
     )
+  } else if (estado === 'congelada') {
+    titulo = 'Cuenta congelada'
+    cuerpo = (
+      <p className="web-sub" data-testid="congelada-detalle">
+        Tu cuenta fue congelada por el equipo de DocTop y ya no puedes usarla para entrar.
+        {perfil?.motivoBloqueo && <><br /><strong>Motivo:</strong> {perfil.motivoBloqueo}</>}
+      </p>
+    )
   }
 
   return (
     <div className="web-auth">
       <div className="web-auth-card" style={{ textAlign: 'center' }} data-testid="cuenta-restringida">
-        <div className="modal-titulo" style={esBloqueo(estado) ? { color: 'var(--alerta)' } : undefined}>{titulo}</div>
+        <div className="modal-titulo" style={esBloqueo(estado) || estado === 'congelada' ? { color: 'var(--alerta)' } : undefined}>{titulo}</div>
         {cuerpo}
         <button type="button" className="btn btn-outline" style={{ marginTop: 16 }} onClick={cerrarSesion}>Cerrar sesión</button>
       </div>

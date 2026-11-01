@@ -79,6 +79,33 @@ export async function bloquearUsuario({ usuarioId, tipo, dias, motivo, reporteId
   return { hasta }
 }
 
+/**
+ * Congela una cuenta en vez de borrarla: ya no puede entrar, pero su historial (consultas, pagos,
+ * comentarios) se conserva intacto porque el documento sigue existiendo. Reutiliza el mismo
+ * mecanismo de "estadoPrevio" que el bloqueo, así levantarBloqueo() también sirve para
+ * descongelarla si alguna vez hace falta.
+ */
+export async function congelarUsuario({ usuarioId, motivo }) {
+  const motivoLimpio = String(motivo ?? '').trim()
+  if (!motivoLimpio) throw new ErrorBloqueo('Escribe el motivo para congelar esta cuenta.')
+
+  const cuenta = await leerCuenta(usuarioId)
+  if (cuenta.rol === 'administrador') {
+    throw new ErrorBloqueo('No se puede congelar una cuenta de administrador desde aquí.')
+  }
+
+  const yaTeniaEstadoGuardado = esBloqueo(cuenta.estado) || cuenta.estado === 'congelada'
+  const estadoPrevio = yaTeniaEstadoGuardado ? (cuenta.estadoPrevio || 'activo') : (cuenta.estado || 'activo')
+
+  await updateDoc(doc(db, 'usuarios', usuarioId), {
+    estado: 'congelada',
+    motivoBloqueo: motivoLimpio,
+    bloqueadoEn: serverTimestamp(),
+    bloqueadoPor: auth.currentUser?.uid ?? null,
+    estadoPrevio,
+  })
+}
+
 const CAMPOS_BLOQUEO_FUERA = {
   bloqueadoHasta: deleteField(),
   motivoBloqueo: deleteField(),

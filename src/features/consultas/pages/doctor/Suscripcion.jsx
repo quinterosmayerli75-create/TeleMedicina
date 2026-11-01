@@ -30,6 +30,13 @@ export default function Suscripcion() {
   const enCurso = suscripciones.find((s) => ['pendiente_pago', 'pago_en_revision', 'rechazada'].includes(s.estado))
   const activa = datosProfesional.suscripcionActiva && datosProfesional.suscripcionVenceEl >= new Date().toISOString().slice(0, 10)
 
+  // Tres estados claros en vez de solo "activa/no activa": al día, por vencer pronto (3 días o
+  // menos) o ya vencida/caducada — así el doctor ve de un vistazo qué tan urgente es renovar.
+  const diasParaVencer = datosProfesional.suscripcionVenceEl
+    ? Math.ceil((new Date(`${datosProfesional.suscripcionVenceEl}T00:00:00`) - new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00')) / 86400000)
+    : null
+  const estadoPago = !activa ? 'vencida' : diasParaVencer !== null && diasParaVencer <= 3 ? 'por_vencer' : 'al_dia'
+
   async function solicitar() {
     setMensaje(null)
     setEnviando(true)
@@ -75,19 +82,28 @@ export default function Suscripcion() {
       <h1 className="web-h1">Suscripción a DocTop</h1>
       <p className="web-sub">Para aparecer en las búsquedas y recibir consultas, tu suscripción debe estar activa.</p>
 
-      <div className={`admin-feature-card${activa ? '' : ' c-ambar'}`} style={{ maxWidth: 720 }}>
-        <div className="icono">{activa ? '✅' : '⚠️'}</div>
-        <div className="overline">Estado de la cuenta</div>
-        {activa ? (
+      <div className={`admin-feature-card${estadoPago === 'al_dia' ? '' : ' c-ambar'}`} style={{ maxWidth: 720 }}>
+        <div className="icono">{estadoPago === 'al_dia' ? '✅' : estadoPago === 'por_vencer' ? '⏰' : '⚠️'}</div>
+        <div className="overline">Estado del pago</div>
+        {estadoPago === 'al_dia' && (
           <>
-            <div className="titulo">Membresía activa</div>
+            <div className="titulo">Al día</div>
             <p style={{ fontSize: 13, marginTop: 8 }}>
               Vigente hasta el <b>{datosProfesional.suscripcionVenceEl}</b> ({PLANES[datosProfesional.suscripcionPlan]?.etiqueta ?? '—'}).
             </p>
           </>
-        ) : (
+        )}
+        {estadoPago === 'por_vencer' && (
           <>
-            <div className="titulo">Sin membresía activa</div>
+            <div className="titulo">Por vencer</div>
+            <p style={{ fontSize: 13, color: 'var(--ambar)', marginTop: 8 }}>
+              Vence el <b>{datosProfesional.suscripcionVenceEl}</b> ({diasParaVencer === 0 ? 'hoy' : `en ${diasParaVencer} día${diasParaVencer === 1 ? '' : 's'}`}). Renueva a tiempo para no quedar suspendido.
+            </p>
+          </>
+        )}
+        {estadoPago === 'vencida' && (
+          <>
+            <div className="titulo">Vencida / caducada</div>
             <p style={{ fontSize: 13, color: 'var(--alerta)', marginTop: 8 }}>
               No apareces en las búsquedas de pacientes hasta que la pagues y sea aprobada.
             </p>

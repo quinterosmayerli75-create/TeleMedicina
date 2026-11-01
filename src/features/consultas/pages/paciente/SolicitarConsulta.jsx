@@ -98,6 +98,7 @@ export default function SolicitarConsulta() {
         costoConsulta: doctor.costoConsulta,
         fecha,
         hora,
+        pacienteEsDoctor: rutas.esDoctor,
       })
       navigate(rutas.cita(idConsulta), { replace: true })
     } catch {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { collection, deleteDoc, doc, onSnapshot, query, serverTimestamp, setDoc, where } from 'firebase/firestore'
-import { db } from '@/services/firebase/config'
+import { collection, doc, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
+import { db, auth } from '@/services/firebase/config'
 import { crearUsuarioAuxiliar } from '@/services/firebase/crearUsuarioSecundario'
 import { mensajeErrorBloqueo } from '@/features/bloqueos/services/bloqueos'
 import { useAuth } from '@/features/auth/context/AuthContext'
@@ -67,11 +67,20 @@ export default function Roles() {
     }
   }
 
+  // Las cuentas nunca se borran de la base de datos: se congelan (se conserva su historial). No
+  // se usa congelarUsuario() del servicio de bloqueos porque esa función, a propósito, rechaza
+  // congelar cuentas de administrador — aquí sí hace falta, es justo lo que hace esta pantalla.
   async function quitarAdministrador(a) {
     setError('')
     setAviso('')
     try {
-      await deleteDoc(doc(db, 'usuarios', a.id))
+      await updateDoc(doc(db, 'usuarios', a.id), {
+        estado: 'congelada',
+        motivoBloqueo: 'Acceso de administrador retirado por el super admin.',
+        bloqueadoEn: serverTimestamp(),
+        bloqueadoPor: auth.currentUser?.uid ?? null,
+        estadoPrevio: a.estado || 'activo',
+      })
       setAviso(`Se quitó el acceso de administrador a ${a.nombre || a.email}.`)
     } catch (err) {
       setError(mensajeErrorBloqueo(err))

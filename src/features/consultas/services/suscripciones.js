@@ -3,8 +3,9 @@ import { db } from '@/services/firebase/config'
 import { nombreSeguro, subirArchivo } from '@/services/archivos'
 import { crearNotificacion, notificarAdmins } from '@/features/notificaciones/services/notificaciones'
 
-// Días de anticipación para avisarle al doctor que su membresía está por vencer.
-const DIAS_AVISO_VENCIMIENTO = 3
+// Días de anticipación para avisarle al doctor que su membresía está por vencer. Exportado para
+// que la ventana emergente (DoctorLayout.jsx) use el mismo umbral que este chequeo.
+export const DIAS_AVISO_VENCIMIENTO = 3
 
 export const PLANES = {
   mensual: { etiqueta: 'Mensual', dias: 30 },

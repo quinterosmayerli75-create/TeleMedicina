@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { collection, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
-import { bloquearUsuario, levantarBloqueo, mensajeErrorBloqueo } from '@/features/bloqueos/services/bloqueos'
+import { bloquearUsuario, congelarUsuario, levantarBloqueo, mensajeErrorBloqueo } from '@/features/bloqueos/services/bloqueos'
 import ModalBloqueo from '@/features/bloqueos/components/ModalBloqueo'
 import { esBloqueo } from '@/features/bloqueos/utils/bloqueos'
 import { formatearFecha } from '@/shared/utils/fechas'
@@ -23,6 +23,7 @@ const FILTROS_ESTADO = [
   { clave: 'activo', etiqueta: 'Activos' },
   { clave: 'bloqueado_temporal', etiqueta: 'Bloqueados temporalmente' },
   { clave: 'bloqueado', etiqueta: 'Bloqueados permanentemente' },
+  { clave: 'congelada', etiqueta: 'Congeladas' },
 ]
 
 const POR_PAGINA = 10
@@ -38,6 +39,7 @@ export default function Usuarios() {
   const [seleccion, setSeleccion] = useState(null)
   const [aviso, setAviso] = useState('')
   const [errorAccion, setErrorAccion] = useState('')
+  const [motivoCongelar, setMotivoCongelar] = useState('')
 
   useEffect(() => {
     const q = query(collection(db, 'usuarios'), where('rol', '==', 'paciente'))
@@ -99,16 +101,18 @@ export default function Usuarios() {
     }
   }
 
-  async function eliminarUsuario() {
+  // Las cuentas nunca se borran de la base de datos: se congelan (se conserva su historial).
+  async function congelarUsuarioAccion() {
     setAviso('')
     setErrorAccion('')
     try {
-      await deleteDoc(doc(db, 'usuarios', seleccion.id))
-      setAviso('El usuario se eliminó.')
+      await congelarUsuario({ usuarioId: seleccion.id, motivo: motivoCongelar })
+      setAviso('La cuenta se congeló.')
+      setModal(null)
+      setMotivoCongelar('')
     } catch (err) {
       setErrorAccion(mensajeErrorBloqueo(err))
     }
-    setModal(null)
   }
 
   if (cargando) return <p className="web-sub">Cargando…</p>
@@ -189,7 +193,8 @@ export default function Usuarios() {
               <span className={`status-pill ${u.estado === 'activo' ? 'status-active' : 'status-blocked'}`}>
                 {u.estado === 'bloqueado_temporal'
                   ? `Bloqueado temporal · hasta ${formatearFecha(u.bloqueadoHasta)}`
-                  : u.estado === 'bloqueado' ? 'Bloqueado permanente' : 'Activo'}
+                  : u.estado === 'bloqueado' ? 'Bloqueado permanente'
+                  : u.estado === 'congelada' ? 'Congelada' : 'Activo'}
               </span>
               <button type="button" className="mini-btn" onClick={() => { setSeleccion(u); setModal('detalle') }}>Ver detalle</button>
               {esBloqueo(u.estado) ? (
@@ -197,7 +202,7 @@ export default function Usuarios() {
               ) : (
                 <button type="button" className="mini-btn danger" onClick={() => { setSeleccion(u); setAviso(''); setErrorAccion(''); setModal('bloquear') }}>Bloquear</button>
               )}
-              <button type="button" className="mini-btn danger" onClick={() => { setSeleccion(u); setModal('eliminar') }}>Eliminar</button>
+              <button type="button" className="mini-btn danger" onClick={() => { setSeleccion(u); setMotivoCongelar(''); setModal('congelar') }}>Congelar</button>
             </div>
           </div>
         ))}
@@ -251,14 +256,18 @@ export default function Usuarios() {
         </div>
       )}
 
-      {modal === 'eliminar' && seleccion && (
+      {modal === 'congelar' && seleccion && (
         <div className="modal-fondo" onClick={() => setModal(null)}>
           <div className="modal-tarjeta" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-titulo" style={{ color: 'var(--alerta)' }}>¿Eliminar a {seleccion.nombre}?</div>
-            <div className="modal-sub">Se borra su perfil de la plataforma de forma permanente.</div>
+            <div className="modal-titulo" style={{ color: 'var(--alerta)' }}>¿Congelar la cuenta de {seleccion.nombre}?</div>
+            <div className="modal-sub">
+              Ya no podrá entrar a DocTop, pero su historial se conserva. Las cuentas nunca se borran de la plataforma.
+            </div>
+            <label className="campo-label">Motivo (lo verá si intenta entrar)</label>
+            <textarea rows="3" value={motivoCongelar} onChange={(e) => setMotivoCongelar(e.target.value)} placeholder="Ej. Cuenta duplicada, a pedido del usuario…" />
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <button type="button" className="btn btn-outline" onClick={() => setModal(null)}>Cancelar</button>
-              <button type="button" className="btn btn-danger" onClick={eliminarUsuario}>Sí, eliminar</button>
+              <button type="button" className="btn btn-danger" disabled={!motivoCongelar.trim()} onClick={congelarUsuarioAccion}>Sí, congelar</button>
             </div>
           </div>
         </div>

@@ -9,7 +9,6 @@ import {
 import { db, auth } from '@/services/firebase/config'
 import CuentaRestringida from '@/features/auth/components/CuentaRestringida'
 import { useAuth } from '@/features/auth/context/AuthContext'
-import { esBloqueo } from '@/features/bloqueos/utils/bloqueos'
 import NotificacionesBell from '@/features/notificaciones/components/NotificacionesBell'
 
 const ITEMS = [
@@ -55,7 +54,9 @@ export default function AdminLayout() {
   const contadores = useContadoresAdmin()
   const [busqueda, setBusqueda] = useState('')
 
-  if (esBloqueo(estado)) return <CuentaRestringida />
+  // Un admin solo puede estar 'activo' o 'congelada' (ver cuentas que nunca se borran) — se
+  // compara directo contra 'activo' en vez de esBloqueo(), que no cubre "congelada".
+  if (estado !== 'activo') return <CuentaRestringida />
 
   async function cerrarSesion() {
     await signOut(auth)

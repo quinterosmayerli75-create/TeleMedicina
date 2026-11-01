@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { Stethoscope, Home, Search, Heart, CalendarDays, MessageSquare, User, Settings, LogOut } from 'lucide-react'
@@ -8,7 +8,7 @@ import LlamadaEntranteBanner from '@/features/chat/components/LlamadaEntranteBan
 import NotificacionesBell from '@/features/notificaciones/components/NotificacionesBell'
 import TutorialInicio from '@/features/onboarding/components/TutorialInicio'
 import { useAuth } from '@/features/auth/context/AuthContext'
-import { esBloqueo } from '@/features/bloqueos/utils/bloqueos'
+import { revisarRecordatorioConsulta } from '@/features/consultas/services/consultas'
 
 const ITEMS = [
   { to: '/paciente/inicio', label: 'Inicio', Icono: Home },
@@ -30,7 +30,17 @@ export default function PacienteLayout() {
   const navigate = useNavigate()
   const [busqueda, setBusqueda] = useState('')
 
-  if (esBloqueo(estado)) return <CuentaRestringida />
+  // Perezoso (sin backend/cron): avisa una sola vez por consulta si tiene una habilitada para
+  // hoy o mañana. Va antes del return de abajo porque los Hooks no pueden ser condicionales.
+  useEffect(() => {
+    if (!usuario || estado !== 'activo') return
+    revisarRecordatorioConsulta(usuario.uid).catch(() => {})
+  }, [usuario, estado])
+
+  // Antes solo miraba esBloqueo(estado) (bloqueado/bloqueado_temporal) — un paciente nunca tenía
+  // otro estado "no activo" posible. Ahora también existe "congelada" (ver sección de cuentas que
+  // nunca se borran), así que se compara contra 'activo' directamente para no dejarla pasar.
+  if (estado !== 'activo') return <CuentaRestringida />
 
   async function cerrarSesion() {
     await signOut(auth)

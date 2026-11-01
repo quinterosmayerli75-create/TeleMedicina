@@ -253,6 +253,15 @@ service cloud.firestore {
             && resource.data.estado == 'habilitada'
             && request.resource.data.estado == 'finalizada'
           )
+          || (
+            // Marca "ya le avisé a esta persona que tiene consulta pronto" (recordatorios, ver
+            // revisarRecordatorioConsulta en consultas.js): no cambia el estado, solo agrega esa
+            // bandera, y cada quien solo puede tocar la suya.
+            (request.auth.uid == resource.data.pacienteId || request.auth.uid == resource.data.doctorId)
+            && resource.data.estado == 'habilitada'
+            && request.resource.data.estado == resource.data.estado
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['recordatorioPacienteEnviado', 'recordatorioDoctorEnviado'])
+          )
         );
       allow delete: if esAdmin();
     }
