@@ -272,27 +272,6 @@ export default function RegistroProfesional() {
               </div>
 
               <div className="registro-seccion">
-                <h2 className="seccion-titulo"><Icono nombre="document" size={19} /> Datos personales</h2>
-                <div className="campos-2col">
-                  <div>
-                    <EtiquetaCampo htmlFor="fechaNacimiento">Fecha de nacimiento</EtiquetaCampo>
-                    <CampoFecha id="fechaNacimiento" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
-                    <CampoError campo="fechaNacimiento" faltantes={faltantes} />
-                  </div>
-                  <div>
-                    <EtiquetaCampo htmlFor="estatura">Estatura aprox.</EtiquetaCampo>
-                    <input id="estatura" type="text" placeholder="1.70 m" value={datos.estatura} onChange={actualizarCampo('estatura')} />
-                    <CampoError campo="estatura" faltantes={faltantes} />
-                  </div>
-                  <div>
-                    <EtiquetaCampo htmlFor="peso">Peso aprox.</EtiquetaCampo>
-                    <input id="peso" type="text" placeholder="72 kg" value={datos.peso} onChange={actualizarCampo('peso')} />
-                    <CampoError campo="peso" faltantes={faltantes} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="registro-seccion">
                 <h2 className="seccion-titulo"><Icono nombre="medical" size={19} /> Datos profesionales y acreditación</h2>
                 <EtiquetaCampo htmlFor="nombre">Nombre completo</EtiquetaCampo>
                 <input id="nombre" type="text" placeholder="Dr./Dra. Nombre Apellido" value={datos.nombre} onChange={actualizarCampo('nombre')} />
@@ -374,6 +353,27 @@ export default function RegistroProfesional() {
             </div>
 
             <div>
+              <div className="registro-seccion">
+                <h2 className="seccion-titulo"><Icono nombre="document" size={19} /> Datos personales</h2>
+                <div className="campos-2col">
+                  <div>
+                    <EtiquetaCampo htmlFor="fechaNacimiento">Fecha de nacimiento</EtiquetaCampo>
+                    <CampoFecha id="fechaNacimiento" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
+                    <CampoError campo="fechaNacimiento" faltantes={faltantes} />
+                  </div>
+                  <div>
+                    <EtiquetaCampo htmlFor="estatura">Estatura aprox.</EtiquetaCampo>
+                    <input id="estatura" type="text" placeholder="1.70 m" value={datos.estatura} onChange={actualizarCampo('estatura')} />
+                    <CampoError campo="estatura" faltantes={faltantes} />
+                  </div>
+                  <div>
+                    <EtiquetaCampo htmlFor="peso">Peso aprox.</EtiquetaCampo>
+                    <input id="peso" type="text" placeholder="72 kg" value={datos.peso} onChange={actualizarCampo('peso')} />
+                    <CampoError campo="peso" faltantes={faltantes} />
+                  </div>
+                </div>
+              </div>
+
               <div className="registro-seccion" style={{ borderColor: 'var(--admin-accent)' }}>
                 <h2 className="seccion-titulo"><Icono nombre="monitor" size={19} /> Modalidades de atención</h2>
                 {MODALIDADES.map((m) => (

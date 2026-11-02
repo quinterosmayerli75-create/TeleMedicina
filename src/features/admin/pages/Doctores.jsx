@@ -50,6 +50,12 @@ export default function Doctores() {
   const [cargando, setCargando] = useState(true)
   const [searchParams] = useSearchParams()
   const [busqueda, setBusqueda] = useState(searchParams.get('q') ?? '')
+  // Mantiene "busqueda" sincronizada si se vuelve a buscar desde la caja de arriba estando ya en
+  // esta pantalla (useState solo lee la URL al montar, no en cada cambio del query string).
+  useEffect(() => {
+    const q = searchParams.get('q')
+    if (q !== null) setBusqueda(q)
+  }, [searchParams])
   const [especialidadSel, setEspecialidadSel] = useState('')
   const [estadoSel, setEstadoSel] = useState('')
   const [aviso, setAviso] = useState('')

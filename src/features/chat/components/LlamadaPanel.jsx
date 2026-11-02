@@ -1,5 +1,6 @@
 import Icono from '@/shared/components/Icono'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff } from '@/shared/components/Icons'
 
 function VideoStream({ stream, muted, espejado, oculto }) {
@@ -48,21 +49,22 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
   // tocar el botón de llamar (justo el bug reportado: "no me muestra que estoy llamando").
   if (!llamada) {
     if (!error) return null
-    return (
+    return createPortal(
       <div className="llamada-overlay">
         <div className="llamada-tarjeta">
           <div className="llamada-nombre">No se pudo iniciar la llamada</div>
           <p style={{ fontSize: 13, color: '#CFE8DE', marginTop: 8 }}>{error}</p>
           <button type="button" className="btn btn-outline btn-auto" style={{ marginTop: 14 }} onClick={onDescartarError}>Cerrar</button>
         </div>
-      </div>
+      </div>,
+      document.body
     )
   }
 
   const sonando = llamada.estado === 'llamando'
   const esVideo = llamada.tipo === 'video'
 
-  return (
+  return createPortal(
     <div className="llamada-overlay">
       {sonando && soyLlamante && (
         <div className="llamada-tarjeta">
@@ -131,6 +133,7 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
       )}
 
       {error && <div className="registro-error" style={{ position: 'absolute', bottom: 10, left: 10, right: 10, background: '#fff', padding: 10 }}>{error}</div>}
-    </div>
+    </div>,
+    document.body
   )
 }

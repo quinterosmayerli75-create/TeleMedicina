@@ -1,5 +1,5 @@
 import Icono from '@/shared/components/Icono'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useConsultasDoctor } from '../../hooks/useConsultas'
@@ -22,6 +22,12 @@ export default function MisConsultas() {
   const [searchParams] = useSearchParams()
   const [pestana, setPestana] = useState('')
   const [busqueda, setBusqueda] = useState(searchParams.get('q') ?? '')
+  // Mantiene "busqueda" sincronizada si se vuelve a buscar desde la caja de arriba estando ya en
+  // esta pantalla (useState solo lee la URL al montar, no en cada cambio del query string).
+  useEffect(() => {
+    const q = searchParams.get('q')
+    if (q !== null) setBusqueda(q)
+  }, [searchParams])
   const [fechaFiltro, setFechaFiltro] = useState('')
 
   const conteos = useMemo(() => {

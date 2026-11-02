@@ -1,5 +1,5 @@
 import Icono from '@/shared/components/Icono'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useProfesionalesActivos } from '../hooks/useProfesionalesActivos'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
@@ -32,6 +32,14 @@ export default function Buscar() {
   const [searchParams] = useSearchParams()
 
   const [texto, setTexto] = useState(searchParams.get('q') ?? '')
+  // useState solo lee "q" de la URL al MONTAR el componente — si ya se estaba en esta pantalla
+  // y se busca de nuevo desde la caja de arriba (mismo componente, cambia solo el query string),
+  // el texto se quedaba pegado en lo que se escribió la primera vez. Este efecto lo mantiene
+  // sincronizado cada vez que cambia "q" en la URL, no solo al entrar.
+  useEffect(() => {
+    const q = searchParams.get('q')
+    if (q !== null) setTexto(q)
+  }, [searchParams])
   const [especialidad, setEspecialidad] = useState('Todas')
   const [precioMax, setPrecioMax] = useState(500)
   const [soloEnLinea, setSoloEnLinea] = useState(false)
