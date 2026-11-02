@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LIMITE_FOTO_MB, validarArchivo } from '@/services/archivos'
 
@@ -72,7 +73,7 @@ export default function SelectorFotos({
         onClick={() => inputRef.current?.click()}
         disabled={deshabilitado || (multiple && archivos.length >= maximo)}
       >
-        📷 {archivos.length > 0 && !multiple ? 'Cambiar foto' : textoBoton}
+        <Icono nombre="image" size={19} /> {archivos.length > 0 && !multiple ? 'Cambiar foto' : textoBoton}
       </button>
       {obligatoria && (
         <div
@@ -83,8 +84,8 @@ export default function SelectorFotos({
           {cargada
             ? `✓ ${multiple && archivos.length > 1 ? `${archivos.length} fotos cargadas` : 'Foto cargada'}`
             : multiple
-              ? `⚠ ${nombre ?? 'Las fotos'} son obligatorias. Suba al menos una.`
-              : `⚠ ${nombre ?? 'La foto'} es obligatoria.`}
+              ? ` ${nombre ?? 'Las fotos'} son obligatorias. Suba al menos una.`
+              : ` ${nombre ?? 'La foto'} es obligatoria.`}
         </div>
       )}
       {ayuda && <div className="selector-ayuda">{ayuda}</div>}

@@ -321,3 +321,160 @@
   .landing-section { padding: 48px 24px; }
   .landing-footer-inner { grid-template-columns: 1fr; }
 }
+
+/* Identidad DocTop: papel cálido, verde profundo y ritmo editorial. */
+.landing { background: #faf9f5; --admin-accent: #146b58; --admin-accent-dark: #145c50; --admin-accent-soft: #eaf0e7; --gris: #596963; --marfil-osc: #dde3da; }
+.landing-nav { padding: 20px max(24px, calc((100vw - 1180px)/2)); background: #faf9f5f5; backdrop-filter: blur(12px); }
+.landing-logo { letter-spacing: -.8px; font-size: 24px; }
+.landing-nav-links a { color: #354c44; }
+.landing-nav-links a:last-child { background: #145c50; border-radius: 6px; padding: 12px 20px; }
+.landing-hero { background: #faf9f5; padding: 76px 48px 88px; overflow: hidden; }
+.landing-hero-inner { grid-template-columns: 1.15fr 1fr; gap: 72px; }
+.landing-hero-tag { padding: 0; border: 0; background: none; font-size: 12px; letter-spacing: 1.3px; text-transform: uppercase; margin-bottom: 26px; }
+.landing-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #146b58; margin-right: 5px; box-shadow: 0 0 0 5px #e5eddf; }
+.landing-hero h1 { font-size: clamp(38px, 4.4vw, 64px); line-height: 1.1; letter-spacing: -2.2px; font-weight: 500; }
+.landing-hero h1 .acento { font-style: italic; }
+.landing-hero p { font-size: 17px; line-height: 1.8; margin: 25px 0 30px; }
+.landing .btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; border-radius: 7px; min-height: 48px; }
+.landing .btn-gold { color: white; background: #145c50; }
+.landing .btn-gold:hover { background: #0d483e; box-shadow: 0 5px 16px #145c5020; }
+.landing .landing-btn-outline { border-color: #bdc9bd; color: #145c50; }
+.landing-hero-badges { gap: 12px 20px; margin-top: 30px; }
+.landing-hero-badge { font-size: 12px; }
+.landing-hero-badge svg { color: #146b58; flex-shrink: 0; }
+.landing-hero-visual { border-radius: 160px 160px 16px 16px; background: #e5ebe0; box-shadow: 18px 18px 0 #e7ebde; padding: 0; }
+.landing-hero-visual img { height: 510px; object-position: center; }
+.landing-hero-visual-badge { top: auto; bottom: 98px; left: 22px; display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 10px 13px; border-radius: 5px; box-shadow: none; }
+.landing-photo-label { position: absolute; bottom: 0; left: 0; right: 0; z-index: 1; background: #145c50; color: #fff; padding: 22px; display: flex; align-items: center; gap: 14px; }
+.landing-photo-label strong { display: block; font-size: 14px; font-weight: 500; }
+.landing-photo-label span { display: block; color: #d0e3d9; font-size: 12px; margin-top: 3px; }
+.landing-section { max-width: 1180px; padding: 76px 24px; scroll-margin-top: 85px; }
+.landing-section-tag { background: none; padding: 0; border-radius: 0; letter-spacing: 2px; font-size: 10px; }
+.landing .section-title { font-size: clamp(27px, 3vw, 38px); letter-spacing: -.8px; font-weight: 500; }
+.landing-section-sub { font-size: 15px; line-height: 1.6; }
+.landing-pasos { gap: 0; border-top: 1px solid #dce2d7; margin-top: 42px; }
+.landing-paso { background: none; border: 0; border-right: 1px solid #dce2d7; border-radius: 0; padding: 28px 25px; margin: 0; }
+.landing-paso:last-child { border-right: 0; }
+.landing-paso-icono { background: #e9eedf; border-radius: 50%; width: 52px; height: 52px; }
+.landing-paso-numero { background: none; font-size: 13px; top: 30px; right: 24px; }
+.landing-paso > div:last-child { line-height: 1.7; }
+#especialidades { border-top: 1px solid #dce2d7; }
+.landing-especialidades { grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; }
+.landing-especialidad { background: white; border: 1px solid #dce2d7; border-radius: 10px; padding: 25px; }
+.landing-especialidad:hover { border-color: #146b58; transform: translateY(-5px); box-shadow: 0 12px 22px #145c500c; }
+.landing-especialidad:nth-child(3n+2) .landing-especialidad-icono { background: #f3e8df; color: #946345; }
+.landing-especialidad-icono { width: 50px; height: 50px; border-radius: 50%; background: #eaf0e7; color: #145c50; }
+.landing-especialidad-desc { line-height: 1.7; }
+.landing-especialidad-link { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; }
+#beneficios { background: #edf1e7; max-width: none; padding: 65px max(24px,calc((100vw - 1132px)/2)); }
+.landing-beneficio { padding: 12px 16px; }
+.landing-beneficio-icono { background: #faf9f5; border-radius: 50%; }
+.landing-beneficio > div:last-child { line-height: 1.7; }
+.landing-cta { background: #145c50; border-radius: 12px; max-width: 1132px; margin: 72px auto; padding: 56px; position: relative; overflow: hidden; }
+.landing-cta::after { content: '+'; position: absolute; right: 45px; top: -60px; font: 320px Georgia,serif; color: #ffffff08; pointer-events: none; }
+.landing-cta > div { position: relative; z-index: 1; }
+.landing-cta h2 { font-size: 38px; font-weight: 500; letter-spacing: -.7px; }
+.landing-cta .btn-gold { background: #e2ebc4; color: #163d32; }
+.landing-cta .btn-gold:hover { background: #f0f5db; }
+.landing-footer { background: #faf9f5; }
+.landing-nav a, .landing-footer a { transition: color .2s, background .2s; }
+.landing-nav a:hover, .landing-footer a:hover { color: #14705a; }
+.landing-nav-links a:last-child:hover { color: #fff; background: #0d483e; }
+@keyframes doctop-entrada { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.landing-hero-inner > div { animation: doctop-entrada .7s ease both; }
+.landing-hero-inner > div:last-child { animation-delay: .12s; }
+@media (max-width: 900px) {
+ .landing-hero { padding: 48px 24px 65px; }
+ .landing-hero-inner { gap: 42px; grid-template-columns: 1fr; }
+ .landing-hero h1 { max-width: 650px; }
+ .landing-hero-visual { max-width: 530px; width: 100%; margin: 0 auto; }
+ .landing-hero-visual img { height: 420px; }
+ .landing-paso:nth-child(2) { border-right: 0; }
+ .landing-paso:nth-child(-n+2) { border-bottom: 1px solid #dce2d7; }
+ .landing-cta { margin: 48px 24px; padding: 36px; }
+}
+@media (max-width: 560px) {
+ .landing-nav { padding: 16px; gap: 16px; }
+ .landing-logo { font-size: 18px; gap: 6px; }
+ .landing-nav-links { gap: 10px; }
+ .landing-nav-links a { font-size: 11px; }
+ .landing-nav-links a:first-child { display: none; }
+ .landing-nav-links a:last-child { padding: 9px 11px; }
+ .landing-hero h1 { font-size: 39px; letter-spacing: -1.4px; }
+ .landing-hero p { font-size: 15px; }
+ .landing-hero-botones { flex-direction: column; }
+ .landing-hero-visual img { height: 360px; }
+ .landing-hero-visual-badge { left: 12px; font-size: 10px; }
+ .landing-pasos, .landing-beneficios { grid-template-columns: 1fr; }
+ .landing-paso { border-right: 0; border-bottom: 1px solid #dce2d7; }
+ .landing-beneficio { text-align: left; display: grid; grid-template-columns: 48px 1fr; gap: 0 16px; }
+ .landing-beneficio-icono { grid-row: span 2; }
+ .landing-cta { padding: 28px; }
+ .landing-cta h2 { font-size: 30px; }
+ .landing-footer { padding: 32px 24px 20px; }
+}
+
+.landing-hero-visual img { object-position: 50% 65%; }
+
+/* Movimiento: entradas progresivas y una presentación interactiva de modalidades. */
+.landing [data-motion-item] { transition: opacity .7s ease var(--motion-delay, 0ms), translate .85s cubic-bezier(.22,1,.36,1) var(--motion-delay, 0ms), transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease; }
+.landing [data-revealed="false"] { opacity: 0; translate: 0 var(--motion-y, 32px); }
+.landing [data-revealed="true"] { opacity: 1; translate: 0 0; }
+.landing-hero-inner > div { animation: none; }
+.landing-hero-media { min-width: 0; position: relative; }
+.landing-hero-media .landing-hero-visual { border-radius: 140px 140px 18px 18px; box-shadow: 14px 14px 0 #e7ebde; }
+.landing-hero-media .landing-hero-visual img { height: 430px; transition: transform 1.1s cubic-bezier(.22,1,.36,1); }
+@media (hover: hover) { .landing-hero-media:hover .landing-hero-visual img { transform: scale(1.035); } }
+.landing-photo-label { padding-bottom: 24px; }
+.landing-modalidades { margin: -8px 16px 0; position: relative; z-index: 2; padding: 12px; border: 1px solid #dce3d8; border-radius: 16px; background: #fff; box-shadow: 0 12px 30px #173e340c; }
+.landing-modalidades-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); padding: 4px; gap: 3px; background: #f0f3eb; border-radius: 10px; }
+.landing-modalidades-tabs button { border: 0; padding: 11px 5px; background: transparent; color: #53675c; border-radius: 7px; font: 500 12px var(--sans); cursor: pointer; transition: color .25s,background .25s,box-shadow .25s; }
+.landing-modalidades-tabs button[aria-selected="true"] { color: #145c50; background: #fff; box-shadow: 0 2px 6px #173e3410; }
+.landing-modalidades-tabs button:hover { color: #145c50; background: #ffffffaa; }
+.landing-modalidades [role="tabpanel"] { min-height: 99px; padding: 16px 10px 6px; }
+.landing-modalidad-copy { animation: modalidad-entrada .35s ease both; }
+.landing-modalidad-copy strong { font-size: 15px; font-weight: 600; color: #173e34; }
+.landing-modalidad-copy p { font-size: 12px; line-height: 1.6; margin: 5px 0 0; color: #596963; }
+@keyframes modalidad-entrada { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+.landing-paso { transition: background .25s,opacity .75s,transform .75s; }
+.landing-paso:hover { background: #f0f3e9; }
+.landing-especialidad:hover .landing-especialidad-link svg, .landing .btn:hover svg { transform: translate(2px,-2px); }
+.landing-especialidad-link svg, .landing .btn svg { transition: transform .25s; }
+.landing-nav-links a:not(:last-child) { position: relative; }
+.landing-nav-links a:not(:last-child)::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .25s; }
+.landing-nav-links a:hover::after { transform: scaleX(1); }
+@supports (animation-timeline: view()) {
+ @media (prefers-reduced-motion: no-preference) {
+  .landing-hero-media .landing-hero-visual img { animation: foto-desplazamiento linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
+ }
+}
+@keyframes foto-desplazamiento { from { translate: 0 0; } to { translate: 0 28px; } }
+@media (max-width: 900px) { .landing-hero-media { width: 100%; max-width: 530px; margin: 0 auto; } }
+@media (max-width: 560px) { .landing-hero-media .landing-hero-visual img { height: 350px; } .landing-modalidades { margin-inline: 6px; } .landing-modalidades [role="tabpanel"] { min-height: 108px; } }
+@media (prefers-reduced-motion: reduce) {
+ .landing [data-motion-item] { opacity: 1; translate: none; transform: none; transition: none; }
+ .landing-modalidad-copy { animation: none; }
+ .landing-hero-media:hover .landing-hero-visual img { transform: none; }
+}
+
+/* Las entradas al hacer scroll y los efectos del cursor usan movimientos independientes. */
+.landing .landing-acceso, .landing .landing-paso, .landing .landing-especialidad, .landing .landing-beneficio { transform: translateY(0); }
+.landing-acceso-icon, .landing-paso-icono, .landing-beneficio-icono, .landing-especialidad-icono { transition: transform .35s cubic-bezier(.22,1,.36,1), background .25s; }
+.landing [data-revealed="true"] .landing-acceso-icon,
+.landing [data-revealed="true"] .landing-paso-icono,
+.landing [data-revealed="true"] .landing-beneficio-icono,
+.landing [data-revealed="true"] .landing-especialidad-icono { animation: icono-aparece .65s var(--motion-delay, 0ms) cubic-bezier(.22,1,.36,1) both; }
+@keyframes icono-aparece { from { opacity: .2; scale: .78; rotate: -9deg; } to { opacity: 1; scale: 1; rotate: 0deg; } }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+ .landing .landing-acceso:hover, .landing .landing-especialidad:hover { transform: translateY(-7px); box-shadow: 0 16px 32px #214a3612; }
+ .landing .landing-paso:hover, .landing .landing-beneficio:hover { transform: translateY(-5px); }
+ .landing-acceso:hover .landing-acceso-icon, .landing-paso:hover .landing-paso-icono,
+ .landing-beneficio:hover .landing-beneficio-icono, .landing-especialidad:hover .landing-especialidad-icono { transform: perspective(350px) rotateY(12deg) rotateZ(-4deg); }
+ .landing-acceso:hover > svg { transform: translate(3px,-3px); }
+}
+.landing-acceso > svg { transition: transform .25s; }
+@media (prefers-reduced-motion: reduce) {
+ .landing [data-revealed] { opacity: 1; translate: none; }
+ .landing [data-revealed="true"] .landing-acceso-icon, .landing [data-revealed="true"] .landing-paso-icono,
+ .landing [data-revealed="true"] .landing-beneficio-icono, .landing [data-revealed="true"] .landing-especialidad-icono { animation: none; }
+}

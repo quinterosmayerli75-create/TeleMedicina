@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
-import { MessageSquareWarning } from 'lucide-react'
+import { MessageSquareWarning } from '@/shared/components/Icons'
 import { db } from '@/services/firebase/config'
 import { bloquearUsuario, mensajeErrorBloqueo } from '@/features/bloqueos/services/bloqueos'
 import ModalBloqueo from '@/features/bloqueos/components/ModalBloqueo'

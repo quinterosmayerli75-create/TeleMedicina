@@ -71,7 +71,7 @@ export default function CambiarFotoPerfil({ compacto = false }) {
       <div>
         <input ref={inputRef} type="file" accept="image/*" hidden onChange={alElegir} aria-label="Elegir foto de perfil" />
         <button type="button" className="btn btn-outline btn-auto" onClick={() => inputRef.current?.click()} disabled={subiendo || cargando}>
-          {subiendo ? `Subiendo… ${Math.round(progreso * 100)}%` : fotoUrl ? '📷 Cambiar foto' : '📷 Subir foto'}
+          {subiendo ? `Subiendo… ${Math.round(progreso * 100)}%` : fotoUrl ? ' Cambiar foto' : ' Subir foto'}
         </button>
         {!compacto && <div className="selector-ayuda">JPG o PNG, máximo {LIMITE_FOTO_MB} MB.</div>}
         {mensaje && (

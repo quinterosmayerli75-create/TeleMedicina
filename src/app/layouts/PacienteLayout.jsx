@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
-import { Stethoscope, Home, Search, Heart, CalendarDays, MessageSquare, User, Settings, LogOut } from 'lucide-react'
+import { Home, Search, Heart, CalendarDays, MessageSquare, User, Settings, LogOut } from '@/shared/components/Icons'
 import { auth } from '@/services/firebase/config'
 import CuentaRestringida from '@/features/auth/components/CuentaRestringida'
 import LlamadaEntranteBanner from '@/features/chat/components/LlamadaEntranteBanner'
@@ -53,11 +53,11 @@ export default function PacienteLayout() {
   }
 
   return (
-    <div className="admin-shell">
+    <div className="admin-shell" data-portal="paciente">
       <LlamadaEntranteBanner base="/paciente" />
       <aside className="admin-sidebar">
         <div className="admin-logo-row">
-          <div className="admin-logo-mark"><Stethoscope size={18} strokeWidth={2.4} /></div>
+          <div className="admin-logo-mark" aria-hidden="true">dt<span>+</span></div>
           <div>
             <div className="admin-logo-word">DOCTOP</div>
             <div className="admin-logo-sub">Portal paciente</div>

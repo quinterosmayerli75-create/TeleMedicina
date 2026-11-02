@@ -113,7 +113,7 @@ export default function MisConsultas() {
                     <div style={{ fontWeight: 600 }}>{c.doctor?.nombre ?? c.doctorNombre}</div>
                     <div className="rank-meta">
                       {MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta} · Bs {c.costoConsulta}
-                      {c.fecha && ` · 📅 ${c.fecha} ${c.hora ?? ''}`}
+                      {c.fecha && ` ·  ${c.fecha} ${c.hora ?? ''}`}
                     </div>
                   </div>
                 </div>

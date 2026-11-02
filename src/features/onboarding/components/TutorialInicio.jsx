@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/features/auth/context/AuthContext'
-import panda from '@/assets/mascota/panda-doctor.png'
+import Icono from '@/shared/components/Icono'
 
 const PASOS_POR_ROL = {
   paciente: [
-    { icono: '👋', titulo: 'Bienvenido a DocTop', texto: 'Encuentra especialistas verificados y atiéndete de forma 100% virtual, sin salir de casa.' },
-    { icono: '🔎', titulo: 'Busca y agenda', texto: 'Busca un doctor, elige la modalidad (chat, llamada o video) y la fecha y hora de tu consulta.' },
-    { icono: '💳', titulo: 'Paga y confirma', texto: 'Paga por QR y sube la foto de tu comprobante. El doctor lo revisa y habilita tu consulta.' },
-    { icono: '💬', titulo: 'Conéctate', texto: 'Cuando esté habilitada, chatea, llama o haz videollamada con tu doctor, y luego califica tu experiencia.' },
+    { icono: 'hand', titulo: 'Bienvenido a DocTop', texto: 'Encuentra especialistas verificados y atiéndete de forma 100% virtual, sin salir de casa.' },
+    { icono: 'search', titulo: 'Busca y agenda', texto: 'Busca un doctor, elige la modalidad (chat, llamada o video) y la fecha y hora de tu consulta.' },
+    { icono: 'card', titulo: 'Paga y confirma', texto: 'Paga por QR y sube la foto de tu comprobante. El doctor lo revisa y habilita tu consulta.' },
+    { icono: 'chat', titulo: 'Conéctate', texto: 'Cuando esté habilitada, chatea, llama o haz videollamada con tu doctor, y luego califica tu experiencia.' },
   ],
   profesional: [
-    { icono: '👋', titulo: 'Bienvenido a DocTop', texto: 'Atiende pacientes de forma 100% virtual desde donde estés.' },
-    { icono: '⚙️', titulo: 'Configura tu perfil', texto: 'En "Panel principal" define tu precio de consulta, tus modalidades y tus horarios de atención.' },
-    { icono: '📋', titulo: 'Atiende consultas', texto: 'Revisa las solicitudes de tus pacientes en "Mis consultas" y mira tu día a día en "Agenda".' },
-    { icono: '💬', titulo: 'Conéctate', texto: 'Chatea, llama o haz videollamada con tus pacientes una vez que su pago esté habilitado.' },
+    { icono: 'hand', titulo: 'Bienvenido a DocTop', texto: 'Atiende pacientes de forma 100% virtual desde donde estés.' },
+    { icono: 'settings', titulo: 'Configura tu perfil', texto: 'En "Panel principal" define tu precio de consulta, tus modalidades y tus horarios de atención.' },
+    { icono: 'clipboard', titulo: 'Atiende consultas', texto: 'Revisa las solicitudes de tus pacientes en "Mis consultas" y mira tu día a día en "Agenda".' },
+    { icono: 'chat', titulo: 'Conéctate', texto: 'Chatea, llama o haz videollamada con tus pacientes una vez que su pago esté habilitado.' },
   ],
 }
 
@@ -53,16 +53,7 @@ export default function TutorialInicio() {
   return (
     <div className="modal-fondo" onClick={cerrar}>
       <div className="modal-tarjeta" style={{ maxWidth: 420, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-        {paso === 0 ? (
-          <img src={panda} alt="Mascota de DocTop" style={{ width: 92, height: 92, objectFit: 'contain', margin: '0 auto 6px' }} />
-        ) : (
-          <div style={{
-            width: 60, height: 60, borderRadius: 16, margin: '0 auto 10px', fontSize: 28,
-            background: 'var(--admin-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            {actual.icono}
-          </div>
-        )}
+        <div className="tutorial-icon"><Icono nombre={actual.icono} size={30} /></div>
         <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--admin-accent-dark)' }}>
           Guía de inicio rápido · Paso {paso + 1} de {pasos.length}
         </div>

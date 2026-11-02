@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import '@/shared/styles/admin-compact.css'
+import '@/shared/styles/estadisticas.css'
+import { Fragment, useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
 import {
   LayoutGrid, ClipboardCheck, Tags, Stethoscope, Users, CreditCard,
   Wallet, ShieldAlert, KeyRound, Settings, LogOut, Search, MessageSquareWarning,
-} from 'lucide-react'
+} from '@/shared/components/Icons'
 import { db, auth } from '@/services/firebase/config'
 import CuentaRestringida from '@/features/auth/components/CuentaRestringida'
 import { useAuth } from '@/features/auth/context/AuthContext'
@@ -24,6 +26,8 @@ const ITEMS = [
   { to: '/admin/roles', label: 'Roles y permisos', Icono: KeyRound },
   { to: '/admin/configuracion', label: 'Configuración', Icono: Settings },
 ]
+
+const GRUPOS = { 0: 'Vista general', 3: 'Personas y actividad', 7: 'Supervisión', 10: 'Tu espacio' }
 
 function iniciales(nombre = '') {
   const partes = nombre.trim().split(/\s+/).filter(Boolean)
@@ -74,10 +78,10 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="admin-shell">
+    <div className="admin-shell" data-portal={esSuperAdmin ? 'superadmin' : 'admin'}>
       <aside className="admin-sidebar">
         <div className="admin-logo-row">
-          <div className="admin-logo-mark"><Stethoscope size={18} strokeWidth={2.4} /></div>
+          <div className="admin-logo-mark" aria-hidden="true">dt<span>+</span></div>
           <div>
             <div className="admin-logo-word">DOCTOP</div>
             <div className="admin-logo-sub">Admin Central</div>
@@ -88,19 +92,22 @@ export default function AdminLayout() {
           {esSuperAdmin ? 'Super administrador' : 'Administrador'}
         </div>
 
-        {ITEMS.map((item) => {
+        {ITEMS.map((item, index) => {
           const conteo = item.contador === 'solicitudes' ? contadores.solicitudes
             : item.contador === 'denuncias' ? contadores.denuncias
             : item.contador === 'comentarios' ? contadores.comentarios
             : 0
           return (
-            <NavLink key={item.to} to={item.to} className={({ isActive }) => `admin-nav-item${isActive ? ' on' : ''}`}>
+            <Fragment key={item.to}>
+            {GRUPOS[index] && <div className="portal-nav-group">{GRUPOS[index]}</div>}
+            <NavLink key={item.to} to={item.to} style={{ '--nav-delay': `${index * 30}ms` }} className={({ isActive }) => `admin-nav-item${isActive ? ' on' : ''}`}>
               <span className="admin-nav-icon"><item.Icono size={17} strokeWidth={2} /></span>
               <span className="admin-nav-label">{item.label}</span>
               {item.contador && conteo > 0 && (
                 <span className={`admin-nav-badge ${item.contador === 'solicitudes' ? 'alerta' : 'ambar'}`}>{conteo}</span>
               )}
             </NavLink>
+            </Fragment>
           )
         })}
 

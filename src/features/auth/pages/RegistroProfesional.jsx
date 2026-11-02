@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
@@ -230,7 +231,7 @@ export default function RegistroProfesional() {
     <div className="registro-fondo">
       <div className="registro-card">
         <div className="admin-eyebrow">
-          <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}>🩺 PORTAL DE COLEGIADOS Y ESPECIALISTAS</span>
+          <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}><Icono nombre="medical" size={19} /> PORTAL DE COLEGIADOS Y ESPECIALISTAS</span>
         </div>
         <h1 className="registro-titulo">Registro profesional</h1>
         <p className="registro-sub">DocTop es 100% virtual: complete sus datos para atender consultas a distancia.</p>
@@ -244,7 +245,7 @@ export default function RegistroProfesional() {
           <div className="registro-grid">
             <div>
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">🔑 Datos de acceso</h2>
+                <h2 className="seccion-titulo"><Icono nombre="key" size={19} /> Datos de acceso</h2>
                 <div className="campos-2col">
                   <div>
                     <EtiquetaCampo htmlFor="email">Correo electrónico</EtiquetaCampo>
@@ -271,7 +272,7 @@ export default function RegistroProfesional() {
               </div>
 
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">🧾 Datos personales</h2>
+                <h2 className="seccion-titulo"><Icono nombre="document" size={19} /> Datos personales</h2>
                 <div className="campos-2col">
                   <div>
                     <EtiquetaCampo htmlFor="fechaNacimiento">Fecha de nacimiento</EtiquetaCampo>
@@ -292,7 +293,7 @@ export default function RegistroProfesional() {
               </div>
 
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">🩺 Datos profesionales y acreditación</h2>
+                <h2 className="seccion-titulo"><Icono nombre="medical" size={19} /> Datos profesionales y acreditación</h2>
                 <EtiquetaCampo htmlFor="nombre">Nombre completo</EtiquetaCampo>
                 <input id="nombre" type="text" placeholder="Dr./Dra. Nombre Apellido" value={datos.nombre} onChange={actualizarCampo('nombre')} />
                 <CampoError campo="nombre" faltantes={faltantes} />
@@ -374,7 +375,7 @@ export default function RegistroProfesional() {
 
             <div>
               <div className="registro-seccion" style={{ borderColor: 'var(--admin-accent)' }}>
-                <h2 className="seccion-titulo">💻 Modalidades de atención</h2>
+                <h2 className="seccion-titulo"><Icono nombre="monitor" size={19} /> Modalidades de atención</h2>
                 {MODALIDADES.map((m) => (
                   <div className="admin-row" key={m.clave}>
                     <label style={{ fontSize: 12.5 }}>

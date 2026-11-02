@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
@@ -119,7 +120,7 @@ export default function Configuracion() {
       <div className="web-2col">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <div className="admin-cat-icon">🔒</div>
+            <div className="admin-cat-icon"><Icono nombre="lock" size={19} /></div>
             <div style={{ fontWeight: 600, fontSize: 13 }}>Seguridad y credenciales</div>
           </div>
           <CambiarContrasena mostrarCorreo textoBoton="Guardar cambios" />
@@ -127,7 +128,7 @@ export default function Configuracion() {
 
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <div className="admin-cat-icon">💳</div>
+            <div className="admin-cat-icon"><Icono nombre="card" size={19} /></div>
             <div style={{ fontWeight: 600, fontSize: 13 }}>QR y tarifas de membresía</div>
           </div>
           <ConfigPagos />

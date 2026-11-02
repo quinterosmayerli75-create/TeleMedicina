@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
@@ -83,13 +84,13 @@ export default function PerfilDoctor() {
               <div className="doc-spec">{doctor.profesion} · {doctor.especialidad}</div>
               <div className={`doc-status ${doctor.disponibleAhora ? 'is-on' : 'is-off'}`}>● {doctor.disponibleAhora ? 'En línea ahora' : 'Desconectado'}</div>
             </div>
-            <div
+            <button type="button" aria-label={favorito ? 'Quitar de favoritos' : 'Guardar en favoritos'} aria-pressed={favorito}
               className={`fav-heart${favorito ? ' on' : ''}`}
               style={{ position: 'static', marginLeft: 'auto', fontSize: 24 }}
               onClick={() => alternar(doctor.id)}
             >
-              ♥
-            </div>
+              <Icono nombre="heart" size={23} fill={favorito ? 'currentColor' : 'none'} />
+            </button>
           </div>
 
           <div style={{ margin: '14px 0' }}>
@@ -135,16 +136,16 @@ export default function PerfilDoctor() {
 
         <div>
           <button type="button" className="btn btn-primary" style={{ width: '100%', marginBottom: 14 }} onClick={() => navigate(rutas.solicitarConsulta(doctor.id))}>
-            📅 Solicitar consulta
+            <Icono nombre="calendar" size={19} /> Solicitar consulta
           </button>
 
           <div className="icon-btn-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            {modalidadesActivas.includes('Llamada de voz') && <div className="icon-btn">📞 Llamar</div>}
-            {modalidadesActivas.includes('Videollamada') && <div className="icon-btn">🎥 Video</div>}
+            {modalidadesActivas.includes('Llamada de voz') && <div className="icon-btn"><Icono nombre="phone" size={19} /> Llamar</div>}
+            {modalidadesActivas.includes('Videollamada') && <div className="icon-btn"><Icono nombre="video" size={19} /> Video</div>}
             {modalidadesActivas.includes('Chat de texto') && (
-              <div className="icon-btn" onClick={() => navigate(rutas.mensajesDoctor(doctor.id))}>💬 Mensaje</div>
+              <div className="icon-btn" onClick={() => navigate(rutas.mensajesDoctor(doctor.id))}><Icono nombre="chat" size={19} /> Mensaje</div>
             )}
-            <div className="icon-btn" style={{ color: 'var(--alerta)' }} onClick={() => navigate(rutas.denuncia(doctor.id))}>⚑ Denunciar</div>
+            <div className="icon-btn" style={{ color: 'var(--alerta)' }} onClick={() => navigate(rutas.denuncia(doctor.id))}><Icono nombre="flag" size={19} /> Denunciar</div>
           </div>
 
           <div className="card-plain">

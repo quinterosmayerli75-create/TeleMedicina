@@ -77,7 +77,7 @@ export default function GestionTitulos() {
       )}
       <input ref={inputRef} type="file" accept="image/*" multiple hidden onChange={alElegir} aria-label="Elegir fotos de títulos" />
       <button type="button" className="btn btn-outline btn-auto" onClick={() => inputRef.current?.click()} disabled={subiendo || cargando}>
-        {subiendo ? 'Subiendo…' : '📷 Agregar título'}
+        {subiendo ? 'Subiendo…' : ' Agregar título'}
       </button>
       {mensaje && <div style={{ fontSize: 12, marginTop: 8, color: mensaje.tipo === 'ok' ? 'var(--esmeralda)' : 'var(--alerta)' }}>{mensaje.texto}</div>}
     </div>

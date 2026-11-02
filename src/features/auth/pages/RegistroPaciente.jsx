@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
@@ -195,7 +196,7 @@ export default function RegistroPaciente() {
     <div className="registro-fondo">
       <div className="registro-card">
         <div className="admin-eyebrow">
-          <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}>🛡️ PROTOCOLO DE REGISTRO CLÍNICO</span>
+          <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}><Icono nombre="shield" size={19} /> PROTOCOLO DE REGISTRO CLÍNICO</span>
         </div>
         <h1 className="registro-titulo">Registro de paciente</h1>
         <p className="registro-sub">Sus datos se usan para que el doctor pueda emitir su informe médico.</p>
@@ -209,7 +210,7 @@ export default function RegistroPaciente() {
           <div className="registro-grid">
             <div>
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">🔑 Datos de acceso</h2>
+                <h2 className="seccion-titulo"><Icono nombre="key" size={19} /> Datos de acceso</h2>
                 <div className="campos-2col">
                   <div>
                     <EtiquetaCampo htmlFor="email">Correo electrónico</EtiquetaCampo>
@@ -236,7 +237,7 @@ export default function RegistroPaciente() {
               </div>
 
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">🧾 Datos personales</h2>
+                <h2 className="seccion-titulo"><Icono nombre="document" size={19} /> Datos personales</h2>
                 <div className="campos-2col">
                   <div>
                     <EtiquetaCampo htmlFor="nombre">Nombre</EtiquetaCampo>
@@ -279,7 +280,7 @@ export default function RegistroPaciente() {
 
             <div>
               <div className="registro-seccion">
-                <h2 className="seccion-titulo">📷 Foto de perfil (obligatoria)</h2>
+                <h2 className="seccion-titulo"><Icono nombre="image" size={19} /> Foto de perfil (obligatoria)</h2>
                 <SelectorFotos
                   archivos={fotos}
                   onChange={setFotos}

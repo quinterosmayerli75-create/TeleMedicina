@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useMemo, useState } from 'react'
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
@@ -186,27 +187,28 @@ export default function Panel() {
         </div>
       </div>
 
+
       <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 24 }}>
         <div className="admin-metric-card c-ambar">
-          <div className="icono">⭐</div>
+          <div className="icono"><Icono nombre="star" size={19} /></div>
           <div className="overline">Calificación médica</div>
           <div className="numero">{datosProfesional.calificacionPromedio ?? 0}</div>
           <div className="caption">{datosProfesional.totalCalificaciones ?? 0} opiniones de pacientes</div>
         </div>
         <div className="admin-metric-card">
-          <div className="icono">💳</div>
+          <div className="icono"><Icono nombre="card" size={19} /></div>
           <div className="overline">Honorario por sesión</div>
           <div className="numero">Bs {datosProfesional.costoConsulta ?? 0}</div>
           <div className="caption">Tarifa activa</div>
         </div>
         <div className="admin-metric-card c-azul">
-          <div className="icono">🛡️</div>
+          <div className="icono"><Icono nombre="shield" size={19} /></div>
           <div className="overline">Acreditación</div>
           <div className="numero" style={{ fontSize: 20 }}>{datosProfesional.verificado ? 'Verificado' : 'En revisión'}</div>
           <div className="caption">Mat. {datosProfesional.carnet || '—'}</div>
         </div>
         <div className="admin-metric-card c-onyx">
-          <div className="icono">📹</div>
+          <div className="icono"><Icono nombre="video" size={19} /></div>
           <div className="overline">Consultas este mes</div>
           <div className="numero">{consultasEsteMes}</div>
           <div className="caption">Habilitadas o finalizadas</div>
@@ -216,7 +218,7 @@ export default function Panel() {
       <div className="web-2col">
         <div>
           <div className="card-plain admin-list-card">
-            <h2 className="section-title">⏱️ Disponibilidad y modalidades</h2>
+            <h2 className="section-title"><Icono nombre="clock" size={19} /> Disponibilidad y modalidades</h2>
             <div className="admin-row">
               <div style={{ fontSize: 12.5 }}>Disponible ahora (visible para pacientes)</div>
               <div className={`switch${datosProfesional.disponibleAhora ? ' on' : ''}`} onClick={alternarDisponible}></div>
@@ -232,13 +234,13 @@ export default function Panel() {
           <HorariosAtencion uid={usuario.uid} disponibilidadInicial={datosProfesional.disponibilidad} />
 
           <div className="card-plain admin-list-card">
-            <h2 className="section-title">🪪 Carnet profesional</h2>
+            <h2 className="section-title"><Icono nombre="document" size={19} /> Carnet profesional</h2>
             <p style={{ fontSize: 12.5, fontFamily: 'var(--mono)', color: 'var(--gris)' }}>{datosProfesional.carnet || 'No registrado'}</p>
             <p style={{ fontSize: 11.5, color: 'var(--gris)' }}>{datosProfesional.experiencia}</p>
           </div>
 
           <div className="card-plain admin-list-card">
-            <h2 className="section-title">👥 Pacientes</h2>
+            <h2 className="section-title"><Icono nombre="users" size={19} /> Pacientes</h2>
             <p style={{ fontSize: 12.5, color: 'var(--gris)' }}>
               ¿Un paciente no puede registrarse por su cuenta? Puedes crearle una cuenta aquí.
             </p>
@@ -248,7 +250,7 @@ export default function Panel() {
 
         <div>
           <form className="card-plain admin-list-card" onSubmit={guardarPrecioYDescripcion}>
-            <h2 className="section-title">🧾 Mi perfil público y tarifa</h2>
+            <h2 className="section-title"><Icono nombre="document" size={19} /> Mi perfil público y tarifa</h2>
             <label className="campo-label" htmlFor="costo">Costo de la consulta (Bs)</label>
             <input id="costo" type="number" value={costoConsulta} onChange={(e) => setCostoConsulta(e.target.value)} />
             <label className="campo-label" htmlFor="descripcion">Descripción</label>
@@ -258,7 +260,7 @@ export default function Panel() {
           </form>
 
           <form className="card-plain admin-list-card" onSubmit={guardarDatosPago}>
-            <h2 className="section-title" style={{ marginTop: 0 }}>📲 Cobro y QR de pago</h2>
+            <h2 className="section-title" style={{ marginTop: 0 }}><Icono nombre="qr" size={19} /> Cobro y QR de pago</h2>
             <p style={{ fontSize: 12.5, color: 'var(--gris)', marginTop: 0 }}>Este QR se le muestra a tus pacientes cuando pagan su consulta — el pago te llega directo a ti.</p>
             {datosProfesional.qrPagoUrl && (
               <div style={{ textAlign: 'center', marginBottom: 10 }}>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from '@/shared/components/Icons'
 
 // Input de contraseña con botón de "ojito" para mostrar/ocultar el texto. Acepta las mismas props
 // que un <input> normal (id, value, onChange, placeholder, autoComplete, required, etc.).

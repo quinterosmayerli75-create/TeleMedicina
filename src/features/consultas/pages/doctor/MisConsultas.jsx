@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
@@ -50,7 +51,7 @@ export default function MisConsultas() {
       <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <span>Mis consultas</span>
         {consultas.length > 0 && (
-          <span className="admin-total-pill">📅 {consultas.length} programadas · {pacientesUnicos} pacientes</span>
+          <span className="admin-total-pill"><Icono nombre="calendar" size={19} /> {consultas.length} programadas · {pacientesUnicos} pacientes</span>
         )}
       </h1>
       <p className="web-sub">Consultas solicitadas por pacientes y su estado de pago. Supervisa la confirmación de pagos y accede a las salas virtuales.</p>
@@ -117,7 +118,7 @@ export default function MisConsultas() {
                     <div style={{ fontWeight: 600 }}>{c.paciente?.nombre ?? c.pacienteNombre}</div>
                     <div className="rank-meta">
                       {MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta} · Bs {c.costoConsulta}
-                      {c.fecha && ` · 📅 ${c.fecha} ${c.hora ?? ''}`}
+                      {c.fecha && ` ·  ${c.fecha} ${c.hora ?? ''}`}
                     </div>
                   </div>
                 </div>

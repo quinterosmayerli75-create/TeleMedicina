@@ -1,9 +1,12 @@
+import ValorAnimado from '@/shared/components/ValorAnimado'
+import '@/shared/styles/estadisticas.css'
+import Icono from '@/shared/components/Icono'
 import { useEffect, useMemo, useState } from 'react'
 import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
 import {
   Stethoscope, Users, ClipboardList, ShieldAlert, Ban, CreditCard, Hourglass,
   BarChart3, TrendingUp, Monitor, Star, Tags, Wallet,
-} from 'lucide-react'
+} from '@/shared/components/Icons'
 import { db } from '@/services/firebase/config'
 import { useBloqueados } from '@/features/bloqueos/hooks/useBloqueados'
 import ListaBloqueos from '@/features/bloqueos/components/ListaBloqueos'
@@ -288,29 +291,29 @@ export default function InicioEstadisticas() {
   }
 
   return (
-    <div>
+    <div className="admin-dashboard-motion">
       <div className="admin-eyebrow">
         PLATAFORMA DOCTOP
         <span className="vivo"><span className="punto" /> Sincronización en vivo</span>
       </div>
       <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>Inicio y estadísticas</span>
-        <button type="button" className="btn btn-outline btn-auto" onClick={exportarReporte}>📄 Descargar reporte PDF</button>
+        <button type="button" className="btn btn-outline btn-auto" onClick={exportarReporte}><Icono nombre="document" size={19} /> Descargar reporte PDF</button>
       </h1>
       <p className="web-sub">Vista general de la actividad de DocTop.</p>
 
       <div className="admin-subtabs" role="tablist">
         <button type="button" role="tab" aria-selected={pestana === 'resumen'} className={`admin-subtab${pestana === 'resumen' ? ' on' : ''}`} onClick={() => setPestana('resumen')}>
-          🏠 Resumen general
+          <Icono nombre="home" size={19} /> Resumen general
         </button>
         <button type="button" role="tab" aria-selected={pestana === 'graficas'} className={`admin-subtab${pestana === 'graficas' ? ' on' : ''}`} onClick={() => setPestana('graficas')}>
-          📊 Gráficas y métricas
+          <Icono nombre="chart" size={19} /> Gráficas y métricas
         </button>
         <button type="button" role="tab" aria-selected={pestana === 'bloqueados'} className={`admin-subtab${pestana === 'bloqueados' ? ' on' : ''}`} onClick={() => setPestana('bloqueados')}>
-          ⏱️ Doctores bloqueados temporalmente <span className="admin-subtab-count">{temporales.bloqueados.length}</span>
+          <Icono nombre="clock" size={19} /> Doctores bloqueados temporalmente <span className="admin-subtab-count">{temporales.bloqueados.length}</span>
         </button>
         <button type="button" role="tab" aria-selected={pestana === 'permanentes'} className={`admin-subtab${pestana === 'permanentes' ? ' on' : ''}`} onClick={() => setPestana('permanentes')}>
-          🛡️ Doctores bloqueados permanentemente <span className="admin-subtab-count">{permanentes.bloqueados.length}</span>
+          <Icono nombre="shield" size={19} /> Doctores bloqueados permanentemente <span className="admin-subtab-count">{permanentes.bloqueados.length}</span>
         </button>
       </div>
 
@@ -320,31 +323,31 @@ export default function InicioEstadisticas() {
             <div className="admin-metric-card">
               <div className="icono"><Stethoscope size={16} strokeWidth={2} /></div>
               <div className="overline">Doctores activos</div>
-              <div className="numero">{doctoresActivos}</div>
+              <div className="numero"><ValorAnimado valor={doctoresActivos} /></div>
               <div className="caption">Disponibles para teleconsulta</div>
             </div>
             <div className="admin-metric-card c-azul">
               <div className="icono"><Users size={16} strokeWidth={2} /></div>
               <div className="overline">Pacientes registrados</div>
-              <div className="numero">{pacientes}</div>
+              <div className="numero"><ValorAnimado valor={pacientes} /></div>
               <div className="caption">Cuentas activas</div>
             </div>
             <div className="admin-metric-card c-rojo">
               <div className="icono"><ClipboardList size={16} strokeWidth={2} /></div>
               <div className="overline">Solicitudes pendientes</div>
-              <div className="numero">{solicitudesPendientes}</div>
+              <div className="numero"><ValorAnimado valor={solicitudesPendientes} /></div>
               <div className="caption">Validación de título y matrícula</div>
             </div>
             <div className="admin-metric-card c-ambar">
               <div className="icono"><ShieldAlert size={16} strokeWidth={2} /></div>
               <div className="overline">Denuncias pendientes</div>
-              <div className="numero">{denunciasPendientes}</div>
+              <div className="numero"><ValorAnimado valor={denunciasPendientes} /></div>
               <div className="caption">Por revisar</div>
             </div>
             <div className="admin-metric-card c-onyx">
               <div className="icono"><Ban size={16} strokeWidth={2} /></div>
               <div className="overline">Doctores bloqueados</div>
-              <div className="numero">{temporales.bloqueados.length + permanentes.bloqueados.length}</div>
+              <div className="numero"><ValorAnimado valor={temporales.bloqueados.length + permanentes.bloqueados.length} /></div>
               <div className="caption">Temporal + permanente</div>
             </div>
           </div>
@@ -354,14 +357,14 @@ export default function InicioEstadisticas() {
               <div className="overline">Pagos de consultas</div>
               <div className="titulo">Ingresos registrados en plataforma</div>
               <div className="sub">Consultas completadas y liquidadas entre doctor y paciente.</div>
-              <div className="numero">Bs {ingresoTotal}</div>
+              <div className="numero"><ValorAnimado valor={ingresoTotal} prefijo="Bs " decimales={2} /></div>
             </div>
             <div className="admin-feature-card c-ambar">
               <div className="icono"><Hourglass size={18} strokeWidth={2} /></div>
               <div className="overline">Validación de pagos</div>
               <div className="titulo">Pagos pendientes de validar</div>
               <div className="sub">Comprobantes subidos por pacientes, a la espera del doctor.</div>
-              <div className="numero">{pagosPendientes}</div>
+              <div className="numero"><ValorAnimado valor={pagosPendientes} /></div>
             </div>
           </div>
           <GraficaBarras

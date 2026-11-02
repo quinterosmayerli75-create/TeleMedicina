@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
@@ -198,30 +199,30 @@ export default function Doctores() {
       </div>
       <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <span>Doctores registrados</span>
-        <span className="admin-total-pill">🩺 {doctores.length} en total</span>
+        <span className="admin-total-pill"><Icono nombre="medical" size={19} /> {doctores.length} en total</span>
       </h1>
 
       <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 16 }}>
         <div className="admin-metric-card">
-          <div className="icono">🩺</div>
+          <div className="icono"><Icono nombre="medical" size={19} /></div>
           <div className="overline">Doctores activos</div>
           <div className="numero">{conteoEstado.activo ?? 0}</div>
           <div className="caption">Habilitados en la plataforma</div>
         </div>
         <div className="admin-metric-card c-azul">
-          <div className="icono">💳</div>
+          <div className="icono"><Icono nombre="card" size={19} /></div>
           <div className="overline">Suscripción vigente</div>
           <div className="numero">{metricas.suscripcionVigente}</div>
           <div className="caption">De {doctores.length} doctores</div>
         </div>
         <div className="admin-metric-card">
-          <div className="icono">🟢</div>
+          <div className="icono"><Icono nombre="check" size={19} /></div>
           <div className="overline">Disponibles ahora</div>
           <div className="numero">{metricas.disponiblesAhora}</div>
           <div className="caption">Marcados como "disponible ahora"</div>
         </div>
         <div className="admin-metric-card c-onyx">
-          <div className="icono">🚫</div>
+          <div className="icono"><Icono nombre="ban" size={19} /></div>
           <div className="overline">Bloqueados</div>
           <div className="numero">{(conteoEstado.bloqueado_temporal ?? 0) + (conteoEstado.bloqueado ?? 0)}</div>
           <div className="caption">Temporal + permanente</div>
@@ -237,7 +238,7 @@ export default function Doctores() {
           style={{ maxWidth: 420, margin: 0 }}
         />
         <button type="button" className="btn btn-outline btn-auto" onClick={() => descargarCSV('doctores-doctop', COLUMNAS_EXPORTAR, filasExportar)}>
-          📊 Exportar a Excel
+          <Icono nombre="chart" size={19} /> Exportar a Excel
         </button>
       </div>
 

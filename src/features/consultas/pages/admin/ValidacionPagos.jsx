@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useState } from 'react'
 import { useConsultasAdmin } from '../../hooks/useConsultas'
 import { ESTADOS_CONSULTA, MODALIDADES, validarPago } from '../../services/consultas'
@@ -147,7 +148,7 @@ export default function ValidacionPagos() {
 
       {filtradas.length > 0 && (
         <button type="button" className="btn btn-outline btn-auto" style={{ marginBottom: 14 }} onClick={() => descargarCSV(`consultas-${pestana}-doctop`, COLUMNAS_EXPORTAR, filasExportar)}>
-          📊 Exportar esta lista a Excel
+          <Icono nombre="chart" size={19} /> Exportar esta lista a Excel
         </button>
       )}
 
@@ -165,7 +166,7 @@ export default function ValidacionPagos() {
               </div>
               <div style={{ fontSize: 11, color: 'var(--gris)', margin: '4px 0 10px' }}>
                 {MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta} · Bs {c.costoConsulta}
-                {c.fecha && ` · 📅 ${c.fecha} ${c.hora ?? ''}`}
+                {c.fecha && ` ·  ${c.fecha} ${c.hora ?? ''}`}
               </div>
 
               {c.comprobanteUrl ? (

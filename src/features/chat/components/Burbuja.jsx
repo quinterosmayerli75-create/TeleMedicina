@@ -1,3 +1,4 @@
+import { Mic, FileText } from '@/shared/components/Icons'
 import { formatearTamano } from '@/services/archivos'
 import { aFecha } from '@/shared/utils/fechas'
 
@@ -29,7 +30,7 @@ function Adjunto({ mensaje, onVerImagen }) {
   if (tipo === 'audio') {
     return (
       <div className="audio-bubble">
-        <span aria-hidden="true">🎤</span>
+        <Mic size={17} aria-hidden="true" />
         <audio className="adjunto-audio" src={archivo.url} controls preload="metadata" />
         {archivo.duracion ? <span className="adjunto-duracion">{formatearSegundos(archivo.duracion)}</span> : null}
       </div>
@@ -37,7 +38,7 @@ function Adjunto({ mensaje, onVerImagen }) {
   }
   return (
     <a className="adjunto-doc" href={archivo.url} target="_blank" rel="noreferrer" download={archivo.nombre}>
-      <span className="adjunto-doc-icono" aria-hidden="true">📄</span>
+      <FileText size={22} aria-hidden="true" />
       <span className="adjunto-doc-info">
         <span className="adjunto-doc-nombre">{archivo.nombre ?? 'Documento'}</span>
         <span className="adjunto-doc-tamano">{formatearTamano(archivo.tamano)} · Abrir / descargar</span>

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import {
   Stethoscope, CreditCard, CalendarDays, Home, Search, Heart,
   FolderKanban, CircleCheckBig, MessageSquare, ClipboardList, Settings, LogOut, ShieldAlert, CalendarHeart,
-} from 'lucide-react'
+} from '@/shared/components/Icons'
 import { db, auth } from '@/services/firebase/config'
 import CuentaRestringida from '@/features/auth/components/CuentaRestringida'
 import LlamadaEntranteBanner from '@/features/chat/components/LlamadaEntranteBanner'
@@ -29,6 +29,8 @@ const ITEMS = [
   { to: '/doctor/informes', label: 'Informes médicos', Icono: ClipboardList },
   { to: '/doctor/configuracion', label: 'Configuración', Icono: Settings },
 ]
+
+const GRUPOS = { 0: 'Mi consulta', 3: 'Red de profesionales', 6: 'Atención al paciente', 11: 'Tu espacio' }
 
 function iniciales(nombre = '') {
   const partes = nombre.trim().split(/\s+/).filter(Boolean)
@@ -95,22 +97,25 @@ export default function DoctorLayout() {
   }
 
   return (
-    <div className="admin-shell">
+    <div className="admin-shell" data-portal="doctor">
       <LlamadaEntranteBanner base="/doctor" />
       <aside className="admin-sidebar">
         <div className="admin-logo-row">
-          <div className="admin-logo-mark"><Stethoscope size={18} strokeWidth={2.4} /></div>
+          <div className="admin-logo-mark" aria-hidden="true">dt<span>+</span></div>
           <div>
             <div className="admin-logo-word">DOCTOP</div>
             <div className="admin-logo-sub">Portal doctor</div>
           </div>
         </div>
 
-        {ITEMS.map((item) => (
+        {ITEMS.map((item, index) => (
+          <Fragment key={item.to}>
+          {GRUPOS[index] && <div className="portal-nav-group">{GRUPOS[index]}</div>}
           <NavLink key={item.to} to={item.to} className={({ isActive }) => `admin-nav-item${isActive ? ' on' : ''}`}>
             <span className="admin-nav-icon"><item.Icono size={17} strokeWidth={2} /></span>
             <span className="admin-nav-label">{item.label}</span>
           </NavLink>
+          </Fragment>
         ))}
 
         <div className="admin-sidebar-footer">

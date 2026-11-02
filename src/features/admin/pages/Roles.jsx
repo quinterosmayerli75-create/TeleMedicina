@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useState } from 'react'
 import { collection, doc, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { db, auth } from '@/services/firebase/config'
@@ -99,7 +100,7 @@ export default function Roles() {
       <div className="web-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', maxWidth: 1100 }}>
         <div className="card-plain admin-list-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <div className="admin-cat-icon">🙂</div>
+            <div className="admin-cat-icon"><Icono nombre="user" size={19} /></div>
             <div style={{ fontWeight: 600, fontSize: 12.5 }}>Paciente</div>
           </div>
           <div className="chip-row">
@@ -109,7 +110,7 @@ export default function Roles() {
         </div>
         <div className="card-plain admin-list-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <div className="admin-cat-icon">🩺</div>
+            <div className="admin-cat-icon"><Icono nombre="medical" size={19} /></div>
             <div style={{ fontWeight: 600, fontSize: 12.5 }}>Doctor</div>
           </div>
           <div className="chip-row">
@@ -119,7 +120,7 @@ export default function Roles() {
         </div>
         <div className="card-plain admin-list-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <div className="admin-cat-icon">🔑</div>
+            <div className="admin-cat-icon"><Icono nombre="key" size={19} /></div>
             <div style={{ fontWeight: 600, fontSize: 12.5 }}>Administrador</div>
           </div>
           <div className="chip-row">
@@ -129,7 +130,7 @@ export default function Roles() {
         </div>
         <div className="card-plain admin-list-card" style={{ borderTopColor: 'var(--admin-accent-dark)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <div className="admin-cat-icon">👑</div>
+            <div className="admin-cat-icon"><Icono nombre="shield" size={19} /></div>
             <div style={{ fontWeight: 600, fontSize: 12.5 }}>Super admin</div>
           </div>
           <div className="chip-row">
@@ -141,7 +142,7 @@ export default function Roles() {
 
       <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', margin: '16px 0' }}>
         <div className="admin-metric-card c-azul">
-          <div className="icono">👥</div>
+          <div className="icono"><Icono nombre="users" size={19} /></div>
           <div className="overline">Administradores con acceso</div>
           <div className="numero">{admins.length}</div>
           <div className="caption">{haySuperAdmin ? 'Incluye al super admin' : 'Sin super admin asignado'}</div>

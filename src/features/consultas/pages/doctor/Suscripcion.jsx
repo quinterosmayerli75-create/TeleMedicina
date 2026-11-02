@@ -1,6 +1,7 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useState } from 'react'
 import { doc, getDoc } from 'firebase/firestore'
-import { QrCode } from 'lucide-react'
+import { QrCode } from '@/shared/components/Icons'
 import { db } from '@/services/firebase/config'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useSuscripcionesDoctor } from '../../hooks/useSuscripciones'
@@ -83,7 +84,7 @@ export default function Suscripcion() {
       <p className="web-sub">Para aparecer en las búsquedas y recibir consultas, tu suscripción debe estar activa.</p>
 
       <div className={`admin-feature-card${estadoPago === 'al_dia' ? '' : ' c-ambar'}`} style={{ maxWidth: 720 }}>
-        <div className="icono">{estadoPago === 'al_dia' ? '✅' : estadoPago === 'por_vencer' ? '⏰' : '⚠️'}</div>
+        <div className="icono">{estadoPago === 'al_dia' ? <Icono nombre="check" size={19} /> : estadoPago === 'por_vencer' ? <Icono nombre="clock" size={19} /> : <Icono nombre="shield-alert" size={19} />}</div>
         <div className="overline">Estado del pago</div>
         {estadoPago === 'al_dia' && (
           <>
@@ -113,7 +114,7 @@ export default function Suscripcion() {
 
       {!enCurso && (
         <div className="card-plain admin-list-card" style={{ maxWidth: 720 }}>
-          <h2 className="section-title" style={{ marginTop: 0 }}>💳 {activa ? 'Renovar' : 'Pagar suscripción'}</h2>
+          <h2 className="section-title" style={{ marginTop: 0 }}><Icono nombre="card" size={19} /> {activa ? 'Renovar' : 'Pagar suscripción'}</h2>
           <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
             {Object.entries(PLANES).map(([clave, info]) => (
               <label key={clave} className="card-plain" style={{ margin: 0, padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', border: plan === clave ? '2px solid var(--esmeralda)' : undefined }}>
@@ -176,7 +177,7 @@ export default function Suscripcion() {
 
       {suscripciones.length > 0 && (
         <div className="card-plain admin-list-card" style={{ maxWidth: 720 }}>
-          <h2 className="section-title" style={{ marginTop: 0 }}>🧾 Historial de pagos</h2>
+          <h2 className="section-title" style={{ marginTop: 0 }}><Icono nombre="document" size={19} /> Historial de pagos</h2>
           {suscripciones.map((s) => (
             <div className="admin-row" key={s.id}>
               <div>

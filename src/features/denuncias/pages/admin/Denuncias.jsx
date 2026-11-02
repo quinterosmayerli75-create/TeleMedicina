@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useState } from 'react'
 import { collection, doc, getDoc, onSnapshot, query, serverTimestamp, updateDoc, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
@@ -230,19 +231,19 @@ export default function Denuncias() {
 
       <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 16 }}>
         <div className="admin-metric-card c-rojo">
-          <div className="icono">🛡️</div>
+          <div className="icono"><Icono nombre="shield" size={19} /></div>
           <div className="overline">Denuncias pendientes</div>
           <div className="numero">{denuncias.length}</div>
           <div className="caption">Por revisar</div>
         </div>
         <div className="admin-metric-card c-onyx">
-          <div className="icono">🚫</div>
+          <div className="icono"><Icono nombre="ban" size={19} /></div>
           <div className="overline">Bloqueos aplicados</div>
           <div className="numero">{temporales.bloqueados.length + permanentes.bloqueados.length}</div>
           <div className="caption">Temporal + permanente</div>
         </div>
         <div className="admin-metric-card c-ambar">
-          <div className="icono">📨</div>
+          <div className="icono"><Icono nombre="send" size={19} /></div>
           <div className="overline">Apelaciones pendientes</div>
           <div className="numero">{pendientes}</div>
           <div className="caption">De usuarios bloqueados</div>
@@ -282,9 +283,9 @@ export default function Denuncias() {
       {pestana === 'denuncias' && !cargando && !errorCarga && denuncias.length === 0 && <p className="web-sub">No hay denuncias pendientes.</p>}
 
       {pestana === 'denuncias' && (
-        <div className="web-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        <div className="web-grid admin-moderation-grid">
           {denuncias.map((d) => (
-            <div className="card-plain admin-list-card" key={d.id}>
+            <div className="card-plain admin-list-card admin-moderation-card" key={d.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div style={{ fontSize: 12.5, fontWeight: 600 }}>{d.motivo}</div>
                 <span className="status-pill status-pending">Pendiente</span>
@@ -298,7 +299,7 @@ export default function Denuncias() {
                   <>
                     {' · '}
                     <span style={{ color: 'var(--alerta)', fontWeight: 600 }}>
-                      ⚠ {historialDenuncias.get(d.denunciadoId).length - 1} denuncia{historialDenuncias.get(d.denunciadoId).length - 1 === 1 ? '' : 's'} anterior{historialDenuncias.get(d.denunciadoId).length - 1 === 1 ? '' : 'es'}
+                      <Icono nombre="shield-alert" size={19} /> {historialDenuncias.get(d.denunciadoId).length - 1} denuncia{historialDenuncias.get(d.denunciadoId).length - 1 === 1 ? '' : 's'} anterior{historialDenuncias.get(d.denunciadoId).length - 1 === 1 ? '' : 'es'}
                     </span>
                   </>
                 )}

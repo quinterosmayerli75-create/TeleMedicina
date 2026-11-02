@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useMemo, useState } from 'react'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
@@ -125,30 +126,30 @@ export default function Usuarios() {
       </div>
       <h1 className="web-h1" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <span>Usuarios registrados</span>
-        <span className="admin-total-pill">👥 {usuarios.length} en total</span>
+        <span className="admin-total-pill"><Icono nombre="users" size={19} /> {usuarios.length} en total</span>
       </h1>
 
       <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: 16 }}>
         <div className="admin-metric-card">
-          <div className="icono">👥</div>
+          <div className="icono"><Icono nombre="users" size={19} /></div>
           <div className="overline">Total pacientes</div>
           <div className="numero">{usuarios.length}</div>
           <div className="caption">Cuentas registradas</div>
         </div>
         <div className="admin-metric-card c-azul">
-          <div className="icono">✅</div>
+          <div className="icono"><Icono nombre="check" size={19} /></div>
           <div className="overline">Activos</div>
           <div className="numero">{conteoEstado.activo ?? 0}</div>
           <div className="caption">Cuentas sin bloqueo</div>
         </div>
         <div className="admin-metric-card c-ambar">
-          <div className="icono">⏱️</div>
+          <div className="icono"><Icono nombre="clock" size={19} /></div>
           <div className="overline">Bloqueados temporalmente</div>
           <div className="numero">{conteoEstado.bloqueado_temporal ?? 0}</div>
           <div className="caption">Con fecha de reactivación</div>
         </div>
         <div className="admin-metric-card c-onyx">
-          <div className="icono">🚫</div>
+          <div className="icono"><Icono nombre="ban" size={19} /></div>
           <div className="overline">Bloqueados permanentemente</div>
           <div className="numero">{conteoEstado.bloqueado ?? 0}</div>
           <div className="caption">Sin acceso a la plataforma</div>
@@ -164,7 +165,7 @@ export default function Usuarios() {
           style={{ maxWidth: 420, margin: 0 }}
         />
         <button type="button" className="btn btn-outline btn-auto" onClick={() => descargarCSV('pacientes-doctop', COLUMNAS_EXPORTAR, filtrados)}>
-          📊 Exportar a Excel
+          <Icono nombre="chart" size={19} /> Exportar a Excel
         </button>
       </div>
 

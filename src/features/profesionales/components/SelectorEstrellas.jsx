@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useState } from 'react'
 
 const TEXTOS = ['', 'Muy mala', 'Mala', 'Regular', 'Buena', 'Excelente']
@@ -24,7 +25,7 @@ export default function SelectorEstrellas({ valor = 0, onChange, deshabilitado =
           onBlur={() => setSobre(0)}
           onClick={() => onChange(n)}
         >
-          ★
+          <Icono nombre="star" size={25} fill={n <= mostrado ? 'currentColor' : 'none'} />
         </button>
       ))}
       <span className="estrellas-texto">{TEXTOS[mostrado]}</span>

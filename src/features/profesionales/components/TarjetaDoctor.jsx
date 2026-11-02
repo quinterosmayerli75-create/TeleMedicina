@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { Link, useNavigate } from 'react-router-dom'
 import { useFavoritos } from '../context/FavoritosContext'
 import Estrellas from '@/shared/components/Estrellas'
@@ -22,15 +23,15 @@ export default function TarjetaDoctor({ doctor, columna = false }) {
       onClick={() => navigate(rutaPerfil)}
     >
       {doctor.destacado && <div className="rank-badge">TOP {doctor.destacado}</div>}
-      <div
+      <button type="button" aria-label={favorito ? 'Quitar de favoritos' : 'Guardar en favoritos'} aria-pressed={favorito}
         className={`fav-heart${favorito ? ' on' : ''}`}
         onClick={(e) => {
           e.stopPropagation()
           alternar(doctor.id)
         }}
       >
-        ♥
-      </div>
+        <Icono nombre="heart" size={21} fill={favorito ? 'currentColor' : 'none'} />
+      </button>
       <Link to={rutaPerfil} onClick={noPropagar} className="doc-link" aria-label={`Ver perfil de ${doctor.nombre}`} style={{ display: 'contents' }}>
         {doctor.fotoUrl ? (
           <img

@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
@@ -46,13 +47,13 @@ export default function ConsultaDetalle() {
         <div className="ficha">
           <div><span>Modalidad</span>{MODALIDADES[consulta.modalidad]?.icono} {MODALIDADES[consulta.modalidad]?.etiqueta}</div>
           <div><span>Costo</span>Bs {consulta.costoConsulta}</div>
-          {consulta.fecha && <div><span>Fecha y hora agendada</span>📅 {consulta.fecha} {consulta.hora}</div>}
+          {consulta.fecha && <div><span>Fecha y hora agendada</span><Icono nombre="calendar" size={19} /> {consulta.fecha} {consulta.hora}</div>}
           <div><span>Solicitada el</span>{formatearFecha(consulta.fechaSolicitud)}</div>
         </div>
 
         {(consulta.estado === 'habilitada' || consulta.estado === 'finalizada') && (
           <button type="button" className="btn btn-outline btn-auto" style={{ marginTop: 10 }} onClick={() => descargarComprobanteConsulta(consulta)}>
-            📄 Descargar comprobante
+            <Icono nombre="document" size={19} /> Descargar comprobante
           </button>
         )}
 

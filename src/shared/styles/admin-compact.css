@@ -1,0 +1,58 @@
+/* Densidad de trabajo para administración; conserva los estados y las animaciones. */
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) { --admin-accent: #176653; --admin-accent-dark: #174d3d; --admin-accent-soft: #e8f0e1; --oro: #176653; background: #f5f7f1; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-sidebar { width: 244px; flex-basis: 244px; background: #123e33; color: #deebe1; border-color: #244e40; padding: 22px 13px 14px; scrollbar-color: #4e7560 transparent; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-logo-word,
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-footer-nombre { color: #fff; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-logo-sub,
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .portal-nav-group,
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-footer-email { color: #b2ccba; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-logo-row { padding-bottom: 17px; border-color: #ffffff1c; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-logo-mark { background: #2b6c52; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-nav-item { color: #deebe1; padding: 9px 11px; gap: 10px; border-radius: 9px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-nav-item:hover { background: #ffffff10; color: #fff; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-nav-item.on { background: #e0edc9; color: #1d4735; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-nav-icon { color: #accbb5; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-nav-item.on .admin-nav-icon { color: #2e6647; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .portal-nav-group { padding-top: 13px; padding-bottom: 5px; font-size: 9px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-sidebar-footer { border-color: #ffffff20; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-topbar { min-height: 64px; padding: 11px 24px; background: #f7f9f3f5; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-content { padding: 24px 24px 36px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .web-h1 { font-size: clamp(25px,2.1vw,30px); letter-spacing: -.8px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .web-sub { margin-bottom: 18px; font-size: 12px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-metric-grid { gap: 12px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-metric-card { padding: 15px 16px 13px; border-radius: 12px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-metric-card .numero { font-size: 27px; margin-top: 9px; letter-spacing: -.8px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-metric-card .caption { margin-top: 3px; font-size: 10px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-metric-card .icono { width: 28px; height: 28px; top: 12px; right: 12px; border-radius: 8px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-metric-card .icono svg { width: 16px; height: 16px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .card-plain,
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-feature-card { padding: 16px; border-radius: 12px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-feature-card .numero { font-size: 26px; margin-top: 12px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .web-grid { gap: 14px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .web-grid > .admin-list-card { margin-bottom: 0; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-subtabs { padding: 4px; border-radius: 10px; margin-bottom: 17px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-subtab { padding: 8px 12px; font-size: 11px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .btn { padding: 9px 13px; font-size: 11px; border-radius: 8px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .btn-grid-4 { gap: 6px; margin-top: 12px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .btn-grid-4 .btn { min-height: 35px; line-height: 1.35; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .btn-warn { background: #faf1df; color: #8b621f; border: 1px solid #ebd8ae; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .btn-danger { background: #fcefeb; color: #a13d35; border: 1px solid #efccc5; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .btn-warn:hover:not(:disabled) { background: #f2e1bc; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .btn-danger:hover:not(:disabled) { background: #f5dcd6; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .status-pill { padding: 4px 8px; font-size: 10px; }
+.admin-shell:is([data-portal=admin],[data-portal=superadmin]) .status-pending { background: #e9f1e2; color: #476c38; }
+.admin-moderation-grid { grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; }
+.admin-moderation-card > div:first-child { gap: 12px; align-items: flex-start; }
+.admin-moderation-card .dt-icon { width: 15px; height: 15px; }
+.admin-moderation-card .status-pill { flex-shrink: 0; }
+@media (min-width: 1300px) { .admin-moderation-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+@media (max-width: 860px) {
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-sidebar { width: 100%; flex-basis: auto; padding: 9px 12px; }
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-logo-row { padding: 0 12px 0 0; }
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-content { padding: 20px 16px 30px; }
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-topbar { padding-inline: 16px; }
+}
+@media (max-width: 720px) {
+ .admin-shell .admin-content .admin-moderation-grid { grid-template-columns: minmax(0,1fr) !important; }
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .btn-grid-4 .btn { min-height: 44px; }
+}

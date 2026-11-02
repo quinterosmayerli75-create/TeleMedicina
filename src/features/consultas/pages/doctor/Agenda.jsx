@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
@@ -50,7 +51,7 @@ export default function Agenda() {
 
       <div className="admin-metric-grid" style={{ gridTemplateColumns: 'repeat(1, 220px)', marginBottom: 16 }}>
         <div className="admin-metric-card">
-          <div className="icono">📅</div>
+          <div className="icono"><Icono nombre="calendar" size={19} /></div>
           <div className="overline">Consultas de hoy</div>
           <div className="numero">{consultasHoy}</div>
           <div className="caption">Habilitadas para hoy</div>

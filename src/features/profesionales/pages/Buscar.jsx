@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useProfesionalesActivos } from '../hooks/useProfesionalesActivos'
@@ -83,7 +84,7 @@ export default function Buscar() {
         </div>
 
         <div className="card-plain admin-list-card">
-          <h2 className="section-title">🧮 Filtros</h2>
+          <h2 className="section-title"><Icono nombre="settings" size={19} /> Filtros</h2>
           <label className="campo-label" htmlFor="texto">Nombre, profesión o especialidad</label>
           <input id="texto" type="text" placeholder="Ej. nombre, especialidad…" value={texto} onChange={(e) => setTexto(e.target.value)} />
 

@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
@@ -68,14 +69,14 @@ export default function Configuracion() {
       <div className="web-2col">
         <div>
           <div className="card-plain admin-list-card">
-            <h2 className="section-title">🖼️ Foto de perfil</h2>
+            <h2 className="section-title"><Icono nombre="image" size={19} /> Foto de perfil</h2>
             <CambiarFotoPerfil />
           </div>
 
           <CambiarContrasena />
 
           <form className="card-plain admin-list-card" onSubmit={guardarDatos}>
-            <h2 className="section-title">🪪 Mis datos</h2>
+            <h2 className="section-title"><Icono nombre="document" size={19} /> Mis datos</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div>
                 <label className="campo-label" htmlFor="fechaNacimiento">Fecha de nacimiento</label>

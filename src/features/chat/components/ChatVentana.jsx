@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Paperclip, Image, Mic, MessageSquareText, Phone, Video, Flag } from 'lucide-react'
+import { Paperclip, Image, Mic, MessageSquareText, Phone, Video, Flag, ArrowLeft, ArrowDown, Send, Trash2 } from '@/shared/components/Icons'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { enviarMensaje, idConversacion, mensajeErrorEnvio } from '../services/chat'
 import { useMensajes } from '../hooks/useChat'
@@ -14,7 +14,7 @@ import LlamadaPanel from './LlamadaPanel'
 
 // Conversación abierta con una persona: cabecera (foto y nombre llevan a su perfil), mensajes en
 // tiempo real y barra para escribir y enviar archivos, documentos, fotos, videos y audios.
-export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenuncia, subtitulo }) {
+export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenuncia, subtitulo, onVolver }) {
   const navigate = useNavigate()
   const { perfil } = useAuth()
   // Quién es "pacienteId" vs "doctorId" en esta conversación: si alguno de los dos es
@@ -51,12 +51,15 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
   const [subidas, setSubidas] = useState([])
   const [aviso, setAviso] = useState('')
   const [visor, setVisor] = useState(null)
-  const finRef = useRef(null)
+  const cuerpoRef = useRef(null)
+  const seguirFinRef = useRef(true)
+  const [mostrarIrAlFinal, setMostrarIrAlFinal] = useState(false)
   const archivosRef = useRef(null)
   const galeriaRef = useRef(null)
 
   useEffect(() => {
-    finRef.current?.scrollIntoView({ block: 'end' })
+    const cuerpo = cuerpoRef.current
+    if (cuerpo && seguirFinRef.current) cuerpo.scrollTop = cuerpo.scrollHeight
   }, [mensajes.length, subidas.length])
 
   // Antes esto solo se revisaba al ENTRAR a la conversación (en PaginaMensajes.jsx): si un
@@ -76,6 +79,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
     e?.preventDefault()
     const limpio = texto.trim()
     if (!limpio) return
+    seguirFinRef.current = true
     setTexto('')
     setAviso('')
     try {
@@ -105,6 +109,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
     await Promise.all(
       validos.map(async (archivo) => {
         const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+        seguirFinRef.current = true
         setSubidas((prev) => [...prev, { id, nombre: archivo.name, progreso: 0, error: '' }])
         try {
           const subida = await subirArchivo(
@@ -153,29 +158,31 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
   return (
     <div className="web-pane-chat">
       <div className="chat-header">
-        {otro.fotoUrl ? (
-          <img src={otro.fotoUrl} alt={otro.nombre} onClick={() => navigate(rutaPerfil)} />
-        ) : (
-          <div className="avatar-vacio chico" onClick={() => navigate(rutaPerfil)} aria-hidden="true">{otro.nombre[0]}</div>
-        )}
-        <div style={{ cursor: 'pointer', flex: 1 }} onClick={() => navigate(rutaPerfil)}>
-          <div className="name">{otro.nombre}</div>
-          <div className="status">{subtitulo}</div>
+        {onVolver && <button type="button" className="chat-back chat-action" onClick={onVolver} aria-label="Volver a conversaciones"><ArrowLeft size={19} /></button>}
+        <button type="button" className="chat-person" onClick={() => navigate(rutaPerfil)} aria-label={`Ver perfil de ${otro.nombre}`}>
+          {otro.fotoUrl ? <img src={otro.fotoUrl} alt="" /> : <span className="avatar-vacio chico" aria-hidden="true">{otro.nombre[0]}</span>}
+          <span className="chat-person-copy"><span className="name">{otro.nombre}</span><span className="status">{subtitulo}</span></span>
+        </button>
+        <div className="chat-header-actions">
+          <button type="button" className="chat-profile-link" onClick={() => navigate(rutaPerfil)}>Ver perfil</button>
+          <button type="button" className="chat-action" title="Llamada de voz" aria-label="Iniciar llamada de voz" disabled={!!llamada.llamada} onClick={() => llamada.iniciar('audio')}><Phone size={18} /></button>
+          <button type="button" className="chat-action chat-video-action" title="Iniciar videollamada" aria-label="Iniciar videollamada" disabled={!!llamada.llamada} onClick={() => llamada.iniciar('video')}><Video size={18} /><span>Videollamada</span></button>
+          <button type="button" className="chat-action chat-report" title="Denunciar" aria-label="Denunciar conversación" onClick={() => navigate(rutaDenuncia)}><Flag size={16} /></button>
         </div>
-        <button type="button" className="btn btn-outline btn-auto" style={{ borderColor: 'var(--admin-accent)', color: '#5FE3B3' }} onClick={() => navigate(rutaPerfil)}>
-          Ver perfil
-        </button>
-        <div className="icn" title="Llamada de voz" onClick={() => !llamada.llamada && llamada.iniciar('audio')}><Phone size={17} /></div>
-        <button type="button" className="btn btn-primary btn-auto" style={{ background: 'var(--admin-accent)', display: 'flex', alignItems: 'center', gap: 7 }} onClick={() => !llamada.llamada && llamada.iniciar('video')}>
-          <Video size={15} /> Iniciar videollamada
-        </button>
-        <div className="icn" style={{ color: 'var(--alerta)' }} title="Denunciar" onClick={() => navigate(rutaDenuncia)}><Flag size={16} /></div>
       </div>
 
-      <div className="chat-body" style={{ flex: 1, overflowY: 'auto' }}>
-        <div className="chat-system">Conversación verificada por DocTop</div>
+      <div className="chat-history">
+      <div className="chat-body" ref={cuerpoRef} role="region" aria-label={`Mensajes con ${otro.nombre}`} tabIndex={0}
+        onScroll={event => {
+          const body = event.currentTarget
+          const cerca = body.scrollHeight - body.scrollTop - body.clientHeight < 100
+          seguirFinRef.current = cerca
+          setMostrarIrAlFinal(!cerca)
+        }}
+        onLoadCapture={() => { const body = cuerpoRef.current; if (body && seguirFinRef.current) body.scrollTop = body.scrollHeight }}>
+        <div className="chat-system">Tu espacio de conversación</div>
         {errorLectura === 'permission-denied' && (
-          <div className="registro-error">Firestore no permite leer los mensajes: hay que publicar las reglas de firestore.rules (ver README).</div>
+          <div className="registro-error">No pudimos cargar los mensajes. Vuelve a abrir esta conversación en unos momentos.</div>
         )}
         {!cargando && !errorLectura && mensajes.length === 0 && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: 'var(--gris)' }}>
@@ -193,7 +200,9 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
             onVerImagen={(archivo) => setVisor({ url: archivo.url, etiqueta: archivo.nombre ?? 'Foto' })}
           />
         ))}
-        <div ref={finRef} />
+        <div className="chat-scroll-end" aria-hidden="true" />
+      </div>
+      {mostrarIrAlFinal && <button type="button" className="chat-jump-bottom" onClick={() => { seguirFinRef.current = true; cuerpoRef.current?.scrollTo({ top: cuerpoRef.current.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }) }}><ArrowDown size={15} /> Ir al final</button>}
       </div>
 
       {(subidas.length > 0 || aviso) && (
@@ -224,7 +233,7 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
 
         {grabadora.grabando ? (
           <>
-            <button type="button" className="attach-btn" title="Cancelar grabación" onClick={grabadora.cancelar}>🗑</button>
+            <button type="button" className="attach-btn" title="Cancelar grabación" aria-label="Cancelar grabación" onClick={grabadora.cancelar}><Trash2 size={17} /></button>
             <div className="grabando"><span className="grabando-punto" />Grabando {formatearSegundos(grabadora.segundos)}</div>
             <button type="button" className="btn btn-primary btn-auto" onClick={enviarGrabacion}>Enviar audio</button>
           </>
@@ -233,8 +242,8 @@ export default function ChatVentana({ miUid, miRol, otro, rutaPerfil, rutaDenunc
             <button type="button" className="attach-btn" title="Enviar documentos o archivos" aria-label="Adjuntar archivo" onClick={() => archivosRef.current?.click()}><Paperclip size={16} /></button>
             <button type="button" className="attach-btn" title="Enviar fotos o videos" aria-label="Adjuntar foto o video" onClick={() => galeriaRef.current?.click()}><Image size={16} /></button>
             <button type="button" className="attach-btn" title="Grabar audio" aria-label="Grabar audio" onClick={empezarGrabacion}><Mic size={16} /></button>
-            <input type="text" placeholder="Escriba un mensaje…" style={{ flex: 1 }} value={texto} onChange={(e) => setTexto(e.target.value)} />
-            <button type="submit" className="btn btn-primary btn-auto" disabled={!texto.trim()}>Enviar</button>
+            <input type="text" aria-label="Escribe un mensaje" placeholder="Escribe un mensaje…" value={texto} onChange={(e) => setTexto(e.target.value)} />
+            <button type="submit" className="btn btn-primary btn-auto" disabled={!texto.trim()} aria-label="Enviar mensaje"><span>Enviar</span><Send size={16} aria-hidden="true" /></button>
           </>
         )}
       </form>

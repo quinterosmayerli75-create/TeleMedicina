@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useLlamadaEntrante } from '../hooks/useLlamadaEntrante'
@@ -13,7 +14,7 @@ export default function LlamadaEntranteBanner({ base }) {
 
   return (
     <div className="llamada-banner" onClick={() => navigate(`${base}/mensajes/${entrante.llamanteId}`)}>
-      <span>{entrante.tipo === 'video' ? '🎥' : '📞'} {entrante.nombre} te está llamando…</span>
+      <span>{entrante.tipo === 'video' ? <Icono nombre="video" size={19} /> : <Icono nombre="phone" size={19} />} {entrante.nombre} te está llamando…</span>
       <button type="button" className="btn btn-ok btn-auto">Ver</button>
     </div>
   )

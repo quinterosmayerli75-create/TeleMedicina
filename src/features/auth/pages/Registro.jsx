@@ -1,5 +1,6 @@
+import Icono from '@/shared/components/Icono'
 import { Link } from 'react-router-dom'
-import { HeartPulse, Stethoscope } from 'lucide-react'
+import { HeartPulse, Stethoscope } from '@/shared/components/Icons'
 
 // Punto de entrada único para registrarse en DocTop: antes había enlaces sueltos a
 // "/registro/paciente" o "/registro/profesional" repartidos en distintas pantallas (landing,
@@ -12,7 +13,7 @@ export default function Registro() {
     <div className="registro-fondo">
       <div className="registro-card" style={{ maxWidth: 640, textAlign: 'center' }}>
         <div className="admin-eyebrow">
-          <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}>🩺 CREAR CUENTA EN DOCTOP</span>
+          <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}><Icono nombre="medical" size={19} /> CREAR CUENTA EN DOCTOP</span>
         </div>
         <h1 className="registro-titulo">¿Cómo quieres registrarte?</h1>
         <p className="registro-sub">Elige tu rol para continuar con los datos que corresponden.</p>

@@ -1,0 +1,34 @@
+.valor-animado { display: inline-block; font-variant-numeric: tabular-nums; }
+.valor-lectura { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.admin-dashboard-motion .admin-metric-grid { align-items: stretch; }
+.admin-shell .admin-dashboard-motion .admin-metric-grid .admin-metric-card:first-child { background: #145c50; border-color: #145c50; }
+.admin-shell .admin-dashboard-motion .admin-metric-grid .admin-metric-card:first-child .numero { color: #fff; }
+.admin-shell .admin-dashboard-motion .admin-metric-grid .admin-metric-card:first-child .overline,
+.admin-shell .admin-dashboard-motion .admin-metric-grid .admin-metric-card:first-child .caption { color: #daebdf; }
+.admin-shell .admin-dashboard-motion .admin-metric-grid .admin-metric-card:first-child .icono { background: #ffffff18; color: #e4efcc; }
+.admin-chart-card .grafica-columnas { gap: 20px; padding: 20px 12px 8px; background: repeating-linear-gradient(to top, transparent 0, transparent 39px, #e7eddf 39px, #e7eddf 40px); }
+.admin-chart-card .grafica-barra { width: 36px; border-radius: 8px 8px 2px 2px; transform-origin: bottom center; transform: scaleY(1); transition: transform .95s cubic-bezier(.22,1,.36,1) var(--barra-delay,0ms), height .65s ease; }
+.admin-chart-card[data-chart-ready=false] .grafica-barra { transform: scaleY(0); }
+.admin-chart-card .grafica-valor { color: #315f48; font-weight: 600; font-size: 12px; }
+.admin-chart-card .grafica-etiqueta { line-height: 1.5; }
+@media (prefers-reduced-motion: no-preference) {
+ .admin-dashboard-motion .admin-metric-card, .admin-dashboard-motion .admin-feature-card { animation: estadistica-entrada .6s cubic-bezier(.22,1,.36,1) both; }
+ .admin-dashboard-motion .admin-metric-card:nth-child(2) { animation-delay: .07s; }
+ .admin-dashboard-motion .admin-metric-card:nth-child(3) { animation-delay: .14s; }
+ .admin-dashboard-motion .admin-metric-card:nth-child(4) { animation-delay: .21s; }
+ .admin-dashboard-motion .admin-metric-card:nth-child(5) { animation-delay: .28s; }
+ .admin-dashboard-motion .admin-feature-card:nth-child(2) { animation-delay: .1s; }
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-sidebar .admin-nav-item { animation: menu-entrada .35s var(--nav-delay,0ms) ease-out both; }
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-sidebar .admin-nav-item .admin-nav-icon { transition: transform .25s, color .25s; }
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-sidebar .admin-nav-item:hover .admin-nav-icon { transform: translateX(2px) rotate(-5deg); }
+ .admin-shell:is([data-portal=admin],[data-portal=superadmin]) .admin-sidebar .admin-nav-item.on::after { animation: indicador-entrada .35s ease-out both; }
+}
+@media (hover:hover) and (prefers-reduced-motion:no-preference) {
+ .admin-dashboard-motion .admin-metric-card:hover, .admin-dashboard-motion .admin-feature-card:hover { translate: 0 -4px; box-shadow: 0 12px 24px #234a3210; }
+ .admin-dashboard-motion .admin-metric-card, .admin-dashboard-motion .admin-feature-card { transition: translate .25s, box-shadow .25s; }
+ .admin-chart-card .grafica-columna:hover .grafica-barra { filter: brightness(1.12); }
+}
+@keyframes estadistica-entrada { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes menu-entrada { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes indicador-entrada { from { scale: .4; opacity: 0; } to { scale: 1; opacity: 1; } }
+@media (prefers-reduced-motion:reduce) { .admin-chart-card .grafica-barra { transform: none; transition: none; } }

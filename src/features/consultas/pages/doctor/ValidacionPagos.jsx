@@ -127,7 +127,7 @@ export default function ValidacionPagos() {
               </div>
               <div style={{ fontSize: 11, color: 'var(--gris)', margin: '4px 0 10px' }}>
                 {MODALIDADES[c.modalidad]?.icono} {MODALIDADES[c.modalidad]?.etiqueta} · Bs {c.costoConsulta}
-                {c.fecha && ` · 📅 ${c.fecha} ${c.hora ?? ''}`}
+                {c.fecha && ` ·  ${c.fecha} ${c.hora ?? ''}`}
               </div>
 
               {c.comprobanteUrl ? (

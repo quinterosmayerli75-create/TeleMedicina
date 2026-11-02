@@ -1,10 +1,11 @@
+import Logo from '@/shared/components/Logo'
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/services/firebase/config'
 import { useAuth } from '../context/AuthContext'
 import CampoContrasena from '@/shared/components/CampoContrasena'
-import fotoDoctora from '@/assets/landing/doctora-consulta.jpg'
+import InicioCarrusel from '@/shared/components/InicioCarrusel'
 import './Acceso.css'
 
 const RUTA_POR_ROL = {
@@ -73,38 +74,35 @@ export default function Acceso() {
   return (
     <div className="acceso-fondo">
       <div className="acceso-tarjeta">
-        <div className="acceso-panel" style={{ backgroundImage: `linear-gradient(160deg, rgba(11,17,32,.92), rgba(14,122,87,.88)), url(${fotoDoctora})` }}>
+        <div className="acceso-panel">
           <div className="acceso-panel-top">
             <div className="acceso-panel-logo">
-              <div className="mark">➕</div>
+              <div className="mark" aria-hidden="true">DT</div>
               <div>
                 <div className="word">DOCTOP</div>
                 <div className="sub">Salud digital</div>
               </div>
             </div>
-            <div className="acceso-panel-pill">🟢 Acceso seguro</div>
+            <div className="acceso-panel-pill">Acceso a tu cuenta</div>
           </div>
 
-          <div className="acceso-panel-tag">🩺 Red de telemedicina</div>
-          <h1>Tu salud y la de tu familia, en manos de profesionales verificados.</h1>
-          <p>Accede a consultas virtuales por chat, llamada o videollamada con profesionales de la salud validados por DocTop.</p>
+          <div className="acceso-panel-tag">Personas que cuidan de personas</div>
+          <h1>Qué bueno tenerte por aquí.</h1>
+          <p>Habla con un profesional de la salud, resuelve tus dudas y cuídate desde donde estés.</p>
 
-          <div className="acceso-panel-spacer" />
+          <figure className="acceso-foto"><InicioCarrusel soloFotos /><figcaption>Tu próxima consulta, desde un lugar cómodo para ti.</figcaption></figure>
 
-          <div className="acceso-panel-badges">
-            <div className="acceso-panel-badge">✓ Profesionales verificados</div>
-            <div className="acceso-panel-badge">💬 Chat, llamada o video</div>
-            <div className="acceso-panel-badge">📱 Pago directo por QR</div>
-          </div>
+          <ul className="acceso-panel-badges" aria-label="Cómo te atendemos">
+            <li className="acceso-panel-badge">Profesionales verificados</li>
+            <li className="acceso-panel-badge">Chat, llamada o videollamada</li>
+            <li className="acceso-panel-badge">Pago directo por QR</li>
+          </ul>
         </div>
 
         <div className="acceso-formulario">
           <div className="acceso-card">
             <div className="acceso-marca">
-              <svg width="46" height="46" viewBox="0 0 100 100" aria-hidden="true">
-                <circle cx="50" cy="50" r="46" fill="none" stroke="var(--onyx)" strokeWidth="4" />
-                <text x="50" y="61" textAnchor="middle" fontFamily="Playfair Display" fontSize="32" fill="var(--onyx)" fontWeight="600">DT</text>
-              </svg>
+              <Logo size={46} />
               <div className="acceso-nombre">DOCTOP</div>
               <div className="acceso-slogan">Bienvenido de nuevo — ingresa a tu cuenta</div>
             </div>

@@ -1,0 +1,65 @@
+/* Ajustes compartidos para los tres portales. */
+:root { --oro: #146b58; --oro-rgb: 20,107,88; --admin-accent: #146b58; --admin-accent-dark: #105345; --admin-accent-soft: #e8f0e9; --marfil: #f8f9f5; --marfil-osc: #dce3dc; --gris: #596963; --admin-navy: #122e2a; }
+html { scroll-behavior: smooth; }
+body { line-height: 1.5; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid #8baf9c; outline-offset: 4px; }
+button, .btn, .chip, .admin-nav-item { transition: background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.btn-gold { color: #fff; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.card-plain, .doc-card { border-color: #dce3dc; box-shadow: 0 3px 14px #163d3205; }
+.admin-shell { background: #f5f7f2; }
+.admin-sidebar { padding: 28px 18px 18px; gap: 5px; }
+.admin-logo-row { padding-bottom: 24px; margin-bottom: 12px; border-bottom: 1px solid #ffffff15; }
+.admin-nav-item { padding: 12px; border-radius: 9px; color: #baccc4; }
+.admin-nav-item.on { background: #e4edcf; color: #183d33; box-shadow: inset 3px 0 #92b96a; }
+.admin-nav-item.on:hover { color: #183d33; background: #d7e5be; }
+.admin-nav-icon { display: flex; align-items: center; justify-content: center; }
+.admin-nav-icon svg { width: 19px; height: 19px; stroke-width: 1.7; }
+.admin-main { min-width: 0; }
+.admin-topbar { padding: 18px 32px; }
+.admin-topbar-search { max-width: 440px; padding: 10px 14px; }
+.admin-content { width: 100%; margin-inline: auto; padding: 36px 36px 56px; }
+.admin-content .web-h1 { font-size: clamp(26px,3vw,38px); letter-spacing: -.7px; }
+.admin-content .section-title { font-size: 23px; }
+.doc-card { border-radius: 12px; padding: 24px; }
+.doc-name { line-height: 1.35; }
+.chip { border-radius: 24px; }
+input:not([type=checkbox]):not([type=radio]):focus, textarea:focus, select:focus { border-color: #146b58; outline: 2px solid #146b5820; outline-offset: 1px; }
+@media (max-width: 1100px) { .admin-content .web-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; } }
+@media (max-width: 860px) {
+ .admin-sidebar { flex: 0 0 auto; width: 100%; padding: 12px; align-items: center; }
+ .admin-logo-row { padding: 0 12px 0 0; margin: 0; border: 0; flex-shrink: 0; }
+ .admin-nav-item { flex-shrink: 0; padding: 10px 12px; }
+ .admin-sidebar-footer { flex-shrink: 0; padding: 0 12px; }
+ .admin-topbar { padding: 12px 20px; gap: 10px; }
+ .admin-content { padding: 24px 20px 40px; }
+}
+@media (max-width: 560px) {
+ .admin-content .web-grid { grid-template-columns: minmax(0,1fr) !important; }
+ .admin-topbar-pill { display: none; }
+ .admin-topbar-search { min-width: 0; }
+ .admin-content { padding: 24px 16px 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ html { scroll-behavior: auto; }
+ *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+.patient-search-card { background: #e7eddf; border: 1px solid #d7e0cf; border-radius: 14px; padding: 26px; margin: 24px 0; max-width: 860px; }
+.patient-search-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; color: #183d33; }
+.patient-search-heading strong { font-size: 18px; font-weight: 600; }
+.patient-search-heading p { font-size: 13px; color: #596963; margin: 3px 0 0; }
+.patient-results-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-top: 26px; }
+.patient-results-heading a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 13px; color: #145c50; white-space: nowrap; }
+
+/* Transiciones compartidas: contenido, diálogos y controles, sin movimiento continuo. */
+@keyframes portal-entrada { from { opacity: 0; translate: 0 9px; } to { opacity: 1; translate: 0 0; } }
+.admin-content > :not(.chat-shell) { animation: portal-entrada .32s ease-out both; }
+.modal-tarjeta { animation: portal-entrada .22s ease-out both; }
+.admin-nav-item .admin-nav-icon { transition: translate .2s ease; }
+@media (hover: hover) { .admin-nav-item:hover .admin-nav-icon { translate: 2px 0; } }
+.mini-btn:hover, .icon-btn:hover { background: var(--admin-accent-soft); }
+.card-plain { transition: border-color .2s, box-shadow .2s; }
+.card-plain:focus-within { border-color: #a9c0ad; }
+@media (prefers-reduced-motion: reduce) { .admin-content > :not(.chat-shell), .modal-tarjeta { animation: none; } .admin-nav-item .admin-nav-icon { transition: none; translate: none; } }

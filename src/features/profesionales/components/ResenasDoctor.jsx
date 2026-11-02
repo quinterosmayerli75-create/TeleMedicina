@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useState } from 'react'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { denunciarComentario, guardarCalificacion } from '../services/calificaciones'
@@ -20,8 +21,7 @@ function mensajeError(err) {
 function EstrellasFijas({ valor }) {
   return (
     <span className="stars" aria-label={`${valor} de 5 estrellas`}>
-      {'★'.repeat(valor)}
-      <span style={{ color: 'var(--marfil-osc)' }}>{'★'.repeat(5 - valor)}</span>
+      {[0, 1, 2, 3, 4].map(index => <Icono key={index} nombre="star" size={14} fill={index < valor ? 'currentColor' : 'none'} style={{ color: index < valor ? 'var(--admin-accent)' : '#c7d0be', marginRight: 2 }} />)}
     </span>
   )
 }
@@ -170,7 +170,7 @@ export default function ResenasDoctor({ doctorId, calificaciones, cargando, erro
                     style={{ fontSize: 11, color: 'var(--alerta)', marginLeft: 'auto', cursor: 'pointer' }}
                     onClick={() => { setDenunciando(c); setMotivoDenuncia(MOTIVOS_DENUNCIA_COMENTARIO[0]) }}
                   >
-                    🚩 Denunciar
+                    <Icono nombre="flag" size={19} /> Denunciar
                   </span>
                 )
               )}

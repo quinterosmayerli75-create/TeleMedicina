@@ -1,3 +1,4 @@
+import Icono from '@/shared/components/Icono'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
@@ -33,7 +34,7 @@ export default function NotificacionesBell() {
   return (
     <div className="notif-wrap">
       <button type="button" className="notif-campana" onClick={() => setAbierto((v) => !v)} aria-label="Notificaciones">
-        🔔
+        <Icono nombre="bell" size={19} />
         {noLeidas > 0 && <span className="notif-badge">{noLeidas > 9 ? '9+' : noLeidas}</span>}
       </button>
 

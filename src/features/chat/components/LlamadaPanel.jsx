@@ -1,5 +1,6 @@
+import Icono from '@/shared/components/Icono'
 import { useEffect, useRef, useState } from 'react'
-import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff } from 'lucide-react'
+import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff } from '@/shared/components/Icons'
 
 function VideoStream({ stream, muted, espejado, oculto }) {
   const ref = useRef(null)
@@ -66,7 +67,7 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
       {sonando && soyLlamante && (
         <div className="llamada-tarjeta">
           <div className="llamada-nombre">Llamando a {otro.nombre}…</div>
-          <div className="llamada-tipo">{esVideo ? '🎥 Videollamada' : '📞 Llamada de voz'}</div>
+          <div className="llamada-tipo">{esVideo ? ' Videollamada' : ' Llamada de voz'}</div>
           <button type="button" className="llamada-redondo colgar" style={{ margin: '16px auto 0' }} onClick={onColgar} title="Cancelar">
             <PhoneOff size={24} />
           </button>
@@ -76,7 +77,7 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
       {sonando && !soyLlamante && (
         <div className="llamada-tarjeta">
           <div className="llamada-nombre">{otro.nombre} te está llamando</div>
-          <div className="llamada-tipo">{esVideo ? '🎥 Videollamada' : '📞 Llamada de voz'}</div>
+          <div className="llamada-tipo">{esVideo ? ' Videollamada' : ' Llamada de voz'}</div>
           <div style={{ display: 'flex', gap: 24, marginTop: 18, justifyContent: 'center' }}>
             <div style={{ textAlign: 'center' }}>
               <button type="button" className="llamada-redondo colgar" onClick={onRechazar} title="Rechazar">
@@ -98,7 +99,7 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
         <div className="llamada-activa" onClick={(e) => reintentarReproduccion(e.currentTarget)}>
           {esVideo && (
             <div className="llamada-header">
-              <div className="llamada-header-chip">🟢 {otro.nombre}</div>
+              <div className="llamada-header-chip"><Icono nombre="check" size={19} /> {otro.nombre}</div>
             </div>
           )}
           {esVideo ? (
@@ -110,7 +111,7 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
             <div className="llamada-audio-indicador">
               <div className="avatar-vacio" style={{ width: 72, height: 72, fontSize: 28 }}>{otro.nombre?.[0]}</div>
               <div className="llamada-nombre">{otro.nombre}</div>
-              <div className="llamada-tipo">📞 En llamada…</div>
+              <div className="llamada-tipo"><Icono nombre="phone" size={19} /> En llamada…</div>
               <VideoStream stream={remoteStream} oculto />
             </div>
           )}

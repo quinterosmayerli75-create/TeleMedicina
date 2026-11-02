@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { deleteDoc, doc, onSnapshot, updateDoc, collection } from 'firebase/firestore'
-import { Tags, Stethoscope, Star, Smile, Heart, Apple, Sparkles, Baby, HeartHandshake, Brain } from 'lucide-react'
+import { Tags, Stethoscope, Star, Smile, Heart, Apple, Sparkles, Baby, HeartHandshake, Brain } from '@/shared/components/Icons'
 import { db } from '@/services/firebase/config'
 import { PROFESIONES } from '@/shared/utils/profesiones'
 
