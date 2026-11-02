@@ -308,8 +308,34 @@ export default function RegistroProfesional() {
                 <EtiquetaCampo htmlFor="costoConsulta">Costo de la consulta (Bs)</EtiquetaCampo>
                 <input id="costoConsulta" type="number" placeholder="150" value={datos.costoConsulta} onChange={actualizarCampo('costoConsulta')} />
                 <CampoError campo="costoConsulta" faltantes={faltantes} />
+              </div>
+            </div>
 
-                <div style={{ marginTop: 14 }}>
+            <div>
+              <div className="registro-seccion">
+                <h2 className="seccion-titulo"><Icono nombre="document" size={19} /> Datos personales</h2>
+                <div className="campos-2col">
+                  <div>
+                    <EtiquetaCampo htmlFor="fechaNacimiento">Fecha de nacimiento</EtiquetaCampo>
+                    <CampoFecha id="fechaNacimiento" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
+                    <CampoError campo="fechaNacimiento" faltantes={faltantes} />
+                  </div>
+                  <div>
+                    <EtiquetaCampo htmlFor="estatura">Estatura aprox.</EtiquetaCampo>
+                    <input id="estatura" type="text" placeholder="1.70 m" value={datos.estatura} onChange={actualizarCampo('estatura')} />
+                    <CampoError campo="estatura" faltantes={faltantes} />
+                  </div>
+                  <div>
+                    <EtiquetaCampo htmlFor="peso">Peso aprox.</EtiquetaCampo>
+                    <input id="peso" type="text" placeholder="72 kg" value={datos.peso} onChange={actualizarCampo('peso')} />
+                    <CampoError campo="peso" faltantes={faltantes} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="registro-seccion">
+                <h2 className="seccion-titulo"><Icono nombre="document" size={19} /> Documentos y acreditación</h2>
+                <div style={{ marginTop: 4 }}>
                   <label className="campo-label">Foto de perfil (obligatoria)</label>
                   <SelectorFotos
                     archivos={fotoPerfil}
@@ -348,29 +374,6 @@ export default function RegistroProfesional() {
                     nombre="La foto del carnet profesional"
                     deshabilitado={enviando}
                   />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div className="registro-seccion">
-                <h2 className="seccion-titulo"><Icono nombre="document" size={19} /> Datos personales</h2>
-                <div className="campos-2col">
-                  <div>
-                    <EtiquetaCampo htmlFor="fechaNacimiento">Fecha de nacimiento</EtiquetaCampo>
-                    <CampoFecha id="fechaNacimiento" max={HOY} value={datos.fechaNacimiento} onChange={actualizarCampo('fechaNacimiento')} />
-                    <CampoError campo="fechaNacimiento" faltantes={faltantes} />
-                  </div>
-                  <div>
-                    <EtiquetaCampo htmlFor="estatura">Estatura aprox.</EtiquetaCampo>
-                    <input id="estatura" type="text" placeholder="1.70 m" value={datos.estatura} onChange={actualizarCampo('estatura')} />
-                    <CampoError campo="estatura" faltantes={faltantes} />
-                  </div>
-                  <div>
-                    <EtiquetaCampo htmlFor="peso">Peso aprox.</EtiquetaCampo>
-                    <input id="peso" type="text" placeholder="72 kg" value={datos.peso} onChange={actualizarCampo('peso')} />
-                    <CampoError campo="peso" faltantes={faltantes} />
-                  </div>
                 </div>
               </div>
 
