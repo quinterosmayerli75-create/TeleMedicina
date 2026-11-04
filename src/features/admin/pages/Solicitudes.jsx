@@ -3,6 +3,7 @@ import { collection, doc, getDoc, onSnapshot, query, updateDoc, where } from 'fi
 import { db } from '@/services/firebase/config'
 import { crearNotificacion } from '@/features/notificaciones/services/notificaciones'
 import { aFecha, formatearFecha } from '@/shared/utils/fechas'
+import { coincideTexto } from '@/shared/utils/texto'
 import FotosDoctorAdmin from '../components/FotosDoctorAdmin'
 
 const ORDENES = [
@@ -41,12 +42,11 @@ export default function Solicitudes() {
   }, [])
 
   const filtradas = useMemo(() => {
-    const termino = busqueda.trim().toLowerCase()
-    const resultado = termino
+    const resultado = busqueda.trim()
       ? solicitudes.filter((s) =>
-          s.nombre?.toLowerCase().includes(termino) ||
-          s.profesional?.especialidad?.toLowerCase().includes(termino) ||
-          s.profesional?.profesion?.toLowerCase().includes(termino)
+          coincideTexto(s.nombre, busqueda) ||
+          coincideTexto(s.profesional?.especialidad, busqueda) ||
+          coincideTexto(s.profesional?.profesion, busqueda)
         )
       : [...solicitudes]
 

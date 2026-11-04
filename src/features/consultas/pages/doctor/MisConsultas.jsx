@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useConsultasDoctor } from '../../hooks/useConsultas'
 import { ESTADOS_CONSULTA, MODALIDADES } from '../../services/consultas'
+import { coincideTexto } from '@/shared/utils/texto'
 
 const PESTANAS = [
   { clave: '', etiqueta: 'Todas' },
@@ -37,12 +38,10 @@ export default function MisConsultas() {
   }, [consultas])
 
   const filtradas = useMemo(() => {
-    const termino = busqueda.trim().toLowerCase()
     return consultas.filter((c) => {
       if (pestana && c.estado !== pestana) return false
       if (fechaFiltro && c.fecha !== fechaFiltro) return false
-      if (!termino) return true
-      return (c.paciente?.nombre ?? c.pacienteNombre ?? '').toLowerCase().includes(termino)
+      return coincideTexto(c.paciente?.nombre ?? c.pacienteNombre, busqueda)
     })
   }, [consultas, pestana, busqueda, fechaFiltro])
 

@@ -6,6 +6,7 @@ import { useProfesionalesActivos } from '../hooks/useProfesionalesActivos'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import TarjetaDoctor from '../components/TarjetaDoctor'
 import { useRutas } from '@/shared/hooks/useRutas'
+import { coincideTexto } from '@/shared/utils/texto'
 
 export default function Inicio() {
   const [especialidad, setEspecialidad] = useState('General')
@@ -17,12 +18,7 @@ export default function Inicio() {
 
   const destacados = profesionales
     .filter((p) => especialidad === 'General' || p.especialidad === especialidad)
-    .filter(
-      (p) =>
-        !busqueda ||
-        p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        p.especialidad?.toLowerCase().includes(busqueda.toLowerCase())
-    )
+    .filter((p) => coincideTexto(p.nombre, busqueda) || coincideTexto(p.especialidad, busqueda))
     .sort((a, b) => b.calificacionPromedio - a.calificacionPromedio)
     .slice(0, 6)
     .map((p, i) => ({ ...p, destacado: i + 1 }))

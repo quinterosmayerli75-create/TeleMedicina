@@ -5,6 +5,7 @@ import { ESTADOS_CONSULTA, MODALIDADES, validarPago } from '../../services/consu
 import { crearNotificacion } from '@/features/notificaciones/services/notificaciones'
 import { descargarCSV } from '@/shared/utils/exportar'
 import { formatearFecha } from '@/shared/utils/fechas'
+import { coincideTexto } from '@/shared/utils/texto'
 import VisorImagen from '@/shared/components/VisorImagen'
 
 const COLUMNAS_EXPORTAR = [
@@ -39,13 +40,12 @@ export default function ValidacionPagos() {
   const [guardando, setGuardando] = useState(false)
 
   const conteos = Object.fromEntries(PESTANAS.map((p) => [p.clave, consultas.filter((c) => c.estado === p.clave).length]))
-  const termino = busqueda.trim().toLowerCase()
   const filtradas = consultas.filter((c) => {
     if (c.estado !== pestana) return false
     if (fechaFiltro && c.fecha !== fechaFiltro) return false
-    if (!termino) return true
-    return (c.paciente?.nombre ?? c.pacienteNombre ?? '').toLowerCase().includes(termino)
-      || (c.doctor?.nombre ?? c.doctorNombre ?? '').toLowerCase().includes(termino)
+    if (!busqueda.trim()) return true
+    return coincideTexto(c.paciente?.nombre ?? c.pacienteNombre, busqueda)
+      || coincideTexto(c.doctor?.nombre ?? c.doctorNombre, busqueda)
   })
   const filasExportar = filtradas.map((c) => ({
     paciente: c.paciente?.nombre ?? c.pacienteNombre,

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useConsultasDoctor } from '../../hooks/useConsultas'
 import { MODALIDADES } from '../../services/consultas'
+import { coincideTexto } from '@/shared/utils/texto'
 
 const HOY = new Date().toISOString().slice(0, 10)
 
@@ -24,11 +25,10 @@ export default function Agenda() {
   const [modalidadSel, setModalidadSel] = useState('')
 
   const grupos = useMemo(() => {
-    const termino = busqueda.trim().toLowerCase()
     const proximas = consultas
       .filter((c) => c.estado === 'habilitada' && c.fecha >= HOY)
       .filter((c) => !modalidadSel || c.modalidad === modalidadSel)
-      .filter((c) => !termino || (c.paciente?.nombre ?? c.pacienteNombre ?? '').toLowerCase().includes(termino))
+      .filter((c) => coincideTexto(c.paciente?.nombre ?? c.pacienteNombre, busqueda))
       .sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora))
     const porFecha = new Map()
     proximas.forEach((c) => {

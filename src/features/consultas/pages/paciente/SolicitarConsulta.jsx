@@ -13,6 +13,11 @@ const HOY = new Date().toISOString().slice(0, 10)
 // rechace o alguien cancele, ese cupo sigue siendo suyo (aunque todavía esté pendiente de pago).
 const ESTADOS_QUE_OCUPAN_HORARIO = ['pendiente_pago', 'pago_en_revision', 'habilitada', 'finalizada']
 
+// Mientras una de estas siga "viva" con el mismo doctor, no se puede pedir otra — evita que el
+// mismo paciente acumule varias solicitudes sueltas con un mismo profesional (aunque elija una
+// hora distinta cada vez) en lugar de resolver la que ya tiene pendiente.
+const ESTADOS_ACTIVOS_DEL_PACIENTE = ['pendiente_pago', 'pago_en_revision', 'habilitada']
+
 // Se usa tanto en /paciente/solicitar/:id como en /doctor/solicitar/:id: un doctor también puede
 // solicitar una consulta con otro doctor (por ejemplo, si él mismo necesita atención), igual que
 // cualquier paciente — ver useRutas.js.
@@ -42,6 +47,13 @@ export default function SolicitarConsulta() {
     [consultasDelDoctor, fecha]
   )
 
+  // Si este paciente ya tiene una solicitud viva con este mismo doctor, no se le deja crear otra
+  // — se le manda a resolver esa en vez de acumular solicitudes sueltas a distintas horas.
+  const miConsultaActiva = useMemo(
+    () => consultasDelDoctor.find((c) => c.pacienteId === usuario?.uid && ESTADOS_ACTIVOS_DEL_PACIENTE.includes(c.estado)),
+    [consultasDelDoctor, usuario?.uid]
+  )
+
   if (cargando) return <p className="web-sub">Cargando…</p>
   if (!doctor) {
     return (
@@ -56,6 +68,21 @@ export default function SolicitarConsulta() {
       <div>
         <span className="back-link" onClick={() => navigate(-1)}>← Volver</span>
         <p>Este profesional no tiene su suscripción activa por ahora, así que no se le pueden solicitar consultas.</p>
+      </div>
+    )
+  }
+  if (miConsultaActiva) {
+    return (
+      <div>
+        <span className="back-link" onClick={() => navigate(-1)}>← Volver</span>
+        <p>
+          Ya tienes una solicitud con {doctor.nombre} en curso (
+          {miConsultaActiva.fecha} {miConsultaActiva.hora}). Resuélvela antes de pedir otra — si ya no la quieres,
+          puedes cancelarla desde ahí.
+        </p>
+        <button type="button" className="btn btn-primary btn-auto" onClick={() => navigate(rutas.cita(miConsultaActiva.id))}>
+          Ver esa solicitud
+        </button>
       </div>
     )
   }

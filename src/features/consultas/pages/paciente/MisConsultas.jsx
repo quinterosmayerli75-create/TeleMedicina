@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/context/AuthContext'
 import { useRutas } from '@/shared/hooks/useRutas'
 import { useConsultasPaciente } from '../../hooks/useConsultas'
 import { ESTADOS_CONSULTA, MODALIDADES } from '../../services/consultas'
+import { coincideTexto } from '@/shared/utils/texto'
 import MascotaVacio from '@/shared/components/MascotaVacio'
 
 const PESTANAS = [
@@ -32,12 +33,10 @@ export default function MisConsultas() {
   }, [consultas])
 
   const filtradas = useMemo(() => {
-    const termino = busqueda.trim().toLowerCase()
     return consultas.filter((c) => {
       if (pestana && c.estado !== pestana) return false
       if (fechaFiltro && c.fecha !== fechaFiltro) return false
-      if (!termino) return true
-      return (c.doctor?.nombre ?? c.doctorNombre ?? '').toLowerCase().includes(termino)
+      return coincideTexto(c.doctor?.nombre ?? c.doctorNombre, busqueda)
     })
   }, [consultas, pestana, busqueda, fechaFiltro])
 

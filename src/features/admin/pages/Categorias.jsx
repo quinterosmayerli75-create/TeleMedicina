@@ -4,6 +4,7 @@ import { deleteDoc, doc, onSnapshot, updateDoc, collection } from 'firebase/fire
 import { Tags, Stethoscope, Star, Smile, Heart, Apple, Sparkles, Baby, HeartHandshake, Brain } from '@/shared/components/Icons'
 import { db } from '@/services/firebase/config'
 import { PROFESIONES } from '@/shared/utils/profesiones'
+import { coincideTexto } from '@/shared/utils/texto'
 
 // Solo decorativo: un ícono aproximado según palabras clave del nombre de la categoría.
 const ICONOS_POR_PALABRA = [
@@ -64,7 +65,7 @@ export default function Categorias() {
 
   const filtradas = useMemo(() => {
     if (!busqueda) return categorias
-    return categorias.filter((c) => c.nombre?.toLowerCase().includes(busqueda.toLowerCase()))
+    return categorias.filter((c) => coincideTexto(c.nombre, busqueda))
   }, [categorias, busqueda])
 
   async function guardarEdicion() {

@@ -7,6 +7,7 @@ import ModalBloqueo from '@/features/bloqueos/components/ModalBloqueo'
 import { esBloqueo } from '@/features/bloqueos/utils/bloqueos'
 import { formatearFecha } from '@/shared/utils/fechas'
 import { descargarCSV } from '@/shared/utils/exportar'
+import { coincideTexto } from '@/shared/utils/texto'
 
 const COLUMNAS_EXPORTAR = [
   { clave: 'nombre', etiqueta: 'Nombre' },
@@ -62,14 +63,13 @@ export default function Usuarios() {
   }, [usuarios])
 
   const filtrados = useMemo(() => {
-    const termino = busqueda.trim().toLowerCase()
     return usuarios.filter((u) => {
       if (estadoSel && u.estado !== estadoSel) return false
-      if (!termino) return true
+      if (!busqueda.trim()) return true
       return (
-        `${u.nombre} ${u.apellido}`.toLowerCase().includes(termino) ||
-        u.email?.toLowerCase().includes(termino) ||
-        u.telefono?.includes(termino)
+        coincideTexto(`${u.nombre} ${u.apellido}`, busqueda) ||
+        coincideTexto(u.email, busqueda) ||
+        u.telefono?.includes(busqueda.trim())
       )
     })
   }, [usuarios, busqueda, estadoSel])

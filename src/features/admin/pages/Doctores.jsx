@@ -7,6 +7,7 @@ import { bloquearUsuario, congelarUsuario, levantarBloqueo, mensajeErrorBloqueo 
 import ModalBloqueo from '@/features/bloqueos/components/ModalBloqueo'
 import { esBloqueo } from '@/features/bloqueos/utils/bloqueos'
 import { diasRestantes, formatearFecha } from '@/shared/utils/fechas'
+import { coincideTexto } from '@/shared/utils/texto'
 import FotosDoctorAdmin from '../components/FotosDoctorAdmin'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import { descargarCSV } from '@/shared/utils/exportar'
@@ -110,13 +111,12 @@ export default function Doctores() {
   }, [tiposProfesion, doctores])
 
   const filtrados = useMemo(() => {
-    const termino = busqueda.trim().toLowerCase()
     return doctores.filter((d) => {
       const especialidad = d.profesional?.especialidad ?? 'Sin especialidad'
       if (especialidadSel && especialidad !== especialidadSel) return false
       if (estadoSel && d.estado !== estadoSel) return false
-      if (!termino) return true
-      return d.nombre?.toLowerCase().includes(termino) || especialidad.toLowerCase().includes(termino)
+      if (!busqueda.trim()) return true
+      return coincideTexto(d.nombre, busqueda) || coincideTexto(especialidad, busqueda)
     })
   }, [doctores, busqueda, especialidadSel, estadoSel])
 

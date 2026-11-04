@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useProfesionalesActivos } from '../hooks/useProfesionalesActivos'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import TarjetaDoctor from '../components/TarjetaDoctor'
+import { coincideTexto } from '@/shared/utils/texto'
 
 const MODALIDADES = [
   { clave: 'Todas', indice: null },
@@ -50,17 +51,16 @@ export default function Buscar() {
   const resultados = useMemo(() => {
     const indiceModalidad = MODALIDADES.find((m) => m.clave === modalidad)?.indice
     const filtrados = profesionales.filter((p) => {
-      const coincideTexto =
-        !texto ||
-        p.nombre.toLowerCase().includes(texto.toLowerCase()) ||
-        p.especialidad?.toLowerCase().includes(texto.toLowerCase()) ||
-        p.profesion?.toLowerCase().includes(texto.toLowerCase())
+      const coincideBusqueda =
+        coincideTexto(p.nombre, texto) ||
+        coincideTexto(p.especialidad, texto) ||
+        coincideTexto(p.profesion, texto)
       const coincideEspecialidad = especialidad === 'Todas' || p.especialidad === especialidad
       const coincidePrecio = p.costoConsulta <= precioMax
       const coincideDisponibilidad = !soloEnLinea || p.disponibleAhora
       const coincideModalidad = indiceModalidad === null || indiceModalidad === undefined || p.modalidades?.[indiceModalidad]
       const coincideCalificacion = (Number(p.calificacionPromedio) || 0) >= calificacionMinima
-      return coincideTexto && coincideEspecialidad && coincidePrecio && coincideDisponibilidad && coincideModalidad && coincideCalificacion
+      return coincideBusqueda && coincideEspecialidad && coincidePrecio && coincideDisponibilidad && coincideModalidad && coincideCalificacion
     })
     if (orden === 'calificacion') {
       return [...filtrados].sort((a, b) => (b.calificacionPromedio || 0) - (a.calificacionPromedio || 0) || a.nombre.localeCompare(b.nombre, 'es'))
