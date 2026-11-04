@@ -14,6 +14,7 @@ import TutorialInicio from '@/features/onboarding/components/TutorialInicio'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { DIAS_AVISO_VENCIMIENTO, revisarVencimientoSuscripcion } from '@/features/consultas/services/suscripciones'
 import { revisarRecordatorioConsulta } from '@/features/consultas/services/consultas'
+import { encontrarSeccion } from '@/shared/utils/texto'
 
 const ITEMS = [
   { to: '/doctor/panel', label: 'Panel principal', Icono: Stethoscope },
@@ -93,7 +94,11 @@ export default function DoctorLayout() {
 
   function buscar(e) {
     e.preventDefault()
-    if (busqueda.trim()) navigate(`/doctor/consultas?q=${encodeURIComponent(busqueda.trim())}`)
+    if (!busqueda.trim()) return
+    // Si lo escrito es el nombre de una sección del menú (ej. "mensajes"), va directo ahí;
+    // si no, busca pacientes en Mis consultas como antes.
+    const ruta = encontrarSeccion(ITEMS, busqueda)
+    navigate(ruta ?? `/doctor/consultas?q=${encodeURIComponent(busqueda.trim())}`)
   }
 
   return (

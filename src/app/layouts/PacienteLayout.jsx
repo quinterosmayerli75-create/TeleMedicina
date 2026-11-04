@@ -9,6 +9,7 @@ import NotificacionesBell from '@/features/notificaciones/components/Notificacio
 import TutorialInicio from '@/features/onboarding/components/TutorialInicio'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { revisarRecordatorioConsulta } from '@/features/consultas/services/consultas'
+import { encontrarSeccion } from '@/shared/utils/texto'
 
 const ITEMS = [
   { to: '/paciente/inicio', label: 'Inicio', Icono: Home },
@@ -49,7 +50,11 @@ export default function PacienteLayout() {
 
   function buscar(e) {
     e.preventDefault()
-    if (busqueda.trim()) navigate(`/paciente/buscar?q=${encodeURIComponent(busqueda.trim())}`)
+    if (!busqueda.trim()) return
+    // Si lo escrito es el nombre de una sección del menú (ej. "mi perfil"), va directo ahí;
+    // si no, busca doctores por nombre/especialidad como antes.
+    const ruta = encontrarSeccion(ITEMS, busqueda)
+    navigate(ruta ?? `/paciente/buscar?q=${encodeURIComponent(busqueda.trim())}`)
   }
 
   return (

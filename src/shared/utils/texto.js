@@ -14,3 +14,17 @@ export function coincideTexto(texto, busqueda) {
   if (!busqueda) return true
   return normalizarTexto(texto).includes(normalizarTexto(busqueda))
 }
+
+// Si lo que se escribió en la caja de búsqueda de arriba coincide con el nombre de una sección
+// del menú (ej. escribir "mensajes" o "inicio"), devuelve su ruta para ir directo ahí en vez de
+// filtrar una lista — la gente espera poder "buscar" una sección igual que busca una persona.
+// Primero intenta una coincidencia exacta (por si dos secciones comparten texto, ej. "Mis
+// consultas" / "Mis citas"); si no hay ninguna exacta, usa la primera que empiece igual.
+export function encontrarSeccion(items, busqueda) {
+  const texto = normalizarTexto(busqueda).trim()
+  if (!texto) return null
+  const exacta = items.find((item) => normalizarTexto(item.label) === texto)
+  if (exacta) return exacta.to
+  const porPrefijo = items.find((item) => normalizarTexto(item.label).startsWith(texto))
+  return porPrefijo ? porPrefijo.to : null
+}

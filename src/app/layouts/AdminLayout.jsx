@@ -12,6 +12,7 @@ import { db, auth } from '@/services/firebase/config'
 import CuentaRestringida from '@/features/auth/components/CuentaRestringida'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import NotificacionesBell from '@/features/notificaciones/components/NotificacionesBell'
+import { encontrarSeccion } from '@/shared/utils/texto'
 
 const ITEMS = [
   { to: '/admin/inicio', label: 'Inicio y estadísticas', Icono: LayoutGrid },
@@ -74,7 +75,11 @@ export default function AdminLayout() {
 
   function buscar(e) {
     e.preventDefault()
-    if (busqueda.trim()) navigate(`/admin/doctores?q=${encodeURIComponent(busqueda.trim())}`)
+    if (!busqueda.trim()) return
+    // Si lo escrito es el nombre de una sección del menú (ej. "categorías"), va directo ahí;
+    // si no, busca doctores por nombre/especialidad como antes.
+    const ruta = encontrarSeccion(ITEMS, busqueda)
+    navigate(ruta ?? `/admin/doctores?q=${encodeURIComponent(busqueda.trim())}`)
   }
 
   return (
