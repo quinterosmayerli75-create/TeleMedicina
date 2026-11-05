@@ -6,7 +6,7 @@ export default function EtiquetaCampo({ htmlFor, children, opcional = false }) {
       {children}
       {opcional
         ? <span style={{ color: 'var(--gris)', fontWeight: 400 }}> (opcional)</span>
-        : <span style={{ color: 'var(--alerta)' }} aria-hidden="true"> *</span>}
+        : <span style={{ color: 'var(--alerta)', fontSize: '1.15em', fontWeight: 700 }} aria-hidden="true"> *</span>}
     </label>
   )
 }

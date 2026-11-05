@@ -8,7 +8,7 @@ import LlamadaEntranteBanner from '@/features/chat/components/LlamadaEntranteBan
 import NotificacionesBell from '@/features/notificaciones/components/NotificacionesBell'
 import TutorialInicio from '@/features/onboarding/components/TutorialInicio'
 import { useAuth } from '@/features/auth/context/AuthContext'
-import { revisarRecordatorioConsulta } from '@/features/consultas/services/consultas'
+import { revisarRecordatorioConsulta, revisarVencimientoPago } from '@/features/consultas/services/consultas'
 import { encontrarSeccion } from '@/shared/utils/texto'
 
 const ITEMS = [
@@ -36,6 +36,12 @@ export default function PacienteLayout() {
   useEffect(() => {
     if (!usuario || estado !== 'activo') return
     revisarRecordatorioConsulta(usuario.uid).catch(() => {})
+  }, [usuario, estado])
+
+  // Perezoso también: cancela solicitudes con más de 24h sin comprobante de pago.
+  useEffect(() => {
+    if (!usuario || estado !== 'activo') return
+    revisarVencimientoPago(usuario.uid).catch(() => {})
   }, [usuario, estado])
 
   // Antes solo miraba esBloqueo(estado) (bloqueado/bloqueado_temporal) — un paciente nunca tenía

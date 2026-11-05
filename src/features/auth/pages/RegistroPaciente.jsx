@@ -294,8 +294,8 @@ export default function RegistroPaciente() {
                 />
               </div>
 
-              <div style={{ fontSize: 11.5, color: 'var(--gris)', marginBottom: 12 }}>
-                <span style={{ color: 'var(--alerta)' }}>*</span> Campo obligatorio
+              <div style={{ fontSize: 12.5, color: 'var(--gris)', marginBottom: 12 }}>
+                <span style={{ color: 'var(--alerta)', fontSize: '1.3em', fontWeight: 700 }}>*</span> Campo obligatorio
               </div>
 
               <div className="terminos-row">

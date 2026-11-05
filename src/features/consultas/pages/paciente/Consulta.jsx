@@ -6,9 +6,9 @@ import { db } from '@/services/firebase/config'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { useConsulta } from '../../hooks/useConsultas'
 import { useRutas } from '@/shared/hooks/useRutas'
-import { cancelarConsulta, ESTADOS_CONSULTA, MODALIDADES, subirComprobante } from '../../services/consultas'
+import { cancelarConsulta, ESTADOS_CONSULTA, HORAS_LIMITE_PAGO, MODALIDADES, subirComprobante } from '../../services/consultas'
 import { LIMITE_FOTO_MB, mensajeErrorSubida, validarArchivo } from '@/services/archivos'
-import { formatearFecha } from '@/shared/utils/fechas'
+import { aFecha, formatearFecha } from '@/shared/utils/fechas'
 import { descargarComprobanteConsulta } from '../../utils/comprobantePdf'
 import { useInformesConsulta } from '@/features/informes/hooks/useInformes'
 
@@ -41,6 +41,10 @@ export default function Consulta() {
 
   const estado = ESTADOS_CONSULTA[consulta.estado] ?? ESTADOS_CONSULTA.pendiente_pago
   const puedeSubirComprobante = consulta.estado === 'pendiente_pago' || consulta.estado === 'rechazada'
+  const solicitada = aFecha(consulta.fechaSolicitud)
+  const vencimientoPago = consulta.estado === 'pendiente_pago' && solicitada
+    ? new Date(solicitada.getTime() + HORAS_LIMITE_PAGO * 3600000)
+    : null
 
   async function alElegirComprobante(e) {
     const archivo = e.target.files?.[0]
@@ -114,6 +118,11 @@ export default function Consulta() {
               {qr?.datosPago && <p style={{ fontSize: 12.5, whiteSpace: 'pre-wrap', textAlign: 'center' }}>{qr.datosPago}</p>}
 
               <h2 className="section-title">Subir comprobante de pago</h2>
+              {vencimientoPago && (
+                <p style={{ fontSize: 11.5, color: 'var(--alerta)', marginTop: -4 }}>
+                  Tienes hasta el {vencimientoPago.toLocaleString('es-BO', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} para subir tu comprobante. Si no lo subes a tiempo, la solicitud se cancela sola.
+                </p>
+              )}
               <input type="file" accept="image/*" onChange={alElegirComprobante} disabled={progreso !== null} />
               <div className="selector-ayuda">Foto o captura del comprobante, máximo {LIMITE_FOTO_MB} MB.</div>
               {progreso !== null && <div style={{ fontSize: 12, marginTop: 8 }}>Subiendo… {Math.round(progreso * 100)}%</div>}

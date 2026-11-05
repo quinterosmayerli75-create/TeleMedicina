@@ -397,8 +397,8 @@ export default function RegistroProfesional() {
                 profesional y sus documentos antes de activar su cuenta.
               </div>
 
-              <div style={{ fontSize: 11.5, color: 'var(--gris)', margin: '12px 0' }}>
-                <span style={{ color: 'var(--alerta)' }}>*</span> Campo obligatorio
+              <div style={{ fontSize: 12.5, color: 'var(--gris)', margin: '12px 0' }}>
+                <span style={{ color: 'var(--alerta)', fontSize: '1.3em', fontWeight: 700 }}>*</span> Campo obligatorio
               </div>
 
               <div className="terms-row">

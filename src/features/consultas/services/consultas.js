@@ -130,3 +130,42 @@ export async function revisarRecordatorioConsulta(uid) {
     await recordarConsultasDe(uid, 'doctorId', 'recordatorioDoctorEnviado', '/doctor/consultas')
   }
 }
+
+// Plazo que tiene el paciente para subir el comprobante antes de que la solicitud se cancele sola.
+export const HORAS_LIMITE_PAGO = 24
+
+async function cancelarPagosVencidosDe(uid, campoUid) {
+  // Mismo truco de un solo "where": filtra por uid y revisa estado/fecha en el código.
+  const snap = await getDocs(query(collection(db, 'consultas'), where(campoUid, '==', uid)))
+  const ahora = Date.now()
+  for (const d of snap.docs) {
+    const c = d.data()
+    if (c.estado !== 'pendiente_pago') continue
+    const solicitada = c.fechaSolicitud?.toDate?.()
+    if (!solicitada || ahora - solicitada.getTime() < HORAS_LIMITE_PAGO * 3600000) continue
+    await updateDoc(d.ref, { estado: 'cancelada', motivoRechazo: 'No se subió el comprobante de pago dentro de las 24 horas.' })
+    crearNotificacion({
+      paraUid: c.pacienteId,
+      tipo: 'consulta_vencida',
+      texto: `Tu solicitud de consulta con ${c.doctorNombre || 'el doctor'} se canceló: pasaron 24 horas sin subir el comprobante de pago.`,
+      enlace: `/paciente/consultas/${d.id}`,
+    }).catch(() => {})
+    crearNotificacion({
+      paraUid: c.doctorId,
+      tipo: 'consulta_vencida',
+      texto: `La solicitud de ${c.pacienteNombre || 'un paciente'} se canceló sola: no subió el comprobante de pago a tiempo.`,
+      enlace: `/doctor/consultas/${d.id}`,
+    }).catch(() => {})
+  }
+}
+
+// Revisión perezosa, igual que revisarRecordatorioConsulta: cancela solicitudes "pago pendiente"
+// con más de 24 horas sin comprobante, para liberar el horario y no dejar al doctor esperando.
+export async function revisarVencimientoPago(uid) {
+  if (!uid) return
+  await cancelarPagosVencidosDe(uid, 'pacienteId')
+  const usuarioSnap = await getDoc(doc(db, 'usuarios', uid))
+  if (usuarioSnap.exists() && usuarioSnap.data().rol === 'profesional') {
+    await cancelarPagosVencidosDe(uid, 'doctorId')
+  }
+}
