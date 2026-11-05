@@ -16,7 +16,7 @@ export const ESTADOS_CONSULTA = {
   pago_en_revision: { etiqueta: 'En espera de confirmación', clase: 'status-warn' },
   habilitada: { etiqueta: 'Habilitada para consulta', clase: 'status-active' },
   rechazada: { etiqueta: 'Pago rechazado', clase: 'status-blocked' },
-  finalizada: { etiqueta: 'Finalizada', clase: 'status-active' },
+  finalizada: { etiqueta: 'Consulta finalizada', clase: 'status-active' },
   cancelada: { etiqueta: 'Cancelada', clase: 'status-blocked' },
 }
 
