@@ -83,13 +83,41 @@ export function cancelarConsulta(id) {
   return updateDoc(doc(db, 'consultas', id), { estado: 'cancelada' })
 }
 
-// El admin aprueba o rechaza el comprobante subido.
-export function validarPago(id, { aprobado, motivoRechazo = '' }) {
-  return updateDoc(doc(db, 'consultas', id), {
+// El doctor (normalmente) o el admin aprueban o rechazan el comprobante subido. Las notificaciones
+// van centralizadas acá (antes estaban repetidas en las dos pantallas de "Validación de pagos",
+// la del doctor y la del admin) para que avisen siempre igual, sin importar quién valide.
+export async function validarPago(id, { aprobado, motivoRechazo = '' }) {
+  const ref = doc(db, 'consultas', id)
+  await updateDoc(ref, {
     estado: aprobado ? 'habilitada' : 'rechazada',
     motivoRechazo: aprobado ? '' : motivoRechazo,
     fechaValidacion: serverTimestamp(),
   })
+  const snap = await getDoc(ref)
+  if (!snap.exists()) return
+  const c = snap.data()
+  const cuando = c.fecha ? `el ${c.fecha}${c.hora ? ` a las ${c.hora}` : ''}` : 'pronto'
+  if (aprobado) {
+    crearNotificacion({
+      paraUid: c.pacienteId,
+      tipo: 'pago_aprobado',
+      texto: `Tu pago fue aprobado: tu consulta con ${c.doctorNombre || 'tu doctor'} quedó agendada ${cuando}. ¡Ya puedes iniciarla!`,
+      enlace: `/paciente/consultas/${id}`,
+    }).catch(() => {})
+    crearNotificacion({
+      paraUid: c.doctorId,
+      tipo: 'consulta_agendada',
+      texto: `Tienes una consulta con ${c.pacienteNombre || 'un paciente'} ${cuando}.`,
+      enlace: `/doctor/consultas/${id}`,
+    }).catch(() => {})
+  } else {
+    crearNotificacion({
+      paraUid: c.pacienteId,
+      tipo: 'pago_rechazado',
+      texto: `Tu comprobante para la consulta con ${c.doctorNombre || 'tu doctor'} fue rechazado: ${motivoRechazo}`,
+      enlace: `/paciente/consultas/${id}`,
+    }).catch(() => {})
+  }
 }
 
 // Paciente o doctor marcan la consulta como finalizada una vez atendida.

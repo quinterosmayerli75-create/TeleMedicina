@@ -6,6 +6,7 @@ import { useAuth } from '@/features/auth/context/AuthContext'
 import SelectorFotos from '@/shared/components/SelectorFotos'
 import { mensajeErrorSubida, subirEvidencias } from '@/services/archivos'
 import { useProfesional } from '@/features/profesionales/hooks/useProfesionalesActivos'
+import { notificarAdmins } from '@/features/notificaciones/services/notificaciones'
 
 const MOTIVOS = ['Acoso o falta de respeto', 'Suplantación de identidad', 'Datos falsos en el perfil', 'Otro']
 
@@ -37,6 +38,11 @@ export default function Denuncia() {
         estado: 'pendiente',
         fecha: serverTimestamp(),
       })
+      notificarAdmins({
+        tipo: 'denuncia',
+        texto: `Nueva denuncia contra ${doctor?.nombre ?? 'un profesional'}: ${motivo}.`,
+        enlace: '/admin/denuncias',
+      }).catch(() => {})
       setEnviado(true)
     } catch (err) {
       setError(err?.code?.startsWith('storage/') ? mensajeErrorSubida(err) : 'No se pudo enviar la denuncia. Intenta de nuevo.')

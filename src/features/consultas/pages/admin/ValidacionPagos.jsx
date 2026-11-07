@@ -2,7 +2,6 @@ import Icono from '@/shared/components/Icono'
 import { useState } from 'react'
 import { useConsultasAdmin } from '../../hooks/useConsultas'
 import { ESTADOS_CONSULTA, MODALIDADES, validarPago } from '../../services/consultas'
-import { crearNotificacion } from '@/features/notificaciones/services/notificaciones'
 import { descargarCSV } from '@/shared/utils/exportar'
 import { formatearFecha } from '@/shared/utils/fechas'
 import { coincideTexto } from '@/shared/utils/texto'
@@ -64,12 +63,6 @@ export default function ValidacionPagos() {
     setGuardando(true)
     try {
       await validarPago(c.id, { aprobado: true })
-      crearNotificacion({
-        paraUid: c.pacienteId,
-        tipo: 'pago_aprobado',
-        texto: `Tu pago para la consulta con ${c.doctorNombre} fue aprobado. ¡Ya puedes iniciarla!`,
-        enlace: `/paciente/consultas/${c.id}`,
-      }).catch(() => {})
       setAviso('Pago aprobado: la consulta quedó habilitada.')
     } catch {
       setErrorAccion('No se pudo aprobar el pago. Intenta de nuevo.')
@@ -84,12 +77,6 @@ export default function ValidacionPagos() {
     setGuardando(true)
     try {
       await validarPago(seleccion.id, { aprobado: false, motivoRechazo: motivo })
-      crearNotificacion({
-        paraUid: seleccion.pacienteId,
-        tipo: 'pago_rechazado',
-        texto: `Tu comprobante para la consulta con ${seleccion.doctorNombre} fue rechazado: ${motivo}`,
-        enlace: `/paciente/consultas/${seleccion.id}`,
-      }).catch(() => {})
       setModal(null)
       setMotivo('')
       setAviso('Pago rechazado: se avisó al paciente para que vuelva a intentarlo.')

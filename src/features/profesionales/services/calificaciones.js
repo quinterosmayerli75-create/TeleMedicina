@@ -1,5 +1,6 @@
 import { addDoc, collection, doc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
+import { notificarAdmins } from '@/features/notificaciones/services/notificaciones'
 
 // Una calificación por paciente y doctor: el id del documento es "{doctorId}_{pacienteId}", así si el
 // paciente vuelve a calificar se actualiza la suya en vez de sumar otra.
@@ -38,8 +39,8 @@ export async function guardarCalificacion({ doctorId, pacienteId, estrellas, com
 // El doctor no puede borrar un comentario, solo denunciarlo — el admin decide qué hacer (ver
 // admin/ComentariosDenunciados.jsx). Reutiliza la colección "reportes" (igual que las denuncias
 // entre personas), marcado con tipoDenuncia: 'comentario' para poder filtrarlo aparte.
-export function denunciarComentario({ doctorId, pacienteId, calificacionId, comentario, motivo }) {
-  return addDoc(collection(db, 'reportes'), {
+export async function denunciarComentario({ doctorId, pacienteId, calificacionId, comentario, motivo }) {
+  const ref = await addDoc(collection(db, 'reportes'), {
     denuncianteId: doctorId,
     denunciadoId: pacienteId,
     tipoDenuncia: 'comentario',
@@ -49,6 +50,12 @@ export function denunciarComentario({ doctorId, pacienteId, calificacionId, come
     estado: 'pendiente',
     fecha: serverTimestamp(),
   })
+  notificarAdmins({
+    tipo: 'denuncia_comentario',
+    texto: 'Un doctor denunció un comentario de un paciente. Revísalo en Comentarios denunciados.',
+    enlace: '/admin/comentarios-denunciados',
+  }).catch(() => {})
+  return ref
 }
 
 // El admin oculta un comentario denunciado: no se borra de la base de datos, solo deja de
