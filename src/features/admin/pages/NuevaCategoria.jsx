@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { addDoc, collection } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
-import { PROFESIONES } from '@/shared/utils/profesiones'
+import { useProfesiones } from '@/shared/hooks/useProfesiones'
 
 export default function NuevaCategoria() {
+  const { profesiones } = useProfesiones()
   const [nombre, setNombre] = useState('')
-  const [profesion, setProfesion] = useState(PROFESIONES[0])
+  const [profesion, setProfesion] = useState(profesiones[0])
   const [enviando, setEnviando] = useState(false)
   const navigate = useNavigate()
 
@@ -27,7 +28,7 @@ export default function NuevaCategoria() {
       <form className="card-plain" style={{ maxWidth: 480 }} onSubmit={guardar}>
         <label className="campo-label" htmlFor="profesion">Profesión</label>
         <select id="profesion" value={profesion} onChange={(e) => setProfesion(e.target.value)}>
-          {PROFESIONES.map((p) => <option key={p}>{p}</option>)}
+          {profesiones.map((p) => <option key={p}>{p}</option>)}
         </select>
         <label className="campo-label" htmlFor="nombre">Nombre de la categoría (especialidad)</label>
         <input id="nombre" type="text" placeholder="Ej. Dermatología" value={nombre} onChange={(e) => setNombre(e.target.value)} required autoFocus />

@@ -1,9 +1,10 @@
 // Reporte general en PDF para el admin (resumen de métricas + ranking de doctores). Mismo estilo
 // visual que los demás PDF de DocTop. jsPDF se carga bajo demanda.
 import { formatearFecha } from '@/shared/utils/fechas'
+import { logoDocTop, TEAL, TEAL_CLARO } from '@/shared/utils/logoPdf'
 
 const ONYX = [15, 20, 23]
-const AZUL = [44, 143, 214]
+const AZUL = TEAL
 const GRIS = [110, 120, 128]
 const TEXTO = [16, 21, 26]
 const LINEA = [220, 232, 240]
@@ -16,13 +17,14 @@ const ANCHO_UTIL = ANCHO - MARGEN * 2
 function encabezado(pdf) {
   pdf.setFillColor(...ONYX)
   pdf.rect(0, 0, ANCHO, 26, 'F')
+  const xTexto = logoDocTop(pdf, MARGEN, 13)
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(17)
   pdf.setTextColor(255, 255, 255)
-  pdf.text('DOCTOP', MARGEN, 16)
+  pdf.text('DOCTOP', xTexto, 16)
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(9.5)
-  pdf.setTextColor(138, 208, 245)
+  pdf.setTextColor(...TEAL_CLARO)
   pdf.text('Reporte general', ANCHO - MARGEN, 16, { align: 'right' })
 }
 

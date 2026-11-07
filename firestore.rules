@@ -168,6 +168,13 @@ service cloud.firestore {
       allow write: if esAdmin();
     }
 
+    // Carreras/profesiones adicionales a las 4 de siempre (Médico, Odontólogo, Psicólogo,
+    // Nutricionista), para cuando se necesite sumar una nueva (ej. Farmacéutico).
+    match /carreras/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
     // Denuncias: cualquiera puede crear una a su propio nombre;
     // solo el admin puede leerlas y resolverlas.
     match /reportes/{id} {

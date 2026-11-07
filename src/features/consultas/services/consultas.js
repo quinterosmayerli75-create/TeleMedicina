@@ -169,3 +169,24 @@ export async function revisarVencimientoPago(uid) {
     await cancelarPagosVencidosDe(uid, 'doctorId')
   }
 }
+
+async function finalizarVencidasDe(uid, campoUid) {
+  const hoy = new Date().toISOString().slice(0, 10)
+  const snap = await getDocs(query(collection(db, 'consultas'), where(campoUid, '==', uid)))
+  for (const d of snap.docs) {
+    const c = d.data()
+    if (c.estado !== 'habilitada' || !c.fecha || c.fecha >= hoy) continue
+    await updateDoc(d.ref, { estado: 'finalizada', fechaFinalizacion: serverTimestamp() })
+  }
+}
+
+// Revisión perezosa: una consulta "habilitada" cuya fecha ya pasó se marca sola como finalizada,
+// para que no se quede colgada en "pendientes" si nadie apretó el botón "Marcar como finalizada".
+export async function revisarFinalizacionAutomatica(uid) {
+  if (!uid) return
+  await finalizarVencidasDe(uid, 'pacienteId')
+  const usuarioSnap = await getDoc(doc(db, 'usuarios', uid))
+  if (usuarioSnap.exists() && usuarioSnap.data().rol === 'profesional') {
+    await finalizarVencidasDe(uid, 'doctorId')
+  }
+}

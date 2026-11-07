@@ -14,8 +14,9 @@ import { AYUDA_CONTRASENA, validarContrasena, validarCorreo, validarNombre } fro
 import { validarTelefono } from '@/shared/utils/telefonos'
 import { calcularEdad } from '@/shared/utils/fechas'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
+import { useProfesiones } from '@/shared/hooks/useProfesiones'
 import { notificarAdmins } from '@/features/notificaciones/services/notificaciones'
-import { PROFESIONES } from '@/shared/utils/profesiones'
+import { PROFESIONES_BASE } from '@/shared/utils/profesiones'
 
 const EDAD_MINIMA = 18
 
@@ -40,7 +41,7 @@ function mensajeError(codigo) {
 
 const ESTADO_INICIAL = {
   email: '', celular: '', celularPais: 'BO', contrasena: '', confirmarContrasena: '',
-  nombre: '', fechaNacimiento: '', estatura: '', peso: '', profesion: PROFESIONES[0], especialidad: '',
+  nombre: '', fechaNacimiento: '', estatura: '', peso: '', profesion: PROFESIONES_BASE[0], especialidad: '',
   experiencia: '', carnet: '', descripcion: '', costoConsulta: '',
 }
 
@@ -52,6 +53,7 @@ function CampoError({ campo, faltantes }) {
 export default function RegistroProfesional() {
   const [datos, setDatos] = useState(ESTADO_INICIAL)
   const tiposProfesion = useTiposProfesion()
+  const { profesiones } = useProfesiones()
   const [fotoPerfil, setFotoPerfil] = useState([])
   const [fotosTitulos, setFotosTitulos] = useState([])
   const [fotoCarnet, setFotoCarnet] = useState([])
@@ -280,7 +282,7 @@ export default function RegistroProfesional() {
                   <div>
                     <EtiquetaCampo htmlFor="profesion">Profesión</EtiquetaCampo>
                     <select id="profesion" value={datos.profesion} onChange={actualizarCampo('profesion')}>
-                      {PROFESIONES.map((p) => <option key={p}>{p}</option>)}
+                      {profesiones.map((p) => <option key={p}>{p}</option>)}
                     </select>
                   </div>
                   <div>

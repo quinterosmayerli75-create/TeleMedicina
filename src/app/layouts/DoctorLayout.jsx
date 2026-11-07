@@ -13,7 +13,7 @@ import NotificacionesBell from '@/features/notificaciones/components/Notificacio
 import TutorialInicio from '@/features/onboarding/components/TutorialInicio'
 import { useAuth } from '@/features/auth/context/AuthContext'
 import { DIAS_AVISO_VENCIMIENTO, revisarVencimientoSuscripcion } from '@/features/consultas/services/suscripciones'
-import { revisarRecordatorioConsulta, revisarVencimientoPago } from '@/features/consultas/services/consultas'
+import { revisarFinalizacionAutomatica, revisarRecordatorioConsulta, revisarVencimientoPago } from '@/features/consultas/services/consultas'
 import { encontrarSeccion } from '@/shared/utils/texto'
 
 const ITEMS = [
@@ -65,6 +65,12 @@ export default function DoctorLayout() {
   useEffect(() => {
     if (!usuario || estado !== 'activo') return
     revisarVencimientoPago(usuario.uid).catch(() => {})
+  }, [usuario, estado])
+
+  // Perezoso también: una consulta habilitada cuya fecha ya pasó se marca sola como finalizada.
+  useEffect(() => {
+    if (!usuario || estado !== 'activo') return
+    revisarFinalizacionAutomatica(usuario.uid).catch(() => {})
   }, [usuario, estado])
 
   // Escucha en vivo el estado de la suscripción para mostrar el bloqueo de pantalla completa en

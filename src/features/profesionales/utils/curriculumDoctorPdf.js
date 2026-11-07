@@ -7,10 +7,11 @@
 // genera igual y la función devuelve la lista de fotos omitidas para avisarle al usuario.
 
 import { obtenerDocumentosEtiquetados } from './documentosDoctor'
+import { logoDocTop, TEAL, TEAL_CLARO } from '@/shared/utils/logoPdf'
 
 const ONYX = [15, 20, 23]
-const ORO = [44, 143, 214]
-const ORO_CLARO = [138, 208, 245]
+const ORO = TEAL
+const ORO_CLARO = TEAL_CLARO
 const GRIS = [110, 120, 128]
 const TEXTO = [16, 21, 26]
 const LINEA = [220, 232, 240]
@@ -308,10 +309,11 @@ export async function descargarCurriculumDoctor(doctor) {
       pdf.rect(0, 0, PAGINA_ANCHO, 24, 'F')
       pdf.setFillColor(...ORO)
       pdf.rect(0, 24, PAGINA_ANCHO, 1.2, 'F')
+      const xTitulo = logoDocTop(pdf, MARGEN, 12, { lado: 8 })
       pdf.setFont('times', 'bold')
       pdf.setFontSize(15)
       pdf.setTextColor(255, 255, 255)
-      pdf.text('Documentos de respaldo', MARGEN, 15)
+      pdf.text('Documentos de respaldo', xTitulo, 15)
       pdf.setFont('helvetica', 'normal')
       pdf.setFontSize(9.5)
       pdf.setTextColor(...ORO_CLARO)

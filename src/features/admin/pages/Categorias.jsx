@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { deleteDoc, doc, onSnapshot, updateDoc, collection } from 'firebase/firestore'
+import { addDoc, deleteDoc, doc, onSnapshot, updateDoc, collection } from 'firebase/firestore'
 import { Tags, Stethoscope, Star, Smile, Heart, Apple, Sparkles, Baby, HeartHandshake, Brain } from '@/shared/components/Icons'
 import { db } from '@/services/firebase/config'
-import { PROFESIONES } from '@/shared/utils/profesiones'
+import { useProfesiones } from '@/shared/hooks/useProfesiones'
+import { PROFESIONES_BASE } from '@/shared/utils/profesiones'
 import { coincideTexto } from '@/shared/utils/texto'
 
 // Solo decorativo: un ícono aproximado según palabras clave del nombre de la categoría.
@@ -22,14 +23,34 @@ function iconoCategoria(nombre = '') {
 }
 
 export default function Categorias() {
+  const { profesiones, extra: carrerasExtra } = useProfesiones()
   const [categorias, setCategorias] = useState([])
   const [profesionales, setProfesionales] = useState([])
   const [busqueda, setBusqueda] = useState('')
   const [editando, setEditando] = useState(null)
   const [nombreEdicion, setNombreEdicion] = useState('')
-  const [profesionEdicion, setProfesionEdicion] = useState(PROFESIONES[0])
+  const [profesionEdicion, setProfesionEdicion] = useState(profesiones[0])
   const [aEliminar, setAEliminar] = useState(null)
+  const [nuevaCarrera, setNuevaCarrera] = useState('')
+  const [guardandoCarrera, setGuardandoCarrera] = useState(false)
   const navigate = useNavigate()
+
+  async function agregarCarrera(e) {
+    e.preventDefault()
+    const nombre = nuevaCarrera.trim()
+    if (!nombre || profesiones.some((p) => p.toLowerCase() === nombre.toLowerCase())) return
+    setGuardandoCarrera(true)
+    try {
+      await addDoc(collection(db, 'carreras'), { nombre })
+      setNuevaCarrera('')
+    } finally {
+      setGuardandoCarrera(false)
+    }
+  }
+
+  function quitarCarrera(carrera) {
+    deleteDoc(doc(db, 'carreras', carrera.id))
+  }
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'tiposProfesion'), (snap) => {
@@ -113,6 +134,44 @@ export default function Categorias() {
         </div>
       </div>
 
+      <div className="card-plain" style={{ maxWidth: 760, marginBottom: 20 }}>
+        <h2 className="section-title" style={{ marginTop: 0 }}>Carreras</h2>
+        <p className="web-sub" style={{ marginTop: 0 }}>De aquí sale la lista de "Profesión" al registrar un doctor y al crear categorías. Las 4 de siempre no se pueden quitar.</p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+          {profesiones.map((nombre) => {
+            const esBase = PROFESIONES_BASE.includes(nombre)
+            const carrera = carrerasExtra.find((c) => c.nombre === nombre)
+            return (
+              <span key={nombre} className="status-pill status-active" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                {nombre}
+                {!esBase && carrera && (
+                  <button
+                    type="button"
+                    onClick={() => quitarCarrera(carrera)}
+                    aria-label={`Quitar ${nombre}`}
+                    style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', fontWeight: 700, padding: 0, lineHeight: 1 }}
+                  >
+                    ×
+                  </button>
+                )}
+              </span>
+            )
+          })}
+        </div>
+        <form onSubmit={agregarCarrera} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Ej. Farmacéutico"
+            value={nuevaCarrera}
+            onChange={(e) => setNuevaCarrera(e.target.value)}
+            style={{ maxWidth: 260 }}
+          />
+          <button type="submit" className="btn btn-outline btn-auto" disabled={guardandoCarrera || !nuevaCarrera.trim()}>
+            + Agregar carrera
+          </button>
+        </form>
+      </div>
+
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         <input
           type="text"
@@ -141,7 +200,7 @@ export default function Categorias() {
                 {total} médico{total === 1 ? '' : 's'} activo{total === 1 ? '' : 's'}
               </span>
               <div style={{ display: 'flex', gap: 6 }}>
-                <button type="button" className="mini-btn" onClick={() => { setEditando(c); setNombreEdicion(c.nombre); setProfesionEdicion(c.profesion ?? PROFESIONES[0]) }}>Editar</button>
+                <button type="button" className="mini-btn" onClick={() => { setEditando(c); setNombreEdicion(c.nombre); setProfesionEdicion(c.profesion ?? profesiones[0]) }}>Editar</button>
                 <button type="button" className="mini-btn danger" onClick={() => setAEliminar(c)}>Eliminar</button>
               </div>
             </div>
@@ -156,7 +215,7 @@ export default function Categorias() {
             <div className="modal-sub">Los doctores ya registrados en esta categoría conservan su especialidad.</div>
             <label className="campo-label">Profesión</label>
             <select value={profesionEdicion} onChange={(e) => setProfesionEdicion(e.target.value)}>
-              {PROFESIONES.map((p) => <option key={p}>{p}</option>)}
+              {profesiones.map((p) => <option key={p}>{p}</option>)}
             </select>
             <label className="campo-label">Nombre de la categoría (especialidad)</label>
             <input type="text" value={nombreEdicion} onChange={(e) => setNombreEdicion(e.target.value)} />
