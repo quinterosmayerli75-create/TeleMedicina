@@ -4,6 +4,9 @@ import Logo from '@/shared/components/Logo'
 import { useTiposProfesion } from '@/shared/hooks/useTiposProfesion'
 import { usePageMotion } from '@/shared/hooks/usePageMotion'
 import InicioCarrusel from '@/shared/components/InicioCarrusel'
+import MascotaInicio from '@/shared/components/MascotaInicio'
+import MascotaViajera from '@/shared/components/MascotaViajera'
+import pandaSaludando from '@/assets/mascota/poses/saludo.png'
 import './InicioPublico.css'
 
 // Solo decorativo: un ícono aproximado según palabras clave del nombre de la especialidad.
@@ -64,6 +67,9 @@ export default function InicioPublico() {
       <div className="landing-hero-full">
         <InicioCarrusel pantallaCompleta />
       </div>
+
+      <MascotaInicio />
+      <MascotaViajera />
 
       <section className="landing-accesos" aria-label="Accesos rápidos">
         <div className="landing-accesos-inner">
@@ -146,6 +152,31 @@ export default function InicioPublico() {
             <Link to="/registro/paciente" className="btn btn-gold btn-auto">Registrarme gratis</Link>
             <a href="#como-funciona" className="btn btn-outline btn-auto landing-btn-outline" style={{ borderColor: '#fff', color: '#fff' }}>Conocer cómo funciona</a>
           </div>
+        </div>
+        <div className="landing-cta-panda" aria-hidden="true">
+          <svg viewBox="0 0 195 300" focusable="false">
+            <defs>
+              <mask id="panda-cuerpo" maskUnits="userSpaceOnUse" x="0" y="0" width="195" height="300">
+                <rect width="195" height="300" fill="white" />
+                <path d="M0 59H49V91Q37 107 0 111Z" fill="black" />
+              </mask>
+              <clipPath id="panda-pata">
+                <path d="M0 58H50V95Q38 111 0 116Z" />
+              </clipPath>
+            </defs>
+            <image href={pandaSaludando} width="195" height="300" mask="url(#panda-cuerpo)" />
+            <g className="landing-panda-pata">
+              <image href={pandaSaludando} width="195" height="300" clipPath="url(#panda-pata)" />
+            </g>
+            <g className="landing-panda-parpado">
+              <path d="M86 56C87 45 104 44 107 54C108 62 100 66 94 65C89 65 85 61 86 56Z" fill="#3c2f2d" />
+              <path d="M89 57Q96 62 103 55" fill="none" stroke="#1d1514" strokeWidth="1.5" strokeLinecap="round" />
+            </g>
+            <g className="landing-panda-parpado">
+              <path d="M129 63C128 55 137 51 143 55C152 59 151 70 144 72C137 74 130 70 129 63Z" fill="#3c302e" />
+              <path d="M131 62Q137 68 146 65" fill="none" stroke="#1d1514" strokeWidth="1.5" strokeLinecap="round" />
+            </g>
+          </svg>
         </div>
       </div>
 

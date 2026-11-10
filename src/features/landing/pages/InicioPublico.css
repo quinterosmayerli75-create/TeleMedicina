@@ -371,8 +371,68 @@
 .landing-beneficio-icono { background: #faf9f5; border-radius: 50%; }
 .landing-beneficio > div:last-child { line-height: 1.7; }
 .landing-cta { background: #145c50; border-radius: 12px; max-width: 1132px; margin: 72px auto; padding: 56px; position: relative; overflow: hidden; }
-.landing-cta::after { content: '+'; position: absolute; right: 45px; top: -60px; font: 320px Georgia,serif; color: #ffffff08; pointer-events: none; }
-.landing-cta > div { position: relative; z-index: 1; }
+.landing-cta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 28%);
+  gap: clamp(16px, 4vw, 48px);
+}
+
+.landing-cta-panda {
+  position: relative;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.landing-cta-panda::before {
+  content: '+';
+  position: absolute;
+  font: clamp(180px, 28vw, 320px)/.8 Georgia, serif;
+  color: #ffffff10;
+}
+
+.landing-cta-panda svg {
+  position: relative;
+  display: block;
+  width: auto;
+  height: clamp(150px, 22vw, 240px);
+  max-width: 100%;
+  overflow: visible;
+}
+
+.landing-panda-pata { transform-origin: 25px 103px; }
+
+.landing-panda-parpado {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center top;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-cta[data-revealed='true'] .landing-panda-pata {
+    animation: landing-panda-saludo 900ms ease-in-out infinite;
+  }
+
+  .landing-cta[data-revealed='true'] .landing-panda-parpado {
+    animation: landing-panda-parpadeo 2700ms ease-in-out infinite;
+  }
+}
+
+@keyframes landing-panda-saludo {
+  25% { transform: rotate(-11deg); }
+  65% { transform: rotate(8deg); }
+}
+
+@keyframes landing-panda-parpadeo {
+  0%, 18%, 26%, 64%, 72%, 100% { opacity: 0; transform: scaleY(.2); }
+  21%, 23%, 67%, 69% { opacity: 1; transform: scaleY(1); }
+}
+
+@media (max-width: 560px) {
+  .landing-cta { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .landing-cta-panda { justify-self: end; width: min(100%, 180px); }
+  .landing-cta-panda svg { height: 135px; }
+}
 .landing-cta h2 { font-size: 38px; font-weight: 500; letter-spacing: -.7px; }
 .landing-cta .btn-gold { background: #e2ebc4; color: #163d32; }
 .landing-cta .btn-gold:hover { background: #f0f5db; }

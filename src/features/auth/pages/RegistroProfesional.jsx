@@ -1,4 +1,5 @@
 import Icono from '@/shared/components/Icono'
+import MascotaRegistro from '@/shared/components/MascotaRegistro'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
@@ -63,6 +64,7 @@ export default function RegistroProfesional() {
   const [error, setError] = useState('')
   const [faltantes, setFaltantes] = useState([])
   const [enviando, setEnviando] = useState(false)
+  const [registroCompleto, setRegistroCompleto] = useState(false)
 
   const navigate = useNavigate()
 
@@ -221,7 +223,7 @@ export default function RegistroProfesional() {
         enlace: '/admin/solicitudes',
       }).catch(() => {})
 
-      navigate('/', { state: { solicitudEnviada: true } })
+      setRegistroCompleto(true)
     } catch (err) {
       setError(mensajeError(err.code))
       setEnviando(false)
@@ -229,8 +231,13 @@ export default function RegistroProfesional() {
     }
   }
 
+  if (registroCompleto) {
+    return <MascotaRegistro completado mensaje="¡Tu solicitud fue enviada!" onContinuar={() => navigate('/', { state: { solicitudEnviada: true } })} />
+  }
+
   return (
-    <div className="registro-fondo">
+    <div className="registro-fondo registro-con-mascota">
+      <MascotaRegistro />
       <div className="registro-card">
         <div className="admin-eyebrow">
           <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}><Icono nombre="medical" size={19} /> PORTAL DE COLEGIADOS Y ESPECIALISTAS</span>

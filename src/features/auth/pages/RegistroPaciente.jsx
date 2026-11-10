@@ -1,4 +1,5 @@
 import Icono from '@/shared/components/Icono'
+import MascotaRegistro from '@/shared/components/MascotaRegistro'
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
@@ -61,6 +62,7 @@ export default function RegistroPaciente() {
   const [error, setError] = useState('')
   const [faltantes, setFaltantes] = useState([])
   const [enviando, setEnviando] = useState(false)
+  const [registroCompleto, setRegistroCompleto] = useState(false)
 
   const navigate = useNavigate()
   const { usuario, rol, cargando, refrescarRol } = useAuth()
@@ -184,7 +186,7 @@ export default function RegistroPaciente() {
       })
 
       await refrescarRol(uid)
-      navigate('/paciente', { replace: true })
+      setRegistroCompleto(true)
     } catch (err) {
       setError(mensajeError(err.code))
       setEnviando(false)
@@ -192,8 +194,13 @@ export default function RegistroPaciente() {
     }
   }
 
+  if (registroCompleto) {
+    return <MascotaRegistro completado mensaje="¡Tu cuenta está lista!" onContinuar={() => navigate('/paciente', { replace: true })} />
+  }
+
   return (
-    <div className="registro-fondo">
+    <div className="registro-fondo registro-con-mascota">
+      <MascotaRegistro />
       <div className="registro-card">
         <div className="admin-eyebrow">
           <span className="vivo" style={{ color: 'var(--admin-accent-dark)' }}><Icono nombre="shield" size={19} /> PROTOCOLO DE REGISTRO CLÍNICO</span>

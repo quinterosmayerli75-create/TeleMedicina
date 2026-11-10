@@ -106,7 +106,7 @@ export default function PaginaMensajes({ rol, encabezadoLista = null }) {
         )}
         {!cargandoLista && !error && filasGrupo.length === 0 && (
           <MascotaVacio
-            tamano={72}
+            tamano={144}
             texto={
               esPaciente
                 ? 'Aún no tiene conversaciones. Busque un especialista y toque “Mensaje” en su perfil.'
