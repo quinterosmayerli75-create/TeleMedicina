@@ -132,7 +132,9 @@ service cloud.firestore {
     // finalizada con ese doctor (se referencia su id en "consultaId" y se verifica aquí).
     match /calificaciones/{id} {
       allow read: if estaAutenticado();
-      allow create: if esPaciente()
+      // Acepta 'paciente' o 'profesional': un doctor también puede calificar a otro doctor cuando
+      // lo consultó como paciente (ver "pacienteEsDoctor" en SolicitarConsulta.jsx).
+      allow create: if (esPaciente() || esProfesional())
         && request.resource.data.pacienteId == request.auth.uid
         && id == request.resource.data.doctorId + '_' + request.auth.uid
         && request.resource.data.estrellas is int
@@ -141,7 +143,7 @@ service cloud.firestore {
         && request.resource.data.consultaId is string
         && consultaFinalizadaValida(request.auth.uid, request.resource.data.doctorId, request.resource.data.consultaId);
       allow update: if (
-          esPaciente()
+          (esPaciente() || esProfesional())
           && resource.data.pacienteId == request.auth.uid
           && request.resource.data.pacienteId == request.auth.uid
           && request.resource.data.doctorId == resource.data.doctorId
