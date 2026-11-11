@@ -251,10 +251,18 @@ service cloud.firestore {
             request.auth.uid == resource.data.pacienteId
             && request.resource.data.pacienteId == resource.data.pacienteId
             && request.resource.data.doctorId == resource.data.doctorId
-            && (
-              (resource.data.estado in ['pendiente_pago', 'rechazada'] && request.resource.data.estado == 'pago_en_revision' && request.resource.data.comprobanteUrl is string)
-              || (resource.data.estado == 'pendiente_pago' && request.resource.data.estado == 'cancelada')
-            )
+            && resource.data.estado in ['pendiente_pago', 'rechazada']
+            && request.resource.data.estado == 'pago_en_revision'
+            && request.resource.data.comprobanteUrl is string
+          )
+          || (
+            // Cancela sola una solicitud sin pago a tiempo (revisarVencimientoPago en consultas.js):
+            // lo puede disparar el paciente o el doctor, cualquiera que entre primero a la app.
+            (request.auth.uid == resource.data.pacienteId || request.auth.uid == resource.data.doctorId)
+            && request.resource.data.pacienteId == resource.data.pacienteId
+            && request.resource.data.doctorId == resource.data.doctorId
+            && resource.data.estado == 'pendiente_pago'
+            && request.resource.data.estado == 'cancelada'
           )
           || (
             // El doctor (o el admin) valida el pago (pago_en_revision -> habilitada/rechazada), y
