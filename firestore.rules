@@ -162,6 +162,17 @@ service cloud.firestore {
       allow delete: if esAdmin();
     }
 
+    // Doctores favoritos de cada cuenta (paciente o doctor-que-consulta-como-paciente). El id del
+    // documento es "{usuarioId}_{doctorId}" para poder togglear con un setDoc/deleteDoc directo.
+    match /favoritos/{id} {
+      allow read: if estaAutenticado() && (resource.data.usuarioId == request.auth.uid || esAdmin());
+      allow create: if estaAutenticado()
+        && request.resource.data.usuarioId == request.auth.uid
+        && request.resource.data.doctorId is string
+        && id == request.resource.data.usuarioId + '_' + request.resource.data.doctorId;
+      allow delete: if estaAutenticado() && resource.data.usuarioId == request.auth.uid;
+    }
+
     // Catálogo de especialidades: lo administra solo el equipo de DocTop.
     match /tiposProfesion/{id} {
       // Lectura pública: el formulario de registro profesional (sin sesión todavía) necesita
