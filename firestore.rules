@@ -109,7 +109,7 @@ service cloud.firestore {
       allow read: if estaAutenticado();
       allow create: if esPropietario(uid) || esAdmin();
       allow update: if esPropietario(uid) || esAdmin() || (
-        esPaciente()
+        (esPaciente() || esProfesional())
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['calificacionPromedio', 'totalCalificaciones'])
         && request.resource.data.calificacionPromedio is number
         && request.resource.data.calificacionPromedio >= 0
