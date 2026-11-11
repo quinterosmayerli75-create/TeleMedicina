@@ -107,13 +107,22 @@ export default function LlamadaPanel({ llamada, soyLlamante, localStream, remote
           {esVideo ? (
             <div className="llamada-videos">
               <VideoStream stream={remoteStream} />
+              {/* La señal (oferta/respuesta) se cruza casi al instante, pero la conexión real de
+                  audio/video tarda un poco más (más con internet lento) — sin este aviso, ese lapso
+                  se ve como una pantalla negra sin explicación. */}
+              {!remoteStream && (
+                <div className="llamada-conectando">
+                  <Icono nombre="phone" size={22} />
+                  <span>Conectando audio y video…</span>
+                </div>
+              )}
               <div className="llamada-video-propio"><VideoStream stream={localStream} muted espejado /></div>
             </div>
           ) : (
             <div className="llamada-audio-indicador">
               <div className="avatar-vacio" style={{ width: 72, height: 72, fontSize: 28 }}>{otro.nombre?.[0]}</div>
               <div className="llamada-nombre">{otro.nombre}</div>
-              <div className="llamada-tipo"><Icono nombre="phone" size={19} /> En llamada…</div>
+              <div className="llamada-tipo"><Icono nombre="phone" size={19} /> {remoteStream ? 'En llamada…' : 'Conectando audio…'}</div>
               <VideoStream stream={remoteStream} oculto />
             </div>
           )}
