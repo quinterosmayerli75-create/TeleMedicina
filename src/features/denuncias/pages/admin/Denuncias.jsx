@@ -136,15 +136,19 @@ export default function Denuncias() {
       q,
       async (snap) => {
         try {
+          // Las denuncias de comentarios (tipoDenuncia: 'comentario') tienen su propia pantalla
+          // ("Comentarios denunciados"); aquí solo van las denuncias de persona a persona.
           const filas = await Promise.all(
-            snap.docs.map(async (docSnap) => {
-              const denuncia = { id: docSnap.id, ...docSnap.data() }
-              const [denunciante, denunciado] = await Promise.all([
-                leerUsuario(denuncia.denuncianteId),
-                leerUsuario(denuncia.denunciadoId),
-              ])
-              return { ...denuncia, denunciante, denunciado }
-            })
+            snap.docs
+              .filter((docSnap) => docSnap.data().tipoDenuncia !== 'comentario')
+              .map(async (docSnap) => {
+                const denuncia = { id: docSnap.id, ...docSnap.data() }
+                const [denunciante, denunciado] = await Promise.all([
+                  leerUsuario(denuncia.denuncianteId),
+                  leerUsuario(denuncia.denunciadoId),
+                ])
+                return { ...denuncia, denunciante, denunciado }
+              })
           )
           if (!vigente) return
           setDenuncias(filas)

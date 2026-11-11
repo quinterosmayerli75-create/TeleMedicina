@@ -45,7 +45,8 @@ function useContadoresAdmin() {
     const qSolicitudes = query(collection(db, 'usuarios'), where('rol', '==', 'profesional'), where('estado', '==', 'pendiente'))
     const unsubSolicitudes = onSnapshot(qSolicitudes, (snap) => setSolicitudes(snap.size))
     const qDenuncias = query(collection(db, 'reportes'), where('estado', '==', 'pendiente'))
-    const unsubDenuncias = onSnapshot(qDenuncias, (snap) => setDenuncias(snap.size))
+    // Las de comentarios se cuentan aparte (badge "comentarios"), para no contarlas dos veces.
+    const unsubDenuncias = onSnapshot(qDenuncias, (snap) => setDenuncias(snap.docs.filter((d) => d.data().tipoDenuncia !== 'comentario').length))
     const qComentarios = query(collection(db, 'reportes'), where('tipoDenuncia', '==', 'comentario'), where('estado', '==', 'pendiente'))
     const unsubComentarios = onSnapshot(qComentarios, (snap) => setComentarios(snap.size))
     return () => {
