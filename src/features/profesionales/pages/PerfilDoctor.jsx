@@ -126,7 +126,6 @@ export default function PerfilDoctor() {
 
           <ResenasDoctor
             doctorId={doctor.id}
-            puedeCalificar={!rutas.esDoctor}
             consultaId={consultaFinalizadaId}
             calificaciones={resenas.calificaciones}
             cargando={resenas.cargando}

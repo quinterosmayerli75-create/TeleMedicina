@@ -28,8 +28,8 @@ function EstrellasFijas({ valor }) {
 
 // Bloque "Deje su calificación" (el paciente elige de 1 a 5 estrellas y puede dejar un comentario) más la
 // lista de calificaciones que ya dejaron otros pacientes. Recibe la lista ya cargada (useCalificaciones).
-// Solo los pacientes califican: en el panel del doctor (`puedeCalificar` = false) se ve la lista, sin el formulario.
-// Además, solo puede calificar quien ya tuvo una consulta finalizada con ese doctor (`consultaId`, o null si no tuvo ninguna).
+// Solo puede calificar quien ya tuvo una consulta finalizada con ese doctor (`consultaId`, o null si no tuvo
+// ninguna) — esto ya cubre tanto a un paciente normal como a un doctor que consultó a otro como paciente.
 export default function ResenasDoctor({ doctorId, calificaciones, cargando, error, puedeCalificar = true, consultaId = null }) {
   const { usuario, rol } = useAuth()
   const miCalificacion = calificaciones.find((c) => c.pacienteId === usuario?.uid)

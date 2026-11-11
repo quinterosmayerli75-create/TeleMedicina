@@ -132,7 +132,7 @@ export default function Suscripcion() {
         </div>
       )}
 
-      {enCurso && (
+      {enCurso && estadoPago !== 'al_dia' && (
         <div className="card-plain admin-list-card" style={{ maxWidth: 720 }}>
           <h2 className="section-title" style={{ marginTop: 0 }}>
             {PLANES[enCurso.plan]?.etiqueta} · Bs {enCurso.precio} <span className={`status-pill ${ESTADOS_SUSCRIPCION[enCurso.estado]?.clase}`} style={{ marginLeft: 8 }}>{ESTADOS_SUSCRIPCION[enCurso.estado]?.etiqueta}</span>
