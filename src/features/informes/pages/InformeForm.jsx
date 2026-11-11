@@ -121,7 +121,10 @@ export default function InformeForm() {
     return <Formulario key={id} inicial={informe} informeId={id} />
   }
   if (idPaciente && cargandoPaciente) return <p className="web-sub">Cargando…</p>
-  const prefijado = idPaciente && paciente?.rol === 'paciente' ? { id: paciente.id, nombre: nombreCompleto(paciente), edad: paciente.edad ?? null, sexo: paciente.sexo ?? '' } : null
+  // El "paciente" puede ser una cuenta de doctor que pidió una consulta como paciente a otro doctor
+  // (ver "pacienteEsDoctor" en SolicitarConsulta.jsx), por eso se acepta tanto 'paciente' como 'profesional'.
+  const esPacienteValido = paciente?.rol === 'paciente' || paciente?.rol === 'profesional'
+  const prefijado = idPaciente && esPacienteValido ? { id: paciente.id, nombre: nombreCompleto(paciente), edad: paciente.edad ?? null, sexo: paciente.sexo ?? '' } : null
   return <Formulario pacientePrefijado={prefijado} />
 }
 

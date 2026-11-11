@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import { db } from '@/services/firebase/config'
 import { nombreCompleto } from '@/features/pacientes/hooks/usePaciente'
 import { normalizarTexto } from '../utils/informes'
@@ -23,12 +23,14 @@ export default function SelectorPaciente({ valor, onChange, deshabilitado = fals
 
   useEffect(() => {
     let vigente = true
-    getDocs(query(collection(db, 'usuarios'), where('rol', '==', 'paciente')))
+    // Sin "where" por rol: un doctor también puede pedir consulta como paciente a otro doctor (ver
+    // "pacienteEsDoctor" en SolicitarConsulta.jsx), así que se filtra en el código para aceptar ambos.
+    getDocs(collection(db, 'usuarios'))
       .then((snap) => {
         if (!vigente) return
         const filas = snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
-          .filter((u) => !u.estado || u.estado === 'activo')
+          .filter((u) => (u.rol === 'paciente' || u.rol === 'profesional') && (!u.estado || u.estado === 'activo'))
           .map(resumenPaciente)
           .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
         setPacientes(filas)
