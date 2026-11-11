@@ -112,7 +112,7 @@ export default function Suscripcion() {
         )}
       </div>
 
-      {!enCurso && (
+      {!enCurso && estadoPago !== 'al_dia' && (
         <div className="card-plain admin-list-card" style={{ maxWidth: 720 }}>
           <h2 className="section-title" style={{ marginTop: 0 }}><Icono nombre="card" size={19} /> {activa ? 'Renovar' : 'Pagar suscripción'}</h2>
           <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
